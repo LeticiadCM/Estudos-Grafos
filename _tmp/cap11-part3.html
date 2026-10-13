@@ -1,0 +1,690 @@
+      <hr class="sep">
+
+      <section class="chapter" id="s18e">
+        <h2><span class="num">§18.1</span> Algoritmo de Edmonds</h2>
+        <p class="sub-lead">Objetivo do bloco: achar, em bipartido, um emparelhamento que cobre A ou um certificado de Hall violado, por busca de caminhos aumentantes.</p>
+
+        <h3 id="s18e-ideia">A busca a partir de um vértice descoberto em A</h3>
+        <p>
+          O algoritmo recebe <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span> e devolve um
+          emparelhamento que cobre <span class="m"><i>A</i></span> ou um
+          <span class="m"><i>S</i> ⊆ <i>A</i></span> com
+          <span class="m">|<i>N</i>(<i>S</i>)| &lt; |<i>S</i>|</span>.
+          Caminhos alternantes começam num extremo descoberto em <span class="m"><i>A</i></span>.
+        </p>
+        <p>
+          A ideia: saia de um <span class="m"><i>u</i> ∈ <i>A</i></span> descoberto. Se algum vizinho em
+          <span class="m"><i>B</i></span> também está descoberto, essas duas pontas formam um aumentante de
+          uma aresta. Se o vizinho está coberto, suba a aresta de <span class="m"><i>M</i></span> de volta a
+          <span class="m"><i>A</i></span> e continue a busca a partir dos vizinhos ainda não explorados.
+          Não é preciso reabrir arestas que só repetiriam um caminho já visto.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 480 240" role="img" aria-label="Busca de caminho aumentante a partir de a1 descoberto; emparelhamento a2-b1 e a3-b2; aumentante a1-b1-a2-b3">
+            <line class="e tree" x1="90" y1="50" x2="330" y2="50"/>
+            <line class="e match" x1="330" y1="50" x2="90" y2="120"/>
+            <line class="e tree" x1="90" y1="120" x2="330" y2="190"/>
+            <line class="e match" x1="90" y1="190" x2="330" y2="120"/>
+            <line class="e faint" x1="90" y1="190" x2="330" y2="190"/>
+            <g class="v hl2"><circle cx="90" cy="50" r="17"/><text x="90" y="50">a1</text></g>
+            <g class="v"><circle cx="90" cy="120" r="17"/><text x="90" y="120">a2</text></g>
+            <g class="v"><circle cx="90" cy="190" r="17"/><text x="90" y="190">a3</text></g>
+            <g class="v"><circle cx="330" cy="50" r="17"/><text x="330" y="50">b1</text></g>
+            <g class="v"><circle cx="330" cy="120" r="17"/><text x="330" y="120">b2</text></g>
+            <g class="v hl2"><circle cx="330" cy="190" r="17"/><text x="330" y="190">b3</text></g>
+            <text class="lbl" x="90" y="18">A</text>
+            <text class="lbl" x="330" y="18">B</text>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--ok)"></i>M = {{a2,b1}, {a3,b2}}</span>
+            <span><i class="ln" style="background:var(--brand)"></i>aumentante a1–b1–a2–b3</span>
+            <span><i style="background:var(--c3)"></i>extremos descobertos</span>
+          </div>
+          <figcaption><b>Figura 5.</b> Exemplo construído para esta versão. A busca parte de a1, sobe o par de b1 até a2 e encontra b3 descoberto. O XOR produz <span class="m">{{a1,b1}, {a2,b3}, {a3,b2}}</span>, que cobre A.</figcaption>
+        </figure>
+        <p>
+          Se a busca se esgota sem achar descoberto em <span class="m"><i>B</i></span>, os vértices visitados
+          formam um obstáculo de Hall. No exemplo abaixo a busca começa em a4; os vizinhos b2 e b3 já estão
+          cobertos por a1 e a3, e esses dois não abrem vizinho novo.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 500 260" role="img" aria-label="Obstáculo de Hall: S = {a1, a3, a4} com N(S) = {b2, b3}">
+            <line class="e match" x1="90" y1="50" x2="340" y2="110"/>
+            <line class="e faint" x1="90" y1="110" x2="340" y2="50"/>
+            <line class="e match" x1="90" y1="170" x2="340" y2="170"/>
+            <line class="e tree" x1="90" y1="230" x2="340" y2="110"/>
+            <line class="e tree" x1="90" y1="230" x2="340" y2="170"/>
+            <g class="v hl"><circle cx="90" cy="50" r="17"/><text x="90" y="50">a1</text></g>
+            <g class="v"><circle cx="90" cy="110" r="17"/><text x="90" y="110">a2</text></g>
+            <g class="v hl"><circle cx="90" cy="170" r="17"/><text x="90" y="170">a3</text></g>
+            <g class="v hl"><circle cx="90" cy="230" r="17"/><text x="90" y="230">a4</text></g>
+            <g class="v"><circle cx="340" cy="50" r="17"/><text x="340" y="50">b1</text></g>
+            <g class="v hl2"><circle cx="340" cy="110" r="17"/><text x="340" y="110">b2</text></g>
+            <g class="v hl2"><circle cx="340" cy="170" r="17"/><text x="340" y="170">b3</text></g>
+            <g class="v"><circle cx="340" cy="230" r="17"/><text x="340" y="230">b4</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c2)"></i>S = {a1, a3, a4}</span>
+            <span><i style="background:var(--c3)"></i>N(S) = {b2, b3}</span>
+            <span><i class="ln" style="background:var(--ok)"></i>M = {{a1,b2}, {a3,b3}}</span>
+          </div>
+          <figcaption><b>Figura 6.</b> Exemplo construído para esta versão (o original citava N({a1,a3,a4}) = {b1,b2} com arestas incompatíveis; aqui N(S) = {b2,b3}, coerente com M). Hall falha: |S| = 3 &gt; 2 = |N(S)|.</figcaption>
+        </figure>
+
+        <div class="box thm">
+          <div class="h">Segunda demonstração de Hall · via aumentantes</div>
+          <div class="proof">
+            <p>
+              A necessidade é a mesma. Para a suficiência, seja
+              <span class="m"><i>M</i></span> máximo e suponha que algum
+              <span class="m"><i>v</i> ∈ <i>A</i></span> ficou descoberto. Seja
+              <span class="m"><i>C</i></span> o conjunto dos vértices alcançáveis de
+              <span class="m"><i>v</i></span> por caminho <span class="m"><i>M</i></span>-alternante,
+              <span class="m"><i>S</i> = <i>C</i> ∩ <i>A</i></span> e
+              <span class="m"><i>T</i> = <i>C</i> ∩ <i>B</i></span>.
+            </p>
+            <p>
+              Vale <span class="m"><i>T</i> ⊆ <i>N</i>(<i>S</i>)</span>. Se existisse
+              <span class="m"><i>y</i> ∈ <i>N</i>(<i>S</i>) \ <i>T</i></span>, o caminho até o vizinho em
+              <span class="m"><i>S</i></span> seguido da aresta até <span class="m"><i>y</i></span> seria
+              aumentante ( <span class="m"><i>y</i></span> descoberto, senão o par de
+              <span class="m"><i>y</i></span> também seria alcançável), contradizendo Berge.
+              Logo <span class="m"><i>T</i> = <i>N</i>(<i>S</i>)</span>.
+            </p>
+            <p>
+              <span class="m"><i>M</i></span> casa <span class="m"><i>T</i></span> com
+              <span class="m"><i>S</i> \ {<i>v</i>}</span>: todo vértice de
+              <span class="m"><i>T</i></span> é coberto (senão haveria aumentante) e o par está em
+              <span class="m"><i>S</i></span>. Portanto
+              <span class="m">|<i>T</i>| = |<i>S</i>| − 1</span> e
+              <span class="m">|<i>N</i>(<i>S</i>)| &lt; |<i>S</i>|</span>, contradizendo (36).
+              Logo <span class="m"><i>M</i></span> cobre <span class="m"><i>A</i></span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+
+        <h3 id="s18e-algo">O algoritmo e a complexidade</h3>
+        <div class="algo">
+          <div class="nome">Edmonds(A, B, E)</div>
+<pre><span class="cm">// devolve emparelhamento que cobre A, ou S ⊆ A com |N(S)| &lt; |S|</span>
+M ← ∅
+<span class="kw">2:</span> <span class="kw">se</span> existe u ∈ A não coberto por M <span class="kw">então</span>
+        S ← {u}; T ← ∅
+    <span class="kw">senão</span>
+        <span class="kw">devolva</span> M
+<span class="kw">7:</span> <span class="kw">se</span> N(S) = T <span class="kw">então</span>
+        <span class="kw">devolva</span> S
+    <span class="kw">senão</span>
+        escolha b ∈ N(S) \ T
+        <span class="kw">se</span> existe a ∉ S com {a, b} ∈ M <span class="kw">então</span>
+            insere a em S
+            insere b em T
+            volte para 7
+        <span class="kw">senão</span>
+            P ← caminho M-aumentante de u até b
+            M ← M ⊕ E(P)
+            volte para 2</pre>
+        </div>
+        <p>
+          <b>Invariante.</b> <span class="m"><i>S</i></span> e <span class="m"><i>T</i></span> são as camadas
+          da árvore alternante enraizada no descoberto <span class="m"><i>u</i></span>:
+          <span class="m"><i>M</i></span> casa <span class="m"><i>T</i></span> com
+          <span class="m"><i>S</i> \ {<i>u</i>}</span>. Se <span class="m"><i>N</i>(<i>S</i>) = <i>T</i></span>,
+          então <span class="m">|<i>N</i>(<i>S</i>)| = |<i>S</i>| − 1 &lt; |<i>S</i>|</span> e
+          <span class="m"><i>S</i></span> é o certificado de Hall. Se a busca encontra
+          <span class="m"><i>b</i> ∈ <i>N</i>(<i>S</i>) \ <i>T</i></span> descoberto, o caminho até
+          <span class="m"><i>b</i></span> é aumentante; o XOR aumenta <span class="m"><i>M</i></span> e o
+          processo recomeça.
+        </p>
+        <p>
+          <b>Término.</b> Cada XOR aumenta <span class="m">|<i>M</i>|</span> em 1, limitado por
+          <span class="m">|<i>A</i>|</span>. Cada busca interna só cresce
+          <span class="m"><i>S</i></span> e <span class="m"><i>T</i></span>. Não há ciclo infinito.
+        </p>
+        <p>
+          <b>Complexidade.</b> Uma busca de aumentante percorre cada vértice e cada aresta um número constante
+          de vezes se o grafo está em listas de adjacência:
+          <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>.
+          Há no máximo uma busca “bem-sucedida” por vértice de
+          <span class="m"><i>A</i></span> (e buscas que devolvem obstáculo). O original conta
+          “uma busca por vértice” e conclui
+          <span class="cplx"><i>O</i>(|<i>V</i>| · (|<i>V</i>| + |<i>E</i>|))</span>.
+        </p>
+        <div class="box warn">
+          <div class="h">Atenção · uma fonte só decide cobertura de A</div>
+          <p>
+            A versão acima arranca de um único <span class="m"><i>u</i></span>. Se esse
+            <span class="m"><i>u</i></span> for um isolado e o resto do grafo tiver emparelhamento grande,
+            o algoritmo devolve um obstáculo (correto: A não pode ser coberto) com
+            <span class="m"><i>M</i></span> ainda vazio. Para <b>emparelhamento máximo</b> é preciso
+            floresta com todos os descobertos de A de uma vez — exercício 143.
+          </p>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex140">
+        <div class="ex-head">
+          <h3>Exercícios 140 a 144</h3>
+          <button class="toggle" type="button" data-scope="#ex140" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: reler modelagens antigas como emparelhamento, executar Edmonds, analisar e adaptar o algoritmo, e a redução a fluxo.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 140</span><div class="stmt">
+            <p>Refaça os exercícios 2 e 18.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h140" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a140" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h140"><div class="plab">Dica</div>
+            <p>O exercício 2 do capítulo 1 é um emparelhamento perfeito em bipartido. O exercício 18 do capítulo 2 pede um subgrafo induzido 1-regular máximo — isto é, um emparelhamento máximo cujas arestas não tenham “acordes” no conjunto de vértices.</p>
+          </div>
+          <div class="panel answer" id="a140"><div class="plab">Resolução</div>
+            <p class="kicker">Exercício 2 (capítulo 1), agora com Hall</p>
+            <p>
+              Amigas <span class="m"><i>A</i> = {Bra, Clo, Dej, Edi}</span>, lanches
+              <span class="m"><i>B</i> = {Bau, MQ, MF, XS}</span>, aresta quando a amiga gosta do lanche.
+              O grafo é o circuito 8
+              Bra–XS–Clo–Bau–Edi–MQ–Dej–MF–Bra, 2-regular, logo tem emparelhamento perfeito (exercício 131):
+              por exemplo <span class="m">{Bra–MF, Clo–XS, Dej–MQ, Edi–Bau}</span>.
+              Hall vale porque o grafo é 2-regular com partes iguais. Cada amiga recebe um lanche de que gosta.
+            </p>
+            <p class="kicker">Exercício 18 (capítulo 2), agora com μ</p>
+            <p>
+              Um subgrafo induzido 1-regular é um emparelhamento que, no conjunto
+              <span class="m"><i>U</i></span> dos extremos, não deixa aresta extra de
+              <span class="m"><i>G</i></span>. Maximizar o número de arestas é maximizar
+              <span class="m">|<i>U</i>|∕2</span> com essa restrição. No grafo daquele exercício
+              <span class="m">μ(<i>G</i>) = 3</span> (por exemplo {{1,2}, {3,4}, {5,7}}), mas
+              <span class="m"><i>G</i>[{1,2,3,4,5,7}]</span> tem arestas a mais e não é 1-regular.
+              O máximo 1-regular induzido tem 2 arestas, por exemplo
+              <span class="m"><i>U</i> = {3,4,5,7}</span> com {{3,4}, {5,7}}. A relação com o exercício 2
+              é a mesma pergunta (“casar sem conflito”), agora com a restrição extra de o conjunto de
+              vértices não induzir acordes — no lanche o grafo já era bipartido e o emparelhamento
+              perfeito induz 1-regular automaticamente.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 141</span><div class="stmt">
+            <p>Uma escola abriu 6 vagas: Matemática, Química, Física, Biologia, Psicologia e Ecologia. Seis candidatos informaram as áreas em que se sentem à vontade:</p>
+            <div class="scroll">
+            <table class="tbl livre">
+              <thead><tr><th>Candidato</th><th>Mat.</th><th>Quím.</th><th>Fís.</th><th>Biol.</th><th>Psicol.</th><th>Ecol.</th></tr></thead>
+              <tbody>
+                <tr><td>Antônio</td><td>×</td><td>×</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Bernardo</td><td>×</td><td>×</td><td>×</td><td>×</td><td></td><td></td></tr>
+                <tr><td>Cássia</td><td></td><td></td><td>×</td><td>×</td><td>×</td><td></td></tr>
+                <tr><td>Débora</td><td></td><td>×</td><td>×</td><td>×</td><td>×</td><td></td></tr>
+                <tr><td>Evandro</td><td></td><td></td><td></td><td></td><td>×</td><td>×</td></tr>
+                <tr><td>Fernanda</td><td></td><td></td><td></td><td>×</td><td></td><td>×</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>Execute um algoritmo conhecido que determine o maior número de professores que a escola pode contratar.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h141" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a141" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h141"><div class="plab">Dica</div>
+            <p>Modele o bipartido candidatos–áreas e rode Edmonds (ou vá aumentando um emparelhamento à mão).</p>
+          </div>
+          <div class="panel answer" id="a141"><div class="plab">Resolução</div>
+            <p>
+              A extração do original perdeu o alinhamento das colunas. A tabela acima reconstrói a disposição
+              consecutiva mais comum (2, 4, 3, 4, 2 e 2 marcas, uma janela que percorre as seis áreas) e torna
+              o problema bem posto. Qualquer outra disposição com as mesmas quantidades se resolve pelo mesmo
+              algoritmo.
+            </p>
+            <p>
+              Grafo bipartido: <span class="m"><i>A</i></span> = candidatos,
+              <span class="m"><i>B</i></span> = {Mat, Qui, Fis, Bio, Psi, Eco}.
+              Comece com <span class="m"><i>M</i> = ∅</span> e cubra A por aumentantes (Edmonds).
+            </p>
+            <ol>
+              <li>Antônio–Mat (aresta solta).</li>
+              <li>Bernardo–Qui.</li>
+              <li>Cássia–Fis.</li>
+              <li>Débora: Qui, Fis, Bio, Psi. Bio está livre → Débora–Bio.</li>
+              <li>Evandro–Psi (Psi livre; Eco também serviria).</li>
+              <li>Fernanda: Bio e Eco. Bio ocupada, Eco livre → Fernanda–Eco.</li>
+            </ol>
+            <p>
+              Emparelhamento perfeito com 6 arestas. Hall não é violado: cada prefixo da janela tem vizinhos
+              suficientes (por exemplo N({Antônio}) = {Mat, Qui}, N({Evandro, Fernanda}) = {Psi, Eco, Bio}).
+              A escola pode contratar os <b>6</b> candidatos, um para cada área:
+              Antônio–Mat, Bernardo–Qui, Cássia–Fis, Débora–Bio, Evandro–Psi, Fernanda–Eco.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 520 280" role="img" aria-label="Emparelhamento perfeito entre seis candidatos e seis áreas">
+                <line class="e match" x1="90" y1="30" x2="360" y2="30"/>
+                <line class="e faint" x1="90" y1="30" x2="360" y2="75"/>
+                <line class="e faint" x1="90" y1="75" x2="360" y2="30"/>
+                <line class="e match" x1="90" y1="75" x2="360" y2="75"/>
+                <line class="e faint" x1="90" y1="75" x2="360" y2="120"/>
+                <line class="e faint" x1="90" y1="75" x2="360" y2="165"/>
+                <line class="e match" x1="90" y1="120" x2="360" y2="120"/>
+                <line class="e faint" x1="90" y1="120" x2="360" y2="165"/>
+                <line class="e faint" x1="90" y1="120" x2="360" y2="210"/>
+                <line class="e faint" x1="90" y1="165" x2="360" y2="75"/>
+                <line class="e faint" x1="90" y1="165" x2="360" y2="120"/>
+                <line class="e match" x1="90" y1="165" x2="360" y2="165"/>
+                <line class="e faint" x1="90" y1="165" x2="360" y2="210"/>
+                <line class="e match" x1="90" y1="210" x2="360" y2="210"/>
+                <line class="e faint" x1="90" y1="210" x2="360" y2="255"/>
+                <line class="e faint" x1="90" y1="255" x2="360" y2="165"/>
+                <line class="e match" x1="90" y1="255" x2="360" y2="255"/>
+                <g class="v"><circle cx="90" cy="30" r="15"/><text x="90" y="30">An</text></g>
+                <g class="v"><circle cx="90" cy="75" r="15"/><text x="90" y="75">Be</text></g>
+                <g class="v"><circle cx="90" cy="120" r="15"/><text x="90" y="120">Cá</text></g>
+                <g class="v"><circle cx="90" cy="165" r="15"/><text x="90" y="165">Dé</text></g>
+                <g class="v"><circle cx="90" cy="210" r="15"/><text x="90" y="210">Ev</text></g>
+                <g class="v"><circle cx="90" cy="255" r="15"/><text x="90" y="255">Fe</text></g>
+                <g class="v"><circle cx="360" cy="30" r="15"/><text x="360" y="30">Mat</text></g>
+                <g class="v"><circle cx="360" cy="75" r="15"/><text x="360" y="75">Qui</text></g>
+                <g class="v"><circle cx="360" cy="120" r="15"/><text x="360" y="120">Fis</text></g>
+                <g class="v"><circle cx="360" cy="165" r="15"/><text x="360" y="165">Bio</text></g>
+                <g class="v"><circle cx="360" cy="210" r="15"/><text x="360" y="210">Psi</text></g>
+                <g class="v"><circle cx="360" cy="255" r="15"/><text x="360" y="255">Eco</text></g>
+              </svg>
+              <figcaption><b>Figura 7.</b> Um emparelhamento perfeito (arestas verdes). A escola contrata os seis.</figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 142</span><div class="stmt">
+            <p>Faça uma análise detalhada da complexidade do algoritmo de Edmonds.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h142" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a142" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h142"><div class="plab">Dica</div>
+            <p>Separe o custo de uma busca (BFS/DFS na árvore alternante) do número de buscas.</p>
+          </div>
+          <div class="panel answer" id="a142"><div class="plab">Resolução</div>
+            <p>
+              Represente <span class="m"><i>G</i></span> por listas de adjacência:
+              <span class="m">|<i>V</i>| = <i>n</i></span>, <span class="m">|<i>E</i>| = <i>m</i></span>.
+            </p>
+            <p>
+              <b>Uma execução das linhas 7–.</b> Os conjuntos <span class="m"><i>S</i></span> e
+              <span class="m"><i>T</i></span> só crescem. Cada vértice entra no máximo uma vez; ao processar
+              <span class="m"><i>a</i> ∈ <i>S</i></span> percorremos <span class="m"><i>N</i>(<i>a</i>)</span>.
+              No total, cada aresta é inspecionada <span class="m"><i>O</i>(1)</span> vezes (do lado de
+              <span class="m"><i>A</i></span>). Manter “coberto por M” e o predecessor na árvore é
+              <span class="m"><i>O</i>(1)</span> por vértice. Custo:
+              <span class="cplx"><i>O</i>(<i>n</i> + <i>m</i>)</span>.
+            </p>
+            <p>
+              <b>Número de fases.</b> Cada XOR aumenta <span class="m">|<i>M</i>|</span> em 1, logo há no máximo
+              <span class="m">|<i>A</i>| ≤ <i>n</i></span> fases bem-sucedidas. A última chamada ou devolve
+              <span class="m"><i>M</i></span> (A coberto) ou devolve <span class="m"><i>S</i></span> após mais uma
+              busca. O original conta “uma busca por vértice”, o que também é
+              <span class="m"><i>O</i>(<i>n</i>)</span> buscas.
+            </p>
+            <p>
+              <b>Total.</b>
+              <span class="cplx"><i>O</i>(<i>n</i>(<i>n</i> + <i>m</i>))</span> =
+              <span class="cplx"><i>O</i>(|<i>V</i>| · (|<i>V</i>| + |<i>E</i>|))</span>.
+              O XOR de um caminho de comprimento
+              <span class="m"><i>O</i>(<i>n</i>)</span> cabe nessa conta (no máximo
+              <span class="m"><i>n</i></span> XORs).
+            </p>
+            <p>
+              Com Hopcroft–Karp o expoente cai para
+              <span class="cplx"><i>O</i>(√<i>n</i> · <i>m</i>)</span>; isso está fora do algoritmo destas notas.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 143</span><div class="stmt">
+            <p>Modifique o algoritmo Edmonds(A, B, E) para que ele devolva um emparelhamento máximo.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h143" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a143" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h143"><div class="plab">Dica</div>
+            <p>Não pare no primeiro obstáculo de um único u. Comece a busca com todos os descobertos de A (floresta húngara).</p>
+          </div>
+          <div class="panel answer" id="a143"><div class="plab">Resolução</div>
+            <p>
+              A versão original decide se A é cobertível. Para máximo, troque a inicialização da busca:
+            </p>
+            <div class="algo">
+              <div class="nome">Edmonds-Máximo(A, B, E)</div>
+<pre>M ← ∅
+<span class="kw">repita</span>
+    S ← {u ∈ A : u não é coberto por M}
+    T ← ∅
+    <span class="kw">se</span> S = ∅ <span class="kw">então devolva</span> M
+    <span class="kw">enquanto</span> N(S) ≠ T <span class="kw">faça</span>
+        escolha b ∈ N(S) \ T
+        <span class="kw">se</span> existe a ∉ S com {a, b} ∈ M <span class="kw">então</span>
+            S ← S ∪ {a}; T ← T ∪ {b}
+        <span class="kw">senão</span>
+            P ← caminho M-aumentante de algum u ∈ S até b
+            M ← M ⊕ E(P)
+            <span class="kw">vá para</span> o próximo repita
+    <span class="kw">devolva</span> M   <span class="cm">// N(S)=T: não há aumentante (Berge)</span></pre>
+            </div>
+            <p>
+              Quando <span class="m"><i>N</i>(<i>S</i>) = <i>T</i></span>, nenhum descoberto de A alcança um
+              descoberto de B: não existe caminho aumentante, e Berge garante que
+              <span class="m"><i>M</i></span> é máximo. A complexidade permanece
+              <span class="cplx"><i>O</i>(|<i>V</i>| · (|<i>V</i>| + |<i>E</i>|))</span>
+              (no máximo <span class="m">|<i>V</i>|∕2</span> aumentos, cada busca linear).
+            </p>
+            <p>
+              Variante equivalente: rode a versão original a partir de cada descoberto, um de cada vez; se a
+              busca de <span class="m"><i>u</i></span> falha, <i>congele</i> os vértices de
+              <span class="m"><i>S</i></span> e passe ao próximo descoberto ainda livre. Quando nenhum
+              descoberto restante aumenta, <span class="m"><i>M</i></span> é máximo.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 144</span><div class="stmt">
+            <p>Seja <span class="m"><i>B</i></span> um grafo bipartido com bipartição <span class="m"><i>A</i>, <i>B</i></span>. Construa um grafo orientado <span class="m"><i>D</i></span> a partir de <span class="m"><i>B</i></span> orientando as arestas no sentido de <span class="m"><i>X</i></span> para <span class="m"><i>Y</i></span>. Acrescente vértices novos <span class="m"><i>s</i></span> e <span class="m"><i>t</i></span>, com <span class="m"><i>s</i></span> ligado a todos os vértices de <span class="m"><i>X</i></span> (sentido <span class="m"><i>s</i> → <i>X</i></span>) e <span class="m"><i>t</i></span> ligado a todos os de <span class="m"><i>Y</i></span> (sentido <span class="m"><i>Y</i> → <i>t</i></span>). Suponha que <span class="m"><i>D</i></span> modela uma rede em que cada aresta tem capacidade 1. Mostre que o fluxo máximo de <span class="m"><i>s</i></span> para <span class="m"><i>t</i></span> é igual ao número máximo de arestas num emparelhamento em <span class="m"><i>B</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h144" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a144" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h144"><div class="plab">Dica</div>
+            <p>O original chama as partes de X e Y no meio do enunciado: leia X = A e Y = B. Fluxo inteiro de valor k desmonta em k caminhos s–a–b–t disjuntos nos vértices internos.</p>
+          </div>
+          <div class="panel answer" id="a144"><div class="plab">Resolução</div>
+            <p>
+              O enunciado usa A, B e depois X, Y para as mesmas partes. Lemos
+              <span class="m"><i>X</i> = <i>A</i></span> e <span class="m"><i>Y</i> = <i>B</i></span>
+              (e o grafo de entrada não se chama <span class="m"><i>B</i></span> na segunda ocorrência — é a
+              parte direita). Capacidades unitárias.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 520 220" role="img" aria-label="Rede s-A-B-t com capacidades 1">
+                <defs><marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker></defs>
+                <line class="arw" x1="58" y1="110" x2="148" y2="50"/>
+                <line class="arw" x1="58" y1="110" x2="148" y2="170"/>
+                <line class="arw" x1="182" y1="50" x2="288" y2="50"/>
+                <line class="arw" x1="182" y1="50" x2="288" y2="170"/>
+                <line class="arw" x1="182" y1="170" x2="288" y2="170"/>
+                <line class="arw" x1="322" y1="50" x2="412" y2="110"/>
+                <line class="arw" x1="322" y1="170" x2="412" y2="110"/>
+                <g class="v hl2"><circle cx="40" cy="110" r="17"/><text x="40" y="110">s</text></g>
+                <g class="v"><circle cx="165" cy="50" r="17"/><text x="165" y="50">a1</text></g>
+                <g class="v"><circle cx="165" cy="170" r="17"/><text x="165" y="170">a2</text></g>
+                <g class="v"><circle cx="305" cy="50" r="17"/><text x="305" y="50">b1</text></g>
+                <g class="v"><circle cx="305" cy="170" r="17"/><text x="305" y="170">b2</text></g>
+                <g class="v hl"><circle cx="430" cy="110" r="17"/><text x="430" y="110">t</text></g>
+              </svg>
+              <figcaption><b>Figura 8.</b> Exemplo construído: rede da redução. Cada arco tem capacidade 1.</figcaption>
+            </figure>
+            <p>
+              <b>μ ≤ fluxo máximo.</b> Dado um emparelhamento de <span class="m"><i>k</i></span> arestas, envie
+              1 unidade ao longo de cada caminho
+              <span class="m"><i>s</i> → <i>a</i> → <i>b</i> → <i>t</i></span>. As arestas do emparelhamento
+              não compartilham vértices, logo os caminhos são internamente disjuntos e o fluxo é viável de
+              valor <span class="m"><i>k</i></span>. Portanto o fluxo máximo é pelo menos
+              <span class="m">μ</span>.
+            </p>
+            <p>
+              <b>Fluxo máximo ≤ μ.</b> Existe fluxo máximo inteiro (capacidades inteiras). Ele se decompõe em
+              caminhos de <span class="m"><i>s</i></span> a <span class="m"><i>t</i></span> de valor 1 e
+              possivelmente ciclos (que podemos zerar). Cada caminho tem a forma
+              <span class="m"><i>s</i>, <i>a</i>, <i>b</i>, <i>t</i></span>: a capacidade 1 em
+              <span class="m"><i>s</i> → <i>a</i></span> e em
+              <span class="m"><i>b</i> → <i>t</i></span> impede que o mesmo
+              <span class="m"><i>a</i></span> ou o mesmo <span class="m"><i>b</i></span> apareça em dois
+              caminhos. As arestas <span class="m"><i>a</i> → <i>b</i></span> usadas formam um emparelhamento
+              de tamanho igual ao valor do fluxo.
+            </p>
+            <p>Logo o fluxo máximo coincide com <span class="m">μ(<i>B</i>)</span>.</p>
+          </div>
+        </article>
+      </section>
+
+      <hr class="sep">
+
+      <section class="chapter" id="s19">
+        <h2><span class="num">§19</span> Cobertura</h2>
+        <p class="sub-lead">Objetivo do bloco: cobrir todas as arestas com o menor número de vértices e, em bipartidos, reconhecer que esse número é μ(G).</p>
+
+        <h3 id="s19-nu">19.1 Cobertura por vértices e ν(G)</h3>
+        <div class="box def">
+          <div class="h">Definição · cobertura por vértices</div>
+          <p>
+            Uma <b>cobertura por vértices</b> em <span class="m"><i>G</i></span> é um subconjunto
+            <span class="m"><i>U</i> ⊆ <i>V</i>(<i>G</i>)</span> tal que
+            <span class="m"><i>e</i> ∩ <i>U</i> ≠ ∅</span> para toda aresta
+            <span class="m"><i>e</i> ∈ <i>E</i></span>: toda aresta encontra
+            <span class="m"><i>U</i></span>. O tamanho de uma cobertura mínima é
+          </p>
+          <div class="eq"><div class="body">
+            ν(<i>G</i>) = min{ |<i>U</i>| : <i>U</i> é cobertura por vértices em <i>G</i> }
+          </div><div class="tag">(38)</div></div>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · cobertura ≠ emparelhamento, e ν ≠ μ em gerais</div>
+          <p>
+            Emparelhamento escolhe arestas disjuntas; cobertura escolhe vértices que “tocam” todas as arestas.
+            Sempre <span class="m">μ(<i>G</i>) ≤ ν(<i>G</i>)</span>: cada aresta do emparelhamento exige um
+            vértice exclusivo na cobertura. A igualdade é o milagre dos bipartidos. Fora deles,
+            <span class="m"><i>C</i><sub>5</sub></span> tem <span class="m">μ = 2</span> e
+            <span class="m">ν = 3</span>.
+          </p>
+        </div>
+        <p>
+          Identidade útil (Gallai): <span class="m"><i>I</i></span> é independente se e somente se
+          <span class="m"><i>V</i> \ <i>I</i></span> é cobertura, logo
+          <span class="m">α(<i>G</i>) + ν(<i>G</i>) = |<i>V</i>(<i>G</i>)|</span>.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 480 230" role="img" aria-label="Grafo bipartido com emparelhamento em verde e cobertura {a1, a2, b3, b4}">
+            <line class="e match" x1="90" y1="40" x2="330" y2="40"/>
+            <line class="e match" x1="90" y1="100" x2="330" y2="100"/>
+            <line class="e" x1="90" y1="40" x2="330" y2="100"/>
+            <line class="e" x1="90" y1="160" x2="330" y2="160"/>
+            <line class="e" x1="90" y1="160" x2="330" y2="220"/>
+            <line class="e" x1="90" y1="220" x2="330" y2="220"/>
+            <line class="e faint" x1="90" y1="100" x2="330" y2="160"/>
+            <g class="v hl"><circle cx="90" cy="40" r="17"/><text x="90" y="40">a1</text></g>
+            <g class="v hl"><circle cx="90" cy="100" r="17"/><text x="90" y="100">a2</text></g>
+            <g class="v"><circle cx="90" cy="160" r="17"/><text x="90" y="160">a3</text></g>
+            <g class="v"><circle cx="90" cy="220" r="17"/><text x="90" y="220">a4</text></g>
+            <g class="v"><circle cx="330" cy="40" r="17"/><text x="330" y="40">b1</text></g>
+            <g class="v"><circle cx="330" cy="100" r="17"/><text x="330" y="100">b2</text></g>
+            <g class="v hl"><circle cx="330" cy="160" r="17"/><text x="330" y="160">b3</text></g>
+            <g class="v hl"><circle cx="330" cy="220" r="17"/><text x="330" y="220">b4</text></g>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--ok)"></i>emparelhamento</span>
+            <span><i style="background:var(--c2)"></i>cobertura {a1, a2, b3, b4}</span>
+          </div>
+          <figcaption><b>Figura 9.</b> Exemplo construído no espírito da figura 25 do original: um emparelhamento (verde) e a cobertura {a1, a2, b3, b4}. Toda aresta encontra um vértice vermelho.</figcaption>
+        </figure>
+
+        <h3 id="s19-konig">19.2 Teorema de König</h3>
+        <div class="box thm">
+          <div class="h">Teorema 24 · König, 1931</div>
+          <p>
+            Num grafo bipartido <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span>,
+          </p>
+          <div class="eq"><div class="body">
+            μ(<i>G</i>) = ν(<i>G</i>).
+          </div><div class="tag">(39)</div></div>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b>
+              Para qualquer emparelhamento <span class="m"><i>M</i></span> e qualquer cobertura
+              <span class="m"><i>U</i></span>, cada aresta de <span class="m"><i>M</i></span> encontra
+              <span class="m"><i>U</i></span> num extremo distinto. Logo
+              <span class="m">|<i>M</i>| ≤ |<i>U</i>|</span> e
+            </p>
+            <div class="eq"><div class="body">μ(<i>G</i>) ≤ ν(<i>G</i>).</div><div class="tag">(40)</div></div>
+            <p>
+              Seja agora <span class="m"><i>M</i></span> máximo. Construa
+              <span class="m"><i>C</i></span> assim: para cada
+              <span class="m">{<i>a</i>, <i>b</i>} ∈ <i>M</i></span> com
+              <span class="m"><i>a</i> ∈ <i>A</i></span> e
+              <span class="m"><i>b</i> ∈ <i>B</i></span>, coloque
+              <span class="m"><i>b</i></span> em <span class="m"><i>C</i></span> se
+              <span class="m"><i>b</i></span> é extremo de algum caminho
+              <span class="m"><i>M</i></span>-alternante; senão coloque
+              <span class="m"><i>a</i></span>. Assim
+              <span class="m">|<i>C</i>| = |<i>M</i>|</span>.
+            </p>
+            <p>
+              <span class="m"><i>C</i></span> é cobertura. Seja
+              <span class="m">{<i>a</i>, <i>b</i>}</span> uma aresta. Se ela está em
+              <span class="m"><i>M</i></span>, encontra <span class="m"><i>C</i></span> por construção.
+              Se não, como <span class="m"><i>M</i></span> é máximo, pelo menos um extremo é coberto.
+            </p>
+            <p>
+              Se <span class="m"><i>a</i></span> está descoberto, então
+              <span class="m"><i>P</i> = <i>a</i>, <i>b</i></span> é alternante e
+              <span class="m"><i>b</i></span> é coberto (Berge), logo
+              <span class="m"><i>b</i> ∈ <i>C</i></span>.
+            </p>
+            <p>
+              Se <span class="m"><i>a</i></span> é coberto, seja
+              <span class="m">{<i>a</i>, <i>b</i>′} ∈ <i>M</i></span>. Se
+              <span class="m"><i>a</i> ∉ <i>C</i></span>, então
+              <span class="m"><i>b</i>′ ∈ <i>C</i></span>, logo
+              <span class="m"><i>b</i>′</span> está num caminho alternante
+              <span class="m"><i>P</i></span>. Se <span class="m"><i>b</i></span> já está em
+              <span class="m"><i>P</i></span>, então <span class="m"><i>b</i> ∈ <i>C</i></span>.
+              Se não, concatenar <span class="m"><i>P</i></span> (ou o prefixo até
+              <span class="m"><i>a</i></span>) com a aresta
+              <span class="m">{<i>a</i>, <i>b</i>}</span> produz um caminho alternante até
+              <span class="m"><i>b</i></span>. Esse caminho não é aumentante (Berge), portanto
+              <span class="m"><i>b</i></span> é coberto e, sendo extremo de alternante,
+              <span class="m"><i>b</i> ∈ <i>C</i></span>.
+            </p>
+            <p>
+              Em todos os casos a aresta encontra <span class="m"><i>C</i></span>. Logo
+              <span class="m">ν ≤ |<i>C</i>| = |<i>M</i>| ≤ μ</span>, e com (40) vem
+              <span class="m">ν = μ</span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+        <p>
+          O original também deduz Hall a partir de König: se não há emparelhamento cobrindo A, então
+          <span class="m">ν = μ &lt; |<i>A</i>|</span>; escrevendo
+          <span class="m"><i>U</i> = <i>A</i>′ ∪ <i>B</i>′</span> a cobertura mínima, não há aresta de
+          <span class="m"><i>A</i> \ <i>A</i>′</span> para <span class="m"><i>B</i> \ <i>B</i>′</span>, e
+        </p>
+        <div class="eq"><div class="body">
+          |<i>N</i>(<i>A</i> \ <i>A</i>′)| ≤ |<i>B</i>′| &lt; |<i>A</i> \ <i>A</i>′|,
+        </div><div class="tag">(42)</div></div>
+        <p>
+          um obstáculo de Hall. A recíproca (König a partir de Hall) é o exercício 145.
+        </p>
+        <div class="box warn">
+          <div class="h">Observação 15 · König não vale fora dos bipartidos</div>
+          <p>
+            Computar <span class="m">ν(<i>G</i>)</span> é NP-difícil em grafos gerais, enquanto
+            <span class="m">μ(<i>G</i>)</span> é polinomial (Edmonds com flores; nestas notas, Edmonds
+            bipartido + o algoritmo geral nas notas de Karp). Se valesse
+            <span class="m">μ = ν</span> em geral, cobertura mínima seria polinomial. Não é — exercício 129.
+          </p>
+        </div>
+        <div class="box rec">
+          <div class="h">Receita: cobertura em bipartido</div>
+          <ol>
+            <li>Calcule um emparelhamento máximo (Edmonds-Máximo ou fluxo).</li>
+            <li>Construa W como no exercício 137 (alternantes a partir de A descoberto).</li>
+            <li>A cobertura <span class="m">(<i>B</i> ∩ <i>W</i>) ∪ (<i>A</i> \ <i>W</i>)</span> tem tamanho μ = ν.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex145">
+        <div class="ex-head">
+          <h3>Exercício 145</h3>
+          <button class="toggle" type="button" data-scope="#ex145" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: equivalência Hall ⟺ König.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 145</span><div class="stmt">
+            <p>Na primeira prova que apresentamos do teorema de Hall deduzimos o resultado do teorema de König. Esses teoremas são, de fato, equivalentes. Demonstre o teorema de König (<span class="m">μ &gt; ν</span>) a partir do teorema de Hall.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h145" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a145" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h145"><div class="plab">Dica</div>
+            <p>O original escreve μ &gt; ν; o que se pede é μ = ν. Use a forma defectiva: o U que maximiza |U| − |N(U)| produz uma cobertura de tamanho |A| − d = μ.</p>
+          </div>
+          <div class="panel answer" id="a145"><div class="plab">Resolução</div>
+            <p>
+              O original pede König “(<span class="m">μ &gt; ν</span>)”. Essa desigualdade é sempre falsa
+              (vale <span class="m">μ ≤ ν</span> em qualquer grafo). Lemos
+              <span class="m">μ = ν</span> em bipartidos, a partir de Hall.
+            </p>
+            <p>
+              <b>Sempre</b> <span class="m">μ ≤ ν</span>: cada aresta de um emparelhamento exige um vértice
+              exclusivo na cobertura.
+            </p>
+            <p>
+              <b>Em bipartido, Hall ⇒ ν ≤ μ.</b> Pelo exercício 138 (que usa só a forma defectiva de Hall),
+            </p>
+            <div class="eq"><div class="body">
+              μ(<i>G</i>) = |<i>A</i>| − <i>d</i>, &nbsp; <i>d</i> = max<sub><i>U</i> ⊆ <i>A</i></sub>(|<i>U</i>| − |<i>N</i>(<i>U</i>)|).
+            </div></div>
+            <p>
+              Seja <span class="m"><i>S</i> ⊆ <i>A</i></span> que atinge o máximo. O conjunto
+              <span class="m"><i>C</i> = <i>N</i>(<i>S</i>) ∪ (<i>A</i> \ <i>S</i>)</span> é cobertura
+              (exercício 136 com <span class="m"><i>A</i><sub>1</sub> = <i>S</i></span>,
+              <span class="m"><i>B</i><sub>1</sub> = <i>N</i>(<i>S</i>)</span>): aresta com ponta em
+              <span class="m"><i>S</i></span> vai a <span class="m"><i>N</i>(<i>S</i>)</span>; aresta com
+              ponta em <span class="m"><i>A</i> \ <i>S</i></span> já encontra
+              <span class="m"><i>C</i></span>. E
+            </p>
+            <div class="eq"><div class="body">
+              |<i>C</i>| = |<i>N</i>(<i>S</i>)| + |<i>A</i>| − |<i>S</i>| = |<i>A</i>| − <i>d</i> = μ(<i>G</i>).
+            </div></div>
+            <p>
+              Logo <span class="m">ν ≤ |<i>C</i>| = μ</span>. Junto com
+              <span class="m">μ ≤ ν</span> obtemos König.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="10-arvores-geradoras-minimas.html"><span class="dir">Capítulo anterior</span><span class="ttl">10. Árvores geradoras mínimas</span></a>
+        <a class="next" href="12-hamilton-e-euler.html"><span class="dir">Próximo capítulo</span><span class="ttl">12. Circuitos hamiltonianos e trilhas eulerianas</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática das seções “Emparelhamento”, “Emparelhamentos em
+          grafos bipartidos” e “Cobertura” das notas de Teoria dos Grafos (CI065 / BC1429) do Prof. Jair
+          Donadelli. Enunciados dos 27 exercícios preservados; explicações, diagramas e resoluções foram
+          escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>

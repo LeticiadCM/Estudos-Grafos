@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>N. TÍTULO DO CAPÍTULO — Teoria dos Grafos</title>
+<meta name="description" content="UMA FRASE descrevendo o capítulo.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo N · ASSUNTO</span>
+    <h1>TÍTULO DO CAPÍTULO</h1>
+    <p class="lead">
+      DUAS A QUATRO LINHAS dizendo o que o leitor vai saber fazer ao terminar o capítulo.
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> tópico · tópico · tópico</span>
+      <span><b>Exercícios:</b> N com resolução</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#s1">1. Primeira seção</a>
+        <a class="sub" href="#s1-a">Subseção</a>
+        <a href="#ex1">Exercícios N a M</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <section class="chapter" id="s1">
+        <h2><span class="num">§2</span> Título da seção (numeração do original)</h2>
+        <p class="sub-lead">Objetivo do bloco: uma frase sobre o que o aluno vai conseguir fazer.</p>
+
+        <h3 id="s1-a">2.1 Subseção</h3>
+        <p>Texto explicativo. Matemática inline assim: <span class="m">|<i>V</i>(<i>G</i>)| ≥ 3</span>.</p>
+
+        <div class="box def">
+          <div class="h">Definição · nome do conceito</div>
+          <p>Enunciado da definição, com a notação introduzida em <b>negrito</b> na primeira aparição.</p>
+        </div>
+
+        <div class="eq"><div class="body">
+          <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> <i>d</i>(<i>u</i>) = 2|<i>E</i>(<i>G</i>)|
+        </div><div class="tag">(7)</div></div>
+
+        <div class="box thm">
+          <div class="h">Teorema 5</div>
+          <p>Enunciado do teorema.</p>
+          <div class="proof">
+            <p><b>Demonstração.</b> Argumento completo. <span class="qed">□</span></p>
+          </div>
+        </div>
+
+        <div class="box rec">
+          <div class="h">Receita: como atacar esse tipo de exercício</div>
+          <ol>
+            <li><b>Passo.</b> Explicação.</li>
+            <li><b>Passo.</b> Explicação.</li>
+          </ol>
+        </div>
+
+        <div class="box warn">
+          <div class="h">Atenção</div>
+          <p>O erro clássico, ou a hipótese que não pode ser esquecida.</p>
+        </div>
+
+        <div class="box tip">
+          <div class="h">Intuição</div>
+          <p>A leitura informal que faz o resultado parecer óbvio depois de entendido.</p>
+        </div>
+
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Símbolo</th><th>Significado</th><th>No exemplo</th></tr></thead>
+          <tbody>
+            <tr><td><i>N</i>(<i>v</i>)</td><td>vizinhança de <span class="m"><i>v</i></span></td><td>{1, 2}</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <figure>
+          <svg class="dg" viewBox="0 0 400 200" role="img" aria-label="Descrição textual do grafo desenhado">
+            <defs><marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker></defs>
+            <line class="e" x1="70" y1="60" x2="200" y2="60"/>
+            <line class="e tree" x1="200" y1="60" x2="330" y2="140"/>
+            <circle class="peso-bg" cx="135" cy="60" r="11"/>
+            <text class="peso" x="135" y="64">7</text>
+            <g class="v"><circle cx="70" cy="60" r="17"/><text x="70" y="60">1</text></g>
+            <g class="v"><circle cx="200" cy="60" r="17"/><text x="200" y="60">2</text></g>
+            <g class="v open"><circle cx="330" cy="140" r="17"/><text x="330" y="140">3</text></g>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--brand)"></i>aresta da árvore</span>
+            <span><i style="background:var(--c2)"></i>vértice em processamento</span>
+          </div>
+          <figcaption><b>Figura 1.</b> O que observar nesta figura.</figcaption>
+        </figure>
+
+        <div class="algo">
+          <div class="nome">Nome-do-Algoritmo(G, s)</div>
+<pre><span class="cm">// invariante: comentário útil</span>
+<span class="kw">para cada</span> v ∈ V(G) <span class="kw">faça</span> d(v) ← ∞
+d(s) ← 0
+<span class="kw">enquanto</span> houver vértice não visitado <span class="kw">faça</span>
+    u ← escolhe o melhor candidato
+    <span class="kw">para cada</span> v ∈ N(u) <span class="kw">faça</span>
+        <span class="kw">se</span> d(v) &gt; d(u) + 1 <span class="kw">então</span> d(v) ← d(u) + 1</pre>
+        </div>
+        <p>Complexidade: <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span> com lista de adjacências.</p>
+
+        <div class="box def">
+          <div class="h">Resumo do bloco em cinco linhas</div>
+          <ul>
+            <li>Ponto essencial 1.</li>
+            <li>Ponto essencial 2.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex1">
+        <div class="ex-head">
+          <h3>Exercícios 17 a 18</h3>
+          <button class="toggle" type="button" data-scope="#ex1" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: assuntos deste bloco.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 17</span><div class="stmt">
+            <p>Enunciado do exercício, com a matemática já convertida para HTML.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h17" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a17" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h17"><div class="plab">Dica</div>
+            <p>Um empurrão, sem entregar a solução.</p>
+          </div>
+          <div class="panel answer" id="a17"><div class="plab">Resolução</div>
+            <p><b>Passo 1.</b> ...</p>
+            <p><b>Passo 2.</b> ...</p>
+            <p>Conclusão. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 18</span><div class="stmt">
+            <p>Exercício direto, sem dica.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a18" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a18"><div class="plab">Resolução</div>
+            <p class="kicker">Parte (a)</p>
+            <p>...</p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="ARQUIVO-ANTERIOR.html"><span class="dir">Capítulo anterior</span><span class="ttl">TÍTULO ANTERIOR</span></a>
+        <a class="next" href="ARQUIVO-PROXIMO.html"><span class="dir">Próximo capítulo</span><span class="ttl">TÍTULO PRÓXIMO</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática das seções “SEÇÕES COBERTAS” das notas de
+          Teoria dos Grafos (CI065 / BC1429) do Prof. Jair Donadelli. Enunciados dos exercícios preservados;
+          explicações, diagramas e resoluções foram escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>

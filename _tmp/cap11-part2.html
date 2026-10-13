@@ -1,0 +1,476 @@
+              O induzido <span class="m"><i>H</i> = <i>G</i>[<i>S</i> ∪ <i>N</i>(<i>S</i>)]</span> herda (36)
+              (os vizinhos de um subconjunto de <span class="m"><i>S</i></span> em
+              <span class="m"><i>H</i></span> são os mesmos que em <span class="m"><i>G</i></span>).
+              Por indução existe emparelhamento <span class="m"><i>M</i></span> em
+              <span class="m"><i>H</i></span> cobrindo <span class="m"><i>S</i></span>.
+            </p>
+            <p>
+              O complemento é o induzido
+              <span class="m"><i>J</i> = <i>G</i>[(<i>A</i> \ <i>S</i>) ∪ (<i>B</i> \ <i>N</i>(<i>S</i>))]</span>
+              — no original a definição de <span class="m"><i>J</i></span> saiu igual à de
+              <span class="m"><i>H</i></span>; o argumento só fecha com o grafo restante.
+              Se algum <span class="m"><i>X</i> ⊆ <i>A</i> \ <i>S</i></span> violasse Hall em
+              <span class="m"><i>J</i></span>, teríamos
+            </p>
+            <div class="eq"><div class="body">
+              |<i>N</i><sub><i>G</i></sub>(<i>S</i> ∪ <i>X</i>)|
+              = |<i>N</i>(<i>S</i>) ∪ <i>N</i><sub><i>J</i></sub>(<i>X</i>)|
+              = |<i>N</i>(<i>S</i>)| + |<i>N</i><sub><i>J</i></sub>(<i>X</i>)|
+              &lt; |<i>S</i>| + |<i>X</i>|,
+            </div></div>
+            <p>
+              pois não há aresta de <span class="m"><i>S</i></span> para
+              <span class="m"><i>B</i> \ <i>N</i>(<i>S</i>)</span>. Isso contradiz (36) em
+              <span class="m"><i>G</i></span>. Logo <span class="m"><i>J</i></span> satisfaz Hall e, por indução,
+              tem emparelhamento <span class="m"><i>M</i>′</span> cobrindo
+              <span class="m"><i>A</i> \ <i>S</i></span>. A união
+              <span class="m"><i>M</i> ∪ <i>M</i>′</span> cobre <span class="m"><i>A</i></span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+
+        <h3 id="s18-defeito">18.3 Forma defectiva</h3>
+        <div class="box thm">
+          <div class="h">Corolário 23 · forma defectiva de Hall</div>
+          <p>
+            Em todo grafo bipartido <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span> existe um
+            emparelhamento que cobre <span class="m"><i>A</i></span> a menos de
+            <span class="m"><i>d</i></span> vértices se, e somente se,
+          </p>
+          <div class="eq"><div class="body">
+            |<i>N</i>(<i>S</i>)| ≥ |<i>S</i>| − <i>d</i> &nbsp; para todo <i>S</i> ⊆ <i>A</i>.
+          </div><div class="tag">(37)</div></div>
+        </div>
+        <p>
+          A leitura é: o pior “buraco” <span class="m">|<i>S</i>| − |<i>N</i>(<i>S</i>)|</span> é no máximo
+          <span class="m"><i>d</i></span>. Então dá para casar
+          <span class="m">|<i>A</i>| − <i>d</i></span> vértices de <span class="m"><i>A</i></span>.
+          A prova vira redução ao caso clássico: acrescente <span class="m"><i>d</i></span> vértices novos em
+          <span class="m"><i>B</i></span>, cada um ligado a todo <span class="m"><i>A</i></span>; Hall vale no
+          grafo novo se e somente se (37) vale no original (exercício 133).
+        </p>
+        <div class="box rec">
+          <div class="h">Receita: Hall nos exercícios 129 a 139</div>
+          <ol>
+            <li><b>Cobrir A.</b> Verifique (36) ou produza um <span class="m"><i>S</i></span> com <span class="m">|<i>N</i>(<i>S</i>)| &lt; |<i>S</i>|</span>.</li>
+            <li><b>Grau máximo.</b> Conte arestas: <span class="m">Δ|<i>S</i>| ≤ Δ|<i>N</i>(<i>S</i>)|</span> para o conjunto dos vértices de grau <span class="m">Δ</span>.</li>
+            <li><b>Regular.</b> As duas partes têm o mesmo tamanho e Hall segue da contagem de arestas.</li>
+            <li><b>Cobertura.</b> O parâmetro <span class="m">ν(<i>G</i>)</span> (mínima cobertura por vértices) é o assunto do §19. Até lá, use só a definição: todo extremo de aresta encontra o conjunto.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex129">
+        <div class="ex-head">
+          <h3>Exercícios 129 a 139</h3>
+          <button class="toggle" type="button" data-scope="#ex129" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: Hall e a forma defectiva, regularidade, unicidade, permanente, e a relação (delicada) entre μ, ν e α.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 129</span><div class="stmt">
+            <p>Como foi dito na observação 2, determinar <span class="m">α(<i>G</i>)</span> é um problema NP-difícil. Suponha que exista um algoritmo que recebe um grafo <span class="m"><i>G</i></span> e computa <span class="m">ν(<i>G</i>)</span> em tempo polinomial e mostre como computar <span class="m">ν(<i>G</i>)</span> em tempo polinomial.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h129" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a129" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h129"><div class="plab">Dica</div>
+            <p>O enunciado original pede para computar ν a partir de ν — é um typo. Decida se a hipótese é um oráculo para μ ou para ν, e em que classe de grafos.</p>
+          </div>
+          <div class="panel answer" id="a129"><div class="plab">Resolução</div>
+            <p>
+              <b>O enunciado está corrompido:</b> “suponha um algoritmo para <span class="m">ν(<i>G</i>)</span> e mostre como computar <span class="m">ν(<i>G</i>)</span>”.
+              Há duas leituras razoáveis. Em ambas usamos que
+              <span class="m">ν(<i>G</i>)</span> é o tamanho de uma cobertura mínima por vértices (definição (38), §19)
+              e que um conjunto <span class="m"><i>I</i></span> é independente se e somente se
+              <span class="m"><i>V</i> \ <i>I</i></span> é cobertura, logo
+              <span class="m">α(<i>G</i>) + ν(<i>G</i>) = |<i>V</i>(<i>G</i>)|</span> (identidade de Gallai).
+            </p>
+            <p class="kicker">Leitura A — a hipótese é um algoritmo polinomial para μ</p>
+            <p>
+              <b>Em grafos gerais isso não implica algoritmo polinomial para ν.</b>
+              Emparelhamento máximo é polinomial (Edmonds, 1965, via flores; nestas notas vemos só o caso bipartido).
+              Cobertura mínima por vértices é NP-difícil — é isso que a observação 15 do §19 aponta, citando este exercício.
+              Portanto “μ em poli ⇒ ν em poli” é falso, a menos que P = NP.
+            </p>
+            <p>
+              A implicação <b>vale em grafos bipartidos</b>: o teorema de König (§19) diz
+              <span class="m">μ(<i>G</i>) = ν(<i>G</i>)</span>. Um algoritmo polinomial para μ (Edmonds abaixo, ou fluxo)
+              devolve ν de graça. Essa é a leitura que torna o exercício verdadeiro sem colapsar P e NP, e é
+              coerente com o bloco em que ele aparece.
+            </p>
+            <p class="kicker">Leitura B — a hipótese é um algoritmo polinomial para ν, e o pedido é α</p>
+            <p>
+              A primeira frase lembra que <span class="m">α</span> é NP-difícil. Com Gallai,
+              <span class="m">α(<i>G</i>) = |<i>V</i>| − ν(<i>G</i>)</span>: um oráculo polinomial para ν dá α
+              (e vice-versa). Os dois problemas são NP-difíceis juntos. O original teria então um segundo typo
+              no alvo (“computar ν” no lugar de “computar α”).
+            </p>
+            <p>
+              Adotamos a leitura A no restante do capítulo: König dá ν em bipartidos via μ; em gerais, μ poli
+              <b>não</b> entrega ν poli.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 130</span><div class="stmt">
+            <p>Prove que se <span class="m"><i>G</i></span> é bipartido então existe um emparelhamento que cobre todos os vértices de grau <span class="m">Δ(<i>G</i>)</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h130" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a130" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h130"><div class="plab">Dica</div>
+            <p>Complete <span class="m"><i>G</i></span> até um supergrafo bipartido Δ-regular (multiarestas permitidas no auxiliar) e use a contagem do exercício 131.</p>
+          </div>
+          <div class="panel answer" id="a130"><div class="plab">Resolução</div>
+            <p>
+              Se <span class="m">Δ = 0</span> não há o que cobrir. Seja
+              <span class="m">Δ ≥ 1</span> e <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span>.
+            </p>
+            <p>
+              <b>Passo 1 — um lado.</b> Seja <span class="m"><i>A</i><sub>Δ</sub> = {<i>a</i> ∈ <i>A</i> : <i>d</i>(<i>a</i>) = Δ}</span>.
+              Para <span class="m"><i>S</i> ⊆ <i>A</i><sub>Δ</sub></span>,
+              <span class="m">Δ|<i>S</i>| = <i>e</i>(<i>S</i>, <i>N</i>(<i>S</i>)) ≤ Δ|<i>N</i>(<i>S</i>)|</span>,
+              logo <span class="m">|<i>N</i>(<i>S</i>)| ≥ |<i>S</i>|</span>. Hall produz um emparelhamento cobrindo
+              <span class="m"><i>A</i><sub>Δ</sub></span>. O mesmo vale para
+              <span class="m"><i>B</i><sub>Δ</sub></span>. Isso ainda não é o mesmo emparelhamento.
+            </p>
+            <p>
+              <b>Passo 2 — os dois lados de uma vez.</b> Construímos um supergrafo bipartido
+              <span class="m">Δ</span>-regular <span class="m"><i>G</i><sup>∗</sup></span> (multiarestas só no auxiliar).
+              Equalize <span class="m">|<i>A</i>|</span> e <span class="m">|<i>B</i>|</span> com vértices novos de
+              grau 0. A deficiência total <span class="m">Δ|<i>A</i>| − |<i>E</i>|</span> coincide nas duas partes.
+              Enquanto houver <span class="m"><i>u</i> ∈ <i>A</i></span> e
+              <span class="m"><i>v</i> ∈ <i>B</i></span> com grau menor que <span class="m">Δ</span>, acrescente a
+              aresta <span class="m">{<i>u</i>, <i>v</i>}</span> (ou mais uma cópia). O resultado é
+              <span class="m">Δ</span>-regular. Pela mesma contagem do exercício 131,
+              <span class="m"><i>G</i><sup>∗</sup></span> tem emparelhamento perfeito
+              <span class="m"><i>M</i><sup>∗</sup></span>.
+            </p>
+            <p>
+              Cada vértice de grau <span class="m">Δ</span> em <span class="m"><i>G</i></span> já tinha
+              <span class="m">Δ</span> arestas originais, logo não recebeu aresta nova e é coberto por uma aresta
+              de <span class="m"><i>M</i><sup>∗</sup></span> que já existia em <span class="m"><i>G</i></span>.
+              A restrição de <span class="m"><i>M</i><sup>∗</sup></span> às arestas de
+              <span class="m"><i>G</i></span> é um emparelhamento de <span class="m"><i>G</i></span> que cobre
+              todos os vértices de grau <span class="m">Δ</span>.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 131</span><div class="stmt">
+            <p>Prove que se <span class="m"><i>G</i></span> é bipartido e regular então <span class="m"><i>G</i></span> tem emparelhamento perfeito.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h131" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a131" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h131"><div class="plab">Dica</div>
+            <p>Conte arestas para obter <span class="m">|<i>A</i>| = |<i>B</i>|</span> e de novo para Hall: <span class="m"><i>r</i>|<i>S</i>| ≤ <i>r</i>|<i>N</i>(<i>S</i>)|</span>.</p>
+          </div>
+          <div class="panel answer" id="a131"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>G</i></span> <span class="m"><i>r</i></span>-regular,
+              <span class="m"><i>r</i> ≥ 1</span>, bipartido com partes
+              <span class="m"><i>A</i>, <i>B</i></span>. Então
+              <span class="m">|<i>E</i>| = <i>r</i>|<i>A</i>| = <i>r</i>|<i>B</i>|</span>, logo
+              <span class="m">|<i>A</i>| = |<i>B</i>|</span>.
+              Para <span class="m"><i>S</i> ⊆ <i>A</i></span>,
+              <span class="m"><i>r</i>|<i>S</i>| = <i>e</i>(<i>S</i>, <i>N</i>(<i>S</i>)) ≤ <i>r</i>|<i>N</i>(<i>S</i>)|</span>,
+              portanto <span class="m">|<i>N</i>(<i>S</i>)| ≥ |<i>S</i>|</span>. Hall dá um emparelhamento que cobre
+              <span class="m"><i>A</i></span>; como as partes têm o mesmo tamanho, ele é perfeito.
+              (Se <span class="m"><i>r</i> = 0</span>, o grafo é vazio: perfeito só se
+              <span class="m"><i>A</i> = <i>B</i> = ∅</span>.)
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 132</span><div class="stmt">
+            <p>Seja <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span> bipartido com <span class="m">|<i>A</i>| = |<i>B</i>| = <i>n</i></span>. Mostre que se não existe emparelhamento perfeito então existe <span class="m"><i>S</i></span> com <span class="m">|<i>S</i>| ≤ ⌈<i>n</i>∕2⌉</span> tal que <span class="m">|<i>N</i>(<i>S</i>)| = |<i>S</i>| − 1</span> e ou <span class="m"><i>S</i> ⊂ <i>A</i></span> ou <span class="m"><i>S</i> ⊂ <i>B</i></span>. (Dica do original: considere um conjunto <span class="m"><i>T</i></span> minimal violando (36).)</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h132" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a132" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h132"><div class="plab">Dica</div>
+            <p>Minimalidade força <span class="m">|<i>N</i>(<i>T</i>)| = |<i>T</i>| − 1</span>. Se <span class="m"><i>T</i></span> for grande, passe para o complementar em <span class="m"><i>B</i></span>.</p>
+          </div>
+          <div class="panel answer" id="a132"><div class="plab">Resolução</div>
+            <p>
+              Sem emparelhamento perfeito e com <span class="m">|<i>A</i>| = |<i>B</i>|</span>, Hall falha em
+              <span class="m"><i>A</i></span>: existe <span class="m"><i>T</i> ⊆ <i>A</i></span> com
+              <span class="m">|<i>N</i>(<i>T</i>)| &lt; |<i>T</i>|</span>. Tome
+              <span class="m"><i>T</i></span> <b>inclusão-minimal</b> com essa propriedade.
+            </p>
+            <p>
+              <b>Afirmação.</b> <span class="m">|<i>N</i>(<i>T</i>)| = |<i>T</i>| − 1</span>.
+              De fato <span class="m">|<i>N</i>(<i>T</i>)| ≤ |<i>T</i>| − 1</span>. Se
+              <span class="m"><i>x</i> ∈ <i>T</i></span>, a minimalidade dá
+              <span class="m">|<i>N</i>(<i>T</i> \ {<i>x</i>})| ≥ |<i>T</i>| − 1</span>.
+              Como <span class="m"><i>N</i>(<i>T</i> \ {<i>x</i>}) ⊆ <i>N</i>(<i>T</i>)</span>,
+              <span class="m">|<i>N</i>(<i>T</i>)| ≥ |<i>T</i>| − 1</span>. As duas desigualdades fecham.
+            </p>
+            <p>
+              Se <span class="m">|<i>T</i>| ≤ ⌈<i>n</i>∕2⌉</span>, tome
+              <span class="m"><i>S</i> = <i>T</i> ⊂ <i>A</i></span> (se
+              <span class="m"><i>T</i> = <i>A</i></span> então
+              <span class="m">|<i>T</i>| = <i>n</i></span>; esse caso cai no parágrafo seguinte, a menos que
+              <span class="m"><i>n</i> ≤ 1</span>, trivial).
+            </p>
+            <p>
+              Se <span class="m">|<i>T</i>| ≥ ⌈<i>n</i>∕2⌉ + 1</span>, defina
+              <span class="m"><i>S</i><sub>0</sub> = <i>B</i> \ <i>N</i>(<i>T</i>)</span>.
+              Então <span class="m">|<i>S</i><sub>0</sub>| = <i>n</i> − |<i>T</i>| + 1 ≤ ⌊<i>n</i>∕2⌋ ≤ ⌈<i>n</i>∕2⌉</span>
+              e não há aresta de <span class="m"><i>T</i></span> para <span class="m"><i>S</i><sub>0</sub></span>,
+              logo <span class="m"><i>N</i>(<i>S</i><sub>0</sub>) ⊆ <i>A</i> \ <i>T</i></span> e
+              <span class="m">|<i>N</i>(<i>S</i><sub>0</sub>)| ≤ <i>n</i> − |<i>T</i>| = |<i>S</i><sub>0</sub>| − 1</span>.
+              Assim <span class="m"><i>S</i><sub>0</sub> ⊂ <i>B</i></span> viola Hall.
+              Um subconjunto inclusão-minimal <span class="m"><i>S</i> ⊆ <i>S</i><sub>0</sub></span> satisfaz
+              <span class="m">|<i>N</i>(<i>S</i>)| = |<i>S</i>| − 1</span> pelo mesmo argumento da afirmação, e
+              <span class="m">|<i>S</i>| ≤ |<i>S</i><sub>0</sub>| ≤ ⌈<i>n</i>∕2⌉</span>.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 133</span><div class="stmt">
+            <p>Prove a seguinte implicação da forma defectiva do teorema de Hall: se <span class="m">|<i>N</i>(<i>S</i>)| ≥ |<i>S</i>| − <i>d</i></span> para todo <span class="m"><i>S</i> ⊆ <i>A</i></span>, então <span class="m"><i>G</i></span> contém um emparelhamento de cardinalidade <span class="m">|<i>A</i>| − <i>d</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h133" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a133" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h133"><div class="plab">Dica</div>
+            <p>Acrescente <span class="m"><i>d</i></span> vértices novos em <span class="m"><i>B</i></span>, cada um adjacente a todo <span class="m"><i>A</i></span>, e aplique Hall clássico.</p>
+          </div>
+          <div class="panel answer" id="a133"><div class="plab">Resolução</div>
+            <p>
+              O enunciado original escreve <span class="m"><i>S</i> ⊂ <i>A</i></span>; a desigualdade precisa valer
+              também para <span class="m"><i>S</i> = <i>A</i></span> (e para o vazio, que é automática). É assim
+              que lemos (37).
+            </p>
+            <p>
+              Seja <span class="m"><i>D</i></span> um conjunto de <span class="m"><i>d</i></span> vértices novos,
+              disjunto de <span class="m"><i>V</i>(<i>G</i>)</span>. Forme
+              <span class="m"><i>G</i>′</span> com partes <span class="m"><i>A</i></span> e
+              <span class="m"><i>B</i> ∪ <i>D</i></span>, acrescentando todas as arestas entre
+              <span class="m"><i>A</i></span> e <span class="m"><i>D</i></span>.
+              Para <span class="m"><i>S</i> ⊆ <i>A</i></span>,
+            </p>
+            <div class="eq"><div class="body">
+              |<i>N</i><sub><i>G</i>′</sub>(<i>S</i>)| = |<i>N</i><sub><i>G</i></sub>(<i>S</i>)| + <i>d</i> ≥ (|<i>S</i>| − <i>d</i>) + <i>d</i> = |<i>S</i>|.
+            </div></div>
+            <p>
+              Hall em <span class="m"><i>G</i>′</span> produz um emparelhamento cobrindo
+              <span class="m"><i>A</i></span>. No máximo <span class="m"><i>d</i></span> dessas arestas usam
+              <span class="m"><i>D</i></span>; as demais formam um emparelhamento de
+              <span class="m"><i>G</i></span> com pelo menos <span class="m">|<i>A</i>| − <i>d</i></span> arestas.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 134</span><div class="stmt">
+            <p>Prove que se o grafo bipartido <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span> é conexo e contém exatamente um emparelhamento perfeito então contém uma aresta <span class="m"><i>e</i></span> tal que <span class="m"><i>G</i> − <i>e</i></span> é desconexo.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h134" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a134" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h134"><div class="plab">Dica</div>
+            <p>Se δ ≥ 2, construa um passeio alternante a partir de uma aresta do emparelhamento único até fechar um circuito alternante — o XOR produziria outro perfeito.</p>
+          </div>
+          <div class="panel answer" id="a134"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>M</i></span> o único emparelhamento perfeito. Basta achar uma ponta de grau 1:
+              a única aresta incidente está em <span class="m"><i>M</i></span> e é ponte.
+            </p>
+            <p>
+              Suponha, por absurdo, <span class="m">δ(<i>G</i>) ≥ 2</span>. Comece num vértice
+              <span class="m"><i>a</i><sub>0</sub> ∈ <i>A</i></span> e construa um passeio
+              <span class="m"><i>M</i></span>-alternante que sai por uma aresta <i>fora</i> de
+              <span class="m"><i>M</i></span> (existe, pois o grau é pelo menos 2 e uma aresta já está em
+              <span class="m"><i>M</i></span>) e volta pelo par em <span class="m"><i>M</i></span>.
+              O grafo é finito: o passeio repete um vértice e o trecho entre as duas ocorrências é um
+              <b>circuito <span class="m"><i>M</i></span>-alternante</b> (em bipartido todo circuito é par, e a
+              construção já alterna). Então
+              <span class="m"><i>M</i> ⊕ <i>E</i>(<i>C</i>)</span> é outro emparelhamento perfeito, contradizendo a
+              unicidade.
+            </p>
+            <p>
+              Logo algum vértice tem grau 1. Sua aresta <span class="m"><i>e</i></span> é ponte:
+              <span class="m"><i>G</i> − <i>e</i></span> desconecta essa folha do restante
+              (que é não vazio porque <span class="m"><i>G</i></span> é conexo com emparelhamento perfeito, logo
+              tem pelo menos dois vértices).
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 135</span><div class="stmt">
+            <p>Seja <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span> bipartido e <span class="m">{<i>A</i><sub>1</sub>, <i>A</i><sub>2</sub>}</span> uma partição de <span class="m"><i>A</i></span> e <span class="m">{<i>B</i><sub>1</sub>, <i>B</i><sub>2</sub>}</span> uma partição de <span class="m"><i>B</i></span>. Mostre que se <span class="m"><i>N</i>(<i>A</i><sub>1</sub>) ⊆ <i>B</i><sub>1</sub></span> então <span class="m"><i>N</i>(<i>B</i><sub>2</sub>) ⊆ <i>A</i><sub>2</sub></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h135" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a135" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h135"><div class="plab">Dica</div>
+            <p>Uma aresta de <span class="m"><i>B</i><sub>2</sub></span> para <span class="m"><i>A</i><sub>1</sub></span> contradiria a hipótese sobre <span class="m"><i>N</i>(<i>A</i><sub>1</sub>)</span>.</p>
+          </div>
+          <div class="panel answer" id="a135"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>b</i> ∈ <i>B</i><sub>2</sub></span> e
+              <span class="m"><i>a</i> ∈ <i>N</i>(<i>b</i>)</span>. Se
+              <span class="m"><i>a</i> ∈ <i>A</i><sub>1</sub></span>, então
+              <span class="m"><i>b</i> ∈ <i>N</i>(<i>A</i><sub>1</sub>) ⊆ <i>B</i><sub>1</sub></span>,
+              contradizendo <span class="m"><i>b</i> ∈ <i>B</i><sub>2</sub></span> (as partes são disjuntas).
+              Logo <span class="m"><i>a</i> ∈ <i>A</i><sub>2</sub></span>. Portanto
+              <span class="m"><i>N</i>(<i>B</i><sub>2</sub>) ⊆ <i>A</i><sub>2</sub></span>.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 136</span><div class="stmt">
+            <p>Nas mesmas hipóteses do exercício 135, mostre que se <span class="m"><i>N</i>(<i>A</i><sub>1</sub>) ⊆ <i>B</i><sub>1</sub></span> então <span class="m"><i>B</i><sub>1</sub> ∪ <i>A</i><sub>2</sub></span> é uma cobertura.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h136" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a136" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h136"><div class="plab">Dica</div>
+            <p>Toda aresta tem uma ponta em <span class="m"><i>A</i></span>. Separe os casos <span class="m"><i>A</i><sub>1</sub></span> e <span class="m"><i>A</i><sub>2</sub></span>.</p>
+          </div>
+          <div class="panel answer" id="a136"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m">{<i>a</i>, <i>b</i>}</span> uma aresta, com
+              <span class="m"><i>a</i> ∈ <i>A</i></span> e <span class="m"><i>b</i> ∈ <i>B</i></span>.
+              Se <span class="m"><i>a</i> ∈ <i>A</i><sub>2</sub></span>, a aresta já encontra
+              <span class="m"><i>A</i><sub>2</sub></span>.
+              Se <span class="m"><i>a</i> ∈ <i>A</i><sub>1</sub></span>, então
+              <span class="m"><i>b</i> ∈ <i>N</i>(<i>A</i><sub>1</sub>) ⊆ <i>B</i><sub>1</sub></span>,
+              e a aresta encontra <span class="m"><i>B</i><sub>1</sub></span>.
+              Em ambos os casos a aresta encontra <span class="m"><i>B</i><sub>1</sub> ∪ <i>A</i><sub>2</sub></span>.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 137</span><div class="stmt">
+            <p>Seja <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span> bipartido e <span class="m"><i>M</i></span> um emparelhamento em <span class="m"><i>G</i></span>. Seja <span class="m"><i>U</i></span> o conjunto dos vértices cobertos por <span class="m"><i>M</i></span> e <span class="m"><i>W</i></span> o conjunto dos vértices de todos os caminhos <span class="m"><i>M</i></span>-alternantes que têm um dos extremos em <span class="m"><i>A</i> \ <i>U</i></span>. Prove que <span class="m">(<i>B</i> ∩ <i>W</i>) ∪ (<i>A</i> \ <i>W</i>)</span> é uma cobertura em <span class="m"><i>G</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h137" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a137" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h137"><div class="plab">Dica</div>
+            <p>Se uma aresta {a,b} evita a cobertura, então a ∈ W e b ∉ W. Estenda o caminho alternante por essa aresta.</p>
+          </div>
+          <div class="panel answer" id="a137"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>C</i> = (<i>B</i> ∩ <i>W</i>) ∪ (<i>A</i> \ <i>W</i>)</span> e seja
+              <span class="m">{<i>a</i>, <i>b</i>}</span> uma aresta,
+              <span class="m"><i>a</i> ∈ <i>A</i></span>, <span class="m"><i>b</i> ∈ <i>B</i></span>.
+              Suponha que ela não encontra <span class="m"><i>C</i></span>. Então
+              <span class="m"><i>a</i> ∉ <i>A</i> \ <i>W</i></span>, logo
+              <span class="m"><i>a</i> ∈ <i>W</i></span>, e
+              <span class="m"><i>b</i> ∉ <i>B</i> ∩ <i>W</i></span>, logo
+              <span class="m"><i>b</i> ∉ <i>W</i></span>.
+            </p>
+            <p>
+              Como <span class="m"><i>a</i> ∈ <i>W</i></span>, existe um caminho
+              <span class="m"><i>M</i></span>-alternante <span class="m"><i>P</i></span> de algum
+              <span class="m"><i>a</i><sub>0</sub> ∈ <i>A</i> \ <i>U</i></span> até
+              <span class="m"><i>a</i></span>.
+            </p>
+            <ul>
+              <li>Se <span class="m">{<i>a</i>, <i>b</i>} ∈ <i>M</i></span>, então <span class="m"><i>b</i></span> é o predecessor de <span class="m"><i>a</i></span> em <span class="m"><i>P</i></span> (chegamos a <span class="m"><i>A</i></span> por aresta de <span class="m"><i>M</i></span>, salvo se <span class="m"><i>a</i> = <i>a</i><sub>0</sub></span>, que está descoberto e não tem aresta em <span class="m"><i>M</i></span>). Logo <span class="m"><i>b</i> ∈ <i>W</i></span>, contradição.</li>
+              <li>Se <span class="m">{<i>a</i>, <i>b</i>} ∉ <i>M</i></span>, o caminho <span class="m"><i>P</i></span> chega em <span class="m"><i>a</i></span> por uma aresta de <span class="m"><i>M</i></span> (ou <span class="m"><i>a</i></span> é o extremo descoberto). Em ambos os casos podemos sair de <span class="m"><i>a</i></span> por <span class="m">{<i>a</i>, <i>b</i>}</span> e obter um caminho alternante até <span class="m"><i>b</i></span>. Então <span class="m"><i>b</i> ∈ <i>W</i></span>, de novo contradição.</li>
+            </ul>
+            <p>
+              Portanto toda aresta encontra <span class="m"><i>C</i></span>:
+              <span class="m"><i>C</i></span> é cobertura. (Esta é a cobertura que o teorema de König
+              extrai de um emparelhamento máximo: nesse caso <span class="m">|<i>C</i>| = |<i>M</i>|</span>.)
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 138</span><div class="stmt">
+            <p>Prove que todo emparelhamento máximo em <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span> tem cardinalidade</p>
+            <div class="eq"><div class="body">
+              min<sub><i>U</i> ⊆ <i>A</i></sub> &nbsp; |<i>A</i>| − |<i>U</i>| + |<i>N</i>(<i>U</i>)|.
+            </div></div>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h138" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a138" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h138"><div class="plab">Dica</div>
+            <p>Um lado é contagem (U manda no máximo |N(U)| arestas). O outro é a forma defectiva com <span class="m"><i>d</i> = max(|<i>U</i>| − |<i>N</i>(<i>U</i>)|)</span>.</p>
+          </div>
+          <div class="panel answer" id="a138"><div class="plab">Resolução</div>
+            <p>
+              Esta é a fórmula de König–Ore. Seja
+              <span class="m"><i>m</i><sup>∗</sup> = min<sub><i>U</i> ⊆ <i>A</i></sub>(|<i>A</i>| − |<i>U</i>| + |<i>N</i>(<i>U</i>)|)</span>.
+            </p>
+            <p>
+              <b>Cota superior.</b> Para qualquer emparelhamento <span class="m"><i>M</i></span> e qualquer
+              <span class="m"><i>U</i> ⊆ <i>A</i></span>, as arestas de <span class="m"><i>M</i></span> com ponta em
+              <span class="m"><i>U</i></span> vão para <span class="m"><i>N</i>(<i>U</i>)</span> (no máximo
+              <span class="m">|<i>N</i>(<i>U</i>)|</span> delas) e as demais cobrem no máximo
+              <span class="m">|<i>A</i> \ <i>U</i>|</span> vértices de <span class="m"><i>A</i></span>. Logo
+              <span class="m">|<i>M</i>| ≤ |<i>A</i>| − |<i>U</i>| + |<i>N</i>(<i>U</i>)|</span> e
+              <span class="m">μ(<i>G</i>) ≤ <i>m</i><sup>∗</sup></span>.
+            </p>
+            <p>
+              <b>Cota inferior.</b> Seja
+              <span class="m"><i>d</i> = max<sub><i>U</i> ⊆ <i>A</i></sub>(|<i>U</i>| − |<i>N</i>(<i>U</i>)|)</span>,
+              de modo que <span class="m"><i>m</i><sup>∗</sup> = |<i>A</i>| − <i>d</i></span>.
+              A hipótese (37) vale com esse <span class="m"><i>d</i></span>. Pelo exercício 133 existe
+              emparelhamento de tamanho <span class="m">|<i>A</i>| − <i>d</i></span>. Portanto
+              <span class="m">μ(<i>G</i>) ≥ <i>m</i><sup>∗</sup></span>.
+            </p>
+            <p>Todo emparelhamento máximo tem exatamente essa cardinalidade.</p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 139</span><div class="stmt">
+            <p>Seja <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span> bipartido com <span class="m">|<i>A</i>| = |<i>B</i>|</span>. Seja <span class="m"><i>M</i></span> a matriz indexada por <span class="m"><i>A</i> × <i>B</i></span> com <span class="m"><i>M</i>(<i>u</i>,<i>v</i>) = 1</span> se <span class="m"><i>uv</i></span> é aresta e <span class="m">0</span> caso contrário. O permanente de <span class="m"><i>M</i></span> é</p>
+            <div class="eq"><div class="body">
+              perm(<i>M</i>) = <span class="sum"><span class="o">∑</span><span class="l">π</span></span> <span class="prod">∏</span><sub><i>u</i> ∈ <i>A</i></sub> <i>M</i>(<i>u</i>, π(<i>u</i>)),
+            </div></div>
+            <p>a soma correndo sobre todas as bijeções <span class="m">π : <i>A</i> → <i>B</i></span>. Mostre que o permanente de <span class="m"><i>M</i></span> é igual ao número de emparelhamentos perfeitos em <span class="m"><i>G</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h139" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a139" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h139"><div class="plab">Dica</div>
+            <p>O produto vale 1 se e somente se todas as arestas {u, π(u)} existem — e aí elas formam um emparelhamento perfeito.</p>
+          </div>
+          <div class="panel answer" id="a139"><div class="plab">Resolução</div>
+            <p>
+              Cada bijeção <span class="m">π : <i>A</i> → <i>B</i></span> define o conjunto de pares
+              <span class="m">{{<i>u</i>, π(<i>u</i>)} : <i>u</i> ∈ <i>A</i>}</span>. Esse conjunto é um
+              emparelhamento perfeito se e somente se cada par é aresta, se e somente se
+              <span class="m"><i>M</i>(<i>u</i>, π(<i>u</i>)) = 1</span> para todo
+              <span class="m"><i>u</i></span>, se e somente se o produto vale 1.
+              Caso contrário algum fator é 0 e o produto some.
+            </p>
+            <p>
+              A soma conta, portanto, exatamente as bijeções que são emparelhamentos perfeitos. Cada emparelhamento
+              perfeito corresponde a exatamente uma bijeção (o parceiro em <span class="m"><i>B</i></span> de cada
+              vértice de <span class="m"><i>A</i></span>). Logo
+              <span class="m">perm(<i>M</i>)</span> é o número de emparelhamentos perfeitos.
+            </p>
+          </div>
+        </article>
+      </section>
