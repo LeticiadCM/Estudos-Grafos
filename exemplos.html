@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Exemplos | Estudos Grafos</title>
+  <meta name="description" content="Exemplos e snippets sobre grafos." />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <div class="brand">
+        <span class="brand-mark">G</span>
+        <h1>Estudos Grafos</h1>
+      </div>
+      <nav aria-label="Menu principal">
+        <ul class="nav">
+          <li><a href="index.html">Início</a></li>
+          <li><a href="sobre.html">Sobre</a></li>
+          <li><a href="tutoriais.html">Tutoriais</a></li>
+          <li><a href="exemplos.html" class="active">Exemplos</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page-content">
+    <section>
+      <h2>Exemplos</h2>
+      <p>Abaixo estão alguns cenários em que grafos aparecem no dia a dia.</p>
+    </section>
+
+    <section class="examples-grid">
+      <article class="example-card">
+        <h3>Rede de cidades</h3>
+        <p>Os vértices são cidades e as arestas representam estradas ou rotas de transporte.</p>
+      </article>
+
+      <article class="example-card">
+        <h3>Rede social</h3>
+        <p>Usuários são nós e conexões representam amizade, seguidores ou interações.</p>
+      </article>
+
+      <article class="example-card">
+        <h3>Mapa de dependências</h3>
+        <p>Projetos e módulos podem ser representados como nós conectados por dependências.</p>
+      </article>
+    </section>
+
+    <section>
+      <h3>Exemplo de código</h3>
+      <div class="code-box">
+<pre><code>grafo = {
+  'A': ['B', 'C'],
+  'B': ['A', 'D'],
+  'C': ['A', 'D'],
+  'D': ['B', 'C']
+}
+
+# DFS simples
+visitados = set()
+
+def dfs(no):
+    if no in visitados:
+        return
+    visitados.add(no)
+    print(no)
+    for vizinho in grafo.get(no, []):
+        dfs(vizinho)
+
+dfs('A')</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-wrap">
+      <p>© 2026 Estudos Grafos</p>
+      <a href="index.html">Voltar ao início</a>
+    </div>
+  </footer>
+</body>
+</html>
