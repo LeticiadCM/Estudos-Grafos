@@ -1,0 +1,257 @@
+﻿=== 1. Grafos—definições iniciais ===
+
+1. Grafos—definições iniciais
+
+Um grafo é um par ordenado de conjuntos finitos (V,E) tal que E ⊆
+[[ (V )
+2 ]]
+. Cada elemento de V é chamado de vértice do
+grafo e cada elemento de E é chamado de aresta do grafo, dessa forma cada aresta e ∈ E é um subconjunto de V
+formado por exatamente dois vértices, ou seja, e ⊆ V e |e| = 2.
+
+Todo grafo pode ser representado geometricamente por um diagrama. No plano, desenhamos um ponto para cada
+vértice e um segmento de curva ligando cada par de vértices que determinam uma aresta (figura 1). Claramente, essa
+representação geométrica de um grafo não é única.
+
+Exemplo 1.Os conjuntos 
+
+[[ V = {1,2,3,4,5,6,7,8}
+E = { {1,2},{1,5},{2,5},{3,4},{6,7}}
+]]
+
+definem um grafo e um diagrama desse grafo é apresentado na figura 1 a seguir. 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 1: Representação geométrica (ou diagrama) do grafo.
+
+Se G denota o grafo que é definido pelo par (V,E) então escrevemos G = (V,E).
+
+No que segue u e v denotam vértices e e e f denotam arestas de um grafo
+
+- se v ∈ e então dizemos que a aresta e incide em v;
+
+- se {u, v}é uma aresta, então dizemos que u e v são vértices adjacentes;
+
+- se |e ∩ f| = 1, então dizemos que e e f são arestas adjacentes;
+
+- quando e = {v,u}, dizemos que u e v são os extremos da aresta e.
+
+Quando nos referimos a um grafo conhecido G sem especificarmos o conjunto dos vértices e o conjunto das arestas que
+definem G esses passam a ser referidos como V(G) e E(G), respectivamente. Assim, se G = (X,Y ) então V (G) = X e
+E(G) = Y .
+
+Para um grafo G qualquer, chamamos |V (G)| de ordem de G e chamamos |V (G)| + |E(G)| de tamanho de
+G.
+
+Um expoente em G, quando G é um grafo, denota a ordem de G, assim quando queremos ressaltar que G é um grafo de
+ordem n, para algum n ∈ ℕ, escrevemos Gn.
+
+Chamamos G0 = (∅,∅) de grafo vazio e todo grafo de ordem 1 de grafo trivial.
+
+
+=== Exercícios ===
+
+Exercícios
+
+Exercício 1.Um químico deseja embarcar os produtos A,B,C,D,E,F,X usando o menor número de caixas.
+Alguns produtos não podem ser colocados numa mesma caixa porque reagem. Os produtos A,B,C,X reagem
+dois-a-dois; A reage com F e com D e vice-versa; E também reage com F e com D e vice-versa. Descreva o grafo
+que modela essa situação, mostre um diagrama desse grafo e use esse grafo para descobrir o menor número de
+caixas necessárias para embarcar os produtos com segurança.
+
+Exercício 2.Adaltina esperava 4 amigas Brandelina, Clodina, Dejaina e Edina para um lanche em sua casa.
+Enquanto esperava preparou as lanches: Bauru, Misto quente, Misto frio e X-salada. Brandelina gosta de Misto
+frio e de X-salada; Clodina de Bauru e X-salada; Dejaina gosta de Misto quente e Misto frio; Edina gosta de de
+Bauru e Misto quente. Descreva o grafo que modela essa situação, mostre um diagrama desse grafo e use esse
+grafo para descobrir se é possível que cada amiga de Adaltina tenha o lanche que gosta.
+
+Exercício 3.Para todo n ∈ ℕ, qual é o número máximo de arestas que pode ter um grafo com n vértices?
+
+☚ 
+
+Exercício 4.O complemento de um grafo G, denotado por G, é o grafo que tem o mesmo conjunto de
+vértices de G e dois vértices formam uma aresta em G se e somente se não formam uma aresta de G:
+
+[[ --
+V (G-) = V(G ),
+E (G ) = {{u,v} ⊂ V (G ): {u,v } ⁄∈ E (G)}.
+]]
+
+Dê o complemento dos seguintes grafos
+
+G dado por 
+
+[[ V (G) = {1,2,3,4,5},
+E (G) = {{1,2},{1,3},{1,4},{1,5},{2,3},{2,4},{2,5},{3,4},{3,5},{4,5}}.
+
+]]
+
+H dado por 
+
+[[ V (H ) = {1,2,3,4,5,6,7},
+E (H ) = {{1,2},{1,3},{2,4},{2,5},{3,6},{3,7}}.
+]]
+
+B dado por 
+
+[[ V(B ) = {a,b,c,1,2,3},
+E(B ) = {{a,1},{a,2},{a,3},{b,1},{b,2},{b,3},{c,1},{c,2},{c,3}}.
+]]
+
+☚ 
+
+Exercício 5.Defina a união dos grafos G e H por
+
+[[ ( )
+G ∪ H = V(G )∪ V (H ),E (G)∪ E (H ) .
+]]
+A união G ∪ H é um grafo?.
+
+☚ 
+
+Exercício 6.Um grafo é chamado de completo sobre V se todo par de vértices de V é uma aresta do grafo, ou
+seja E = 
+[[ (V)
+2 ]]
+. Um grafo completo com n vértices é denotado por Kn. Prove que
+
+[[ -- n
+G ∪ G = K .
+]]
+
+Exercício 7.Considere o caso geral do exercício 1: Um químico deseja embarcar os produtos p1,p2,…,pn usando
+o menor número de caixas. Alguns produtos não podem ser colocados num mesmo caixas porque reagem. Seja G
+o grafo que modela esse problema, onde vértices são produtos e arestas os pares que reagem, e denote por χ(G)
+o número de mínimo de caixas de modo que seja possível encaixotar os produtos com segurança. Prove que
+
+[[ ∘ -------
+1 1
+χ (G ) ≤ 2-+ 2m + 4-
+]]
+onde m é o número de pares de produtos que reagem.
+
+1.1. Grau.
+
+Para um vértice v qualquer num grafo G, definimos os conjuntos 
+
+[[ E (v) = {e ∈ E(G ): v ∈ e},
+G
+]]
+(1)
+
+e
+
+[[ NG (v) = {w ∈ V(G ): vw ∈ E },
+]]
+(2)
+
+esse último chamado de vizinhança de v. Os elementos de NG(v) são chamados de vizinhos de v.
+
+Para todo v ∈ V (G), o número de vizinhos de v é chamado de grau do vértice v no grafo G. Os graus dos vértices de
+um grafo é um dos seus parâmetros importantes e por isso recebem uma notação especial. Para um grafo G = (V,E)
+não-vazio 
+
+[[ (3) grau de u em G: dG(u) = |NG (u)|
+
+(4) grau m´inimo em G: δ(G) = min {dG(u): u ∈ V }
+(5) grau m ´aximo em G: Δ (G) = max {dG (u): u ∈ V }
+1 ∑
+(6) grau m ´edio em G n˜ao-vazio: d(G) = |V-| dG(u)
+u∈V
+]]
+
+Observação 1.As vezes suprimimos os índices _G ou os argumentos _(G) para simplificar escrevendo, por exemplo,
+usamos simplesmente E(v) e N(v), omitindo os índices da notação, ou escrevemos Δ para o grau máximo e d(v)
+para o grau de v.
+
+Exemplo 2.No exemplo 1 encontramos d(7) = |E(7)| = d(6) = |E(6)| = 1 e d(5) = |E(5)| = 2. Também, o grau
+máximo é Δ(G) = 2, o grau mínimo é δ(G) = 0 e o grau médio é d(G) = 5∕4.
+
+Teorema 1.Para todo grafo G vale que
+
+[[ ∑
+dG(u) = 2|E (G )|.
+u∈V(G)
+]]
+(7)
+
+Demonstração. Seja (V,E) em grafo e defina o conjunto X = {(u,e) ∈ V ×E : u ∈ e} e vamos contar seu número
+de elementos de duas maneiras distintas.
+
+Primeiro, cada vértice u participa de d(u) elementos de X, portanto
+
+[[ ∑
+|X | = d(u).
+u∈V
+]]
+(8)
+
+Depois, cada aresta e está presente em dois elementos de X, logo
+
+[[ |X | = 2|E |.
+]]
+(9)
+
+De (8) e (9) temos (7). □
+
+Corolário 2.Em todo grafo o número de vértices com grau ímpar é par.
+
+Demonstração. Seja G um grafo. Denote por I o subconjunto formado pelos vértices em V (G) de grau ímpar e denote
+por P o subconjunto dos vértices de grau par. Usando que I ∩ P = ∅, que I ∪ P = V (G) e o Teorema 1,
+temos
+
+[[ ∑ ∑
+2|E(G )|= dG (u)+ dG(v),
+◟--◝◜-◞ u∈I v∈P
+par ◟---◝◜--◞
+par
+]]
+(10)
+
+portanto devemos ter ∑
+u∈Id(u) par, o que semente é possível quando |I|é par. □
+
+
+
+=== Exercícios ===
+
+Exercícios
+
+Exercício 8.Chico e sua esposa foram a uma festa com três outros casais. No encontro deles houveram vários
+apertos de mão. Ninguém apertou a própria mão ou a mão da(o) esposa(o), e ninguém apertou a mão da mesma
+pessoa mais que uma vez.
+
+Após os cumprimentos Chico perguntou para todos, inclusive para a esposa, quantas mãos cada um apertou e
+recebeu de cada pessoa uma resposta diferente. (i) Quantas mãos Chico apertou? (ii) Quantas mãos a esposa de
+Chico apertou?
+
+Exercício 9.Prove que δ(G) ≤ d(G) ≤ Δ(G) para todo grafo G.
+
+Exercício 10.Decida se pode existir um grafo G com vértices que têm graus 2,3,3,4,4,5. E graus 2,3,4,4,5?
+
+Exercício 11.Seja G um grafo com 14 vértices e 25 arestas. Se todo vértice de G tem grau 3 ou 5, quantos
+vértices de grau 3 o grafo G possui?
+
+Exercício 12.Prove que em todo grafo de ordem pelo menos 2 existem pelo menos dois vértices com o mesmo
+grau.
+
+☚ 
+
+Exercício 13. Para um número natural r, um grafo é r-regular se todos os vértices têm grau r. Para um grafo
+r-regular com n vértices e m arestas, expresse m em função de n e r.
+
+Exercício 14.Dê exemplo de um grafo 3-regular que não é completo.
+
+Exercício 15.Prove que se |V (G)|≥ 3 e δ(G) ≥
+[[ ⌊|V (G)|∕2⌋ ]]
+então existem vértices u e v em G distintos e tais
+que N(u) ∩ N(v)≠∅.
+
+Exercício 16. Dado G, o grafo linha de G, denotado por LG, é o grafo cujos vértices são as arestas de G e um
+par de vértices define uma aresta em LG se, e somente se, esses vértices são arestas adjacentes em G. Dado G
+determine |V (LG)| e |E(LG)|.
+
+
+
+

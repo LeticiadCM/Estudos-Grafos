@@ -1,0 +1,182 @@
+﻿=== 6. Representação computacional ===
+
+6. Representação computacional
+
+O primeiro passo para representar computacionalmente um grafo é mapear (construir um isomorfismo) o conjunto de
+vértices do grafo G no subconjunto dos número naturais {1,2,…,|V (G)|} para facilitar o acesso as informações usando
+estruturas indexadas. Isso pode ser feito usando as técnicas de busca conhecidas para recuperar os inteiros associados aos
+vértices como, por exemplo, tabela de espalhamento (hashing) ou árvore binária de busca. Feito isso, qualquer problema
+computacional sobre um grafo G é tratado computacionalmente sobre um grafo isomorfo G′ com vértices
+V (G′) = {1, 2, …,|V (G)|} e a estrutura de busca escolhida no passo anterior é usada para representar o
+isomorfismo.
+
+No que segue, sempre que tratamos problemas computacionais sobre grafos estamos assumindo os grafos são definidos
+sobre o conjunto de vértices {1,2,…,n}, para algum n ∈ ℕ. Veremos duas das estruturas de dados mais importantes para a
+representação de grafos.
+
+6.1. Matriz de adjacências de G.
+
+É a matriz |V |×|V | denotada por A(G), ou A simplesmente, definida por
+
+[[ {
+1, se {i,j} ∈ E (G)
+A(i,j) =
+0, caso contr´ario.
+]]
+
+Exemplo 9.Para o G grafo do exemplo do exemplo 8, a matriz de adjacências é
+
+[[ ⌊ ⌋
+| 0 1 0 0 0 0|
+| 1 0 1 0 1 0|
+A = || 0 1 0 1 1 0|| .
+|| 0 0 1 0 0 1||
+⌈ 0 1 1 0 0 1⌉
+0 0 0 1 1 0
+]]
+
+6.2. Lista de adjacências de G.
+
+É um vetor N[] de listas ligadas. A lista N[i] contém os vizinhos do vértice i e cada nó dessa lista é
+composto por uma variável que armazena um vértice e um ponteiro que aponta para o próximo nó da
+lista.
+
+Exemplo 10.Para o grafo G do exemplo 8 uma lista de adjacências é representada na figura 8 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 8: Lista de adjacências do grafo G no exemplo 8.
+
+Observação 6.A representação de uma grafo por lista de adjacências não é única, pois qualquer permutação dos
+nós em N[i] define uma lista válida.
+
+6.3. Complexidade de algoritmos em grafos.
+
+Neste texto entendemos por complexidade do algoritmo a
+
+complexidade de tempo no pior caso.
+
+Exemplo 11.Sejam A e B dois algoritmos distintos que executam a mesma tarefa sobre um grafo G = (V,E).
+O algoritmo A gasta, no pior caso, |V |2 passos para executar a tarefa e o algoritmo B gasta (|V | + |E|)log |E|
+passos no pior caso. Para grafos com |V |2∕4 arestas o primeiro algoritmo é sempre melhor enquanto que para
+grafos com 1.000|V | arestas o segundo algoritmo é assintoticamente melhor (melhor para |V |≥ 16.645, enquanto
+que o primeiro é melhor para |V |≤ 16.644). Para entradas pequenas (até 25 mil vértices) a ordem das funções
+são comparadas nos gráficos da figura 9. 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 9: Gráfico das funções do exemplo 11.
+
+Usualmente, a expressão que estabelece a complexidade de um algoritmo é escrita em função do tamanho da
+representação usada e em notação assintótica: sejam f,g duas funções definidas nos naturais, então
+
+[[ f(n) = O(g(n)), para n suficientemente grande ]]
+
+significa que existem constantes positivas c e n0 tais que para todo n ≥ n0 vale
+
+[[ f(n) ≤ c⋅g(n). ]]
+No
+nosso caso n é o tamanho da representação do grafo.
+
+Vejamos a complexidade de alguns algoritmos que executam tarefas simples comparando cada uma das representações
+dadas acima para um grafo fixo G = (V,E)
+
+Tarefa Matriz de adjacênciasLista de adjacências
+ij ∈ E? O(1) O(|V |) 
+Determine d(i) O(|V |) O(|V |) 
+Devolva E O(|V |2) O(|E|) 
+
+Note que o número de arestas satisfaz a desigualdade
+
+[[ 2
+0 ≤ |E | ≤ |V-|-−-|V|-
+2
+]]
+
+portanto, para “Devolva E” é mais eficiente usar listas quando temos poucas arestas. As vezes a comparação entre o
+desempenho pode ser mais complicada.
+
+Observação 7. Um algoritmo em grafo é de complexidade polinomial se a complexidade de tempo no pior caso
+é expressa por uma função polinomial no tamanho da representação. Complexidade polinomial é independente
+da representação do grafo por matriz ou lista de adjacências, ou seja, essas representações são polinomialmente
+relacionadas.
+
+
+
+=== Exercícios ===
+
+Exercícios
+
+Exercício 40.Mostre que se f(n) = O(g(n)) então O(f(n)) + O(g(n)) = O(g(n)).
+
+Exercício 41.É verdade que para todo G vale que |E(G)| = O(|V (G)|) para |V (G)| suficientemente grande?
+
+Exercício 42.É verdade que para todo G vale que log |E(G)| = O(log |V (G)|) para |V (G)| suficientemente grande?
+
+Exercício 43.Prove o afirmação feita na observação 7.
+
+Exercício 44.Sejam G um grafo, A a sua matriz de adjacências e b(i,j) as entradas da matriz A2. Que parâmetro
+de G está associado ao número b(i,i), para cada i ∈{1,2,…,|V (G)|}? Qual a relação entre b(i,j) e, NG(i) e NG(j)
+quando i≠ j?
+
+Exercício 45. Para um grafo dirigido dizemos que a aresta (u,v) ∈ E sai de u e chega em v. Os vetores de
+incidências de um grafo dirigido D = (V,E) são os vetores S e C indexados por E tais que para e = (u,v) ∈ E
+temos S[e] = u e C[e] = v, e nesse caso dizemos que e sai de u e chega em v. Determine o tempo para:
+
+(i) dados e ∈ E e v ∈ V , determinar se e incide em v;
+
+(ii) dado e ∈ E, determinar suas extremidades;
+
+(iii) dado v ∈ V , determinar as arestas que saem de v e determinar as arestas que chegam em v.
+
+Uma matriz de incidências de um grafo dirigido D = (V,E) é uma matriz B de dimensão |V |×|E| (as
+linhas são indexadas por V e as colunas por E) tal que
+
+[[ (
+{ − 1 se a aresta j sai do v´ertice i,
+B(i,j) = 1 se a aresta j chega no v´ertice i,
+( 0 caso contr´ario.
+]]
+
+(a) Determine o tempo para:
+
+(i) dados e ∈ E e v ∈ V , determinar se e incide em v;
+
+(ii) dado e ∈ E, determinar suas extremidades;
+
+(iii) dado v ∈ V determinar as arestas que saem de v e determinar as arestas que chegam em v.
+
+(b) Determine o que as entradas da matriz |V |×|V | dada por B ⋅ BT representam, onde BT é a matriz
+transposta de B.
+
+Exercício 46.Seja G um grafo qualquer e A sua matriz de adjacências. Como é possível determinar o número
+de triângulos de um grafo G qualquer a partir de A3?
+
+Exercício 47.Em 1990, Coppersmith e Winograd mostraram um algoritmo que determina o produto de matrizes
+duas n × n usando O(n2,376) operações aritméticas. Como esse pode ser usado para determinar se um grafo tem
+triângulo?
+
+Exercício 48.Sejam G um grafo e A sua matriz de adjacências. Prove que se os autovalores de A são distintos
+então o grupo dos automorfismos é abeliano.
+
+Exercício 49.O traço de uma matriz A, denotado por tr(A), é a soma dos elementos na diagonal da matriz.
+Quanto vale o traço de uma matriz de adjacências? Quanto vale tr(A2) em função de E(G)?
+
+Exercício 50.Por A ser uma matriz simétrica, sabemos da Álgebra Linear que todos os seus autovalores são
+números reais. Determine os autovalores da matriz de adjacências do grafo completo Kn. Mostre que se G é
+r-regular então r é uma autovalor de A.
+
+Exercício 51.Dada uma representação por listas de adjacências de um grafo dirigido D descreva um algoritmo
+com tempo de execução O(|V (D)| + |E(D)|) para computar a representação por listas de adjacências do grafo
+subjacente.
+
+Exercício 52.Quando uma representação por uma matriz de adjacências é utilizada, muitos algoritmos sobre
+grafos gastam tempo Θ(|V |2), mas existem algumas exceções. Mostre que determinar se um grafo orientado contém
+um sorvedouro — isto é, um vértice com grau de entrada |V |− 1 e grau de saída 0 — pode ser determinado em
+tempo O(|V |) quando uma representação por matriz é utilizada.
+
+
+
+

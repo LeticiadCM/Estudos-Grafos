@@ -1,0 +1,165 @@
+﻿=== 4. Isomorfismo ===
+
+4. Isomorfismo
+
+Dizemos que os grafos G e H são isomorfos e, nesse caso escrevemos G ≃ H, se existe uma função bijetora
+
+[[ f : V (G) → V (H )
+]]
+(14)
+
+tal que
+
+[[ {u,v } ∈ E (G) ⇐⇒ {f(u),f(v)} ∈ E(H )
+]]
+(15)
+
+para todos u, v ∈ V (G). Uma função f como acima é chamada de isomorfismo.
+
+Exemplo 6 (Grafo de Petersen). Os grafos representados na figura 3 são isomorfos pelo isomorfismo f(1) = a,
+f(2) = b, f(3) = c, f(4) = d, f(5) = e, f(6) = f, f(7) = g, f(8) = h, f(9) = i, f(10) = j. Esse grafo é chamado
+de grafo de Petersen, é um dos grafos mais conhecidos na Teoria dos Grafos (leia mais aqui). 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 3: Grafos isomorfos.
+
+Notamos que quaisquer dois grafos completos G e H de mesma ordem são isomorfos. Mais que isso, qualquer bijeção
+entre V (G) e V (H) define um isomorfismo entre eles. Nesse caso, dizemos que o grafo é único a menos de isomorfismos
+e por isso usamos a mesma notação para todos eles, a saber Kn, quando o conjunto dos vértices não é
+relevante.
+
+Exemplo 7.Há oito grafos distintos com três vértices, eles estão descritos nas representações da figura abaixo. 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 4: Grafos distintos de ordem 3.
+
+No entanto, há apenas 4 grafos não-isomorfos com três vértices, representados pelos seguintes diagramas 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 5: Grafos não-isomorfos de ordem 3.
+
+Não existe uma caracterização simples de grafos isomorfos. Isso significa que não há algoritmo eficiente que recebe dois
+grafos e decide se eles são isomorfos.
+
+Exemplo 8.Nenhum dos grafos G, H e K representados na figura 6 são isomorfos.
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 6: Grafos não-isomorfos.
+
+Temos que G não é isomorfo a H porque G não tem um vértice de grau quatro enquanto que o vértice 5 em H tem
+grau quatro, portanto não há como haver uma bijeção entre os vértices desse grafo que preserve as adjacências. Pelo
+mesmo motivo H não é isomorfo a K. Agora, G não é isomorfo a K porque caso existisse um isomorfismo
+f : V (G) → V (K) então a imagem por f do conjunto {2,3,5}⊂ V (G) é, obrigatoriamente, o conjunto {2,3,5}⊂ V (K),
+mas qualquer bijeção f não preserva adjacência entre esses vértices pois {2,3,5} em G induz um triângulo e em K não
+(veja mais no exercício 33 abaixo).
+
+Nesse exemplo foram dados argumentos diferentes para concluir o mesmo fato, o não-isomorfismo entre pares de
+grafos. Ainda, existem exemplos de grafos não isomorfos para os quais esses argumentos não funcionam (da
+mesma forma que a existência de um vértice de grau quatro funciona para mostrar que G não é isomorfo a
+H mas não serve para mostrar que G não é isomorfo a K pois 1,2,2,3,3,3 são os graus dos vértices de
+ambos os grafos). Isso se deve ao fato de ser difícil caracterizar de modo eficiente o não-isomorfismo entre
+grafos:
+
+- O problema do não-isomorfismo de grafos: Dados os grafos G = (V,E) e H = (V,E′) decidir se eles são
+não-isomorfos.
+
+Observação 4 (leia esse aviso antes). Não se conhece algoritmo de tempo polinomial no tamanho dos grafos para
+decidir se dois grafos não são isomorfos. Mais do que isso, não se conhece um algoritmo de tempo polinomial que
+receba como entrada uma terna (G,H,P) onde P é uma prova de que G e H não são isomorfos e que devolva
+sim se G1 não é isomorfo a G2 e devolva não caso contrário. Em linguagem técnica dissemos que não se sabe se
+o problema do não-isomorfismo de grafos está na classe NP de complexidade computacional.
+
+Por outro lado, podemos considerar o problema do isomorfismo de grafos:
+
+- O problema do isomorfismo de grafos: Dados os grafos G = (V,E) e H = (V,E′) decidir se eles são
+isomorfos.
+
+Observação 5 (leia esse aviso antes). Atualmente não se conhece algoritmo polinomial no tamanho do grafo que
+resolva o problema. Entretanto, não é difícil projetar um algoritmo de tempo polinomial que recebe a terna
+(G, H, f) onde f : V (G) → V (H) e devolve sim caso G e H são isomorfos e f é o isomorfismo, caso contrário
+devolve não. Em linguagem técnica dizemos que o problema do isomorfismo de grafos está na classe NP de
+complexidade de problemas computacionais. Entretanto, não é sabido se esse problema é NP-completo
+
+4.1. Exercícios.
+
+Exercício 31.Determine quais pares dentre os grafos abaixo são isomorfos.
+
+G1 dado por V (G1) = {v1,u1,w1,x1,y1,z1} e E(G1 ) = {{u1,v1},{u1,w1},{v1,w1},{v1,x1},{w1,y1},{x1,y1},{x1,z1}};
+
+G2 dado por V (G2) = {v2,u2,w2,x2,y2,z2} e E(G2 ) = {{u2,v2},{u2,w2},{v2,w2},{v2,x2},{w2,y2},{x2,y2},{y2,z2}};
+
+G3 dado por V (G3) = {v3,u3,w3,x3,y3,z3} e E(G3 ) = {{u3,v3},{u3,w3},{v3,w3},{v3,x3},{w3,y3},{x3,y3},{u3,z3}}.
+
+Exercício 32.Mostre que existem 11 grafos não-isomorfos com 4 vértices.
+
+Exercício 33. Sejam G e H grafos isomorfos e f : V (G) → V (H) um isomorfismo. É verdade que G[U] é isomorfo
+a H[f(U)] para todo U ⊆ V (G)? Justifique.
+
+☚ 
+
+Exercício 34.Um automorfismo de um grafo é um isomorfismo do grafo sobre ele mesmo. Quantos
+automorfismos tem um grafo completo?
+
+Exercício 35.Mostre que o conjunto de automorfismos de um grafo com a operação de composição de funções
+definem um grupo.
+
+Exercício 36.Um grafo G = (V,E) é vértice-transitivo se para quaisquer u,v ∈ V existe um automorfismo f
+de G com f(v) = u. Analogamente, G é aresta-transitivo se para quaisquer arestas {x,y},{z,w}∈ E existe um
+automorfismo f de G tal que {f(x),f(y)} = {z,w}.
+
+Dê um exemplo de grafo vértice-transitivo. Dê um exemplo de grafo aresta-transitivo. Dê um exemplo de grafo
+aresta-transitivo mas não vértice-transitivo.
+
+
+
+=== 5. Outras noções de grafos ===
+
+5. Outras noções de grafos
+
+Em algumas situações podemos ter um modelo para um problema a ser resolvido e esse modelo seria um grafo se
+desconsiderassemos algumas peculiaridades da situação. Por exemplo, um mapa rodoviário pode ser modelado
+definindo-se um vértice para cada cidade e duas cidades formam uma aresta no grafo (modelo) se existe rodovia ligando
+essas cidades correspondentes aos vértices. Normalmente, distância é um parâmetro importante nesses mapas e assim as
+arestas devem ter um comprimento associado a elas. Entretanto, “comprimento de aresta” não faz parte da definição de
+um grafo. Num outro exemplo, se estamos interessados em rotas de tráfego dentro de uma cidade podemos definir um
+vértice por esquina e duas esquinas consecutivas numa mesma rua formam uma aresta. Nesse caso, as ruas têm sentido
+(mão e contra-mão) e as arestas também deveriam ter mas, novamente, essa característica não faz parte da definição de
+grafos.
+
+Esses problemas e muitos outros podem ser modelados com “outros tipos” de grafos. Alguns desses outros tipos
+são
+
+Grafo com pesos nas arestas é um tripla (V,E,ρ) de modo que (V,E) é um grafo e ρ: E → R é uma função que
+assume valores em R ⊆ ℝ. O conjunto R em geral depende do problema sendo considerado. Por exemplo, se os pesos
+representam distância então tomamos R = ℝ+ (reais não-negativos). O grafo (V,E) é chamado grafo subjacente do
+
+grafo com pesos nas arestas.
+
+Grafo orientado é aquele onde as arestas têm uma orientação (são pares ordenados) de modo que se u e v são
+vértices, então (u,v)≠(v,u) e além disso se (u,v) é uma aresta então (v,u) não é aresta. Removendo o sentido das arestas
+temos o grafo subjacente ao grafo orientado.
+
+Grafos dirigido ou digrafo é dado (V,E) onde E ⊆ V × V \{(v,v): v ∈ V }.
+
+Multigrafo é dado por um conjuntode vértices e podemos ter mais de uma aresta incidente ao mesmo par de vértices.
+Removendo as arestas repetidas de um multigrafo temos o grafo subjacente ao multigrafo.
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 7: (a) Grafo orientado. (b) Multigrafo. (c) Grafo dirigido. (d) Grafo subjacente. 
+
+5.1. Exercícios.
+
+Exercício 37.Dê uma definição formal para multigrafo.
+
+Exercício 38.Defina isomorfismo para grafos orientados.
+
+Exercício 39.Formule uma versão do teorema 1 para grafos orientados.
+
+
+
+

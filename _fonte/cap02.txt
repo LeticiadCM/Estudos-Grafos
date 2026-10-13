@@ -1,0 +1,218 @@
+﻿=== 2. Subgrafos ===
+
+2. Subgrafos
+
+Dizemos que o grafo H é um subgrafo do grafo G se, e somente se, V (H) ⊆ V (G) e E(H) ⊆ E(G) e nesse caso
+escrevemos H ⊆ G para indicar que H é subgrafo de G.
+
+Exemplo 3.Considerando o grafo G do exemplo 1 temos que 
+
+[[ ({ } { })
+G′ = 1,2,5 , {1,5},{5,2},{1,2} e
+′′ ({ } )
+G = 3,5,6 ,∅
+]]
+
+são subgrafos de G, enquanto que 
+
+[[ ({ } { })
+H = 1,2,3 , {1,2},{3,4} ,
+I = ({1,2,3,4,9}, {{1,2},{3,4}}) e
+({ } { })
+J = 1,2,3,4,8 , {1,2},{3,4},{1,8}
+]]
+
+não são subgrafos de G pois: H não é grafo, em I não vale V (I) ⊆ V (G) e em J não vale E(J) ⊆ E(G).
+
+Um subgrafo H ⊆ G onde V (H) = V (G) é chamado de subgrafo gerador.
+
+2.1. Subgrafo induzido por um subconjunto de vértices.
+
+Se U ⊆ V (G) então escrevemos G[U] para o subgrafo induzido por U que é o subgrafo 
+
+[[ ( { })
+G [U ] = U, {u, v} ∈ E (G): u ∈ U e v ∈ U .
+]]
+
+2.2. Subgrafo induzido por um subconjunto de arestas.
+
+Se M = {e1 ,e2,…,em}⊆ E(G), então o subgrafo induzido por M, denotado , tem como conjunto de vértices
+e1 ∪ e2 ∪ 
+[[ ⋅⋅⋅ ]]
+∪ em e como conjunto de arestas o próprio M
+
+[[ m
+( ⋃ )
+G [M ] = ei,M .
+i=1
+]]
+
+Exemplo 4.Dos grafos G, H e I cujos diagramas são dados na figura 2, podemos dizer que H é um subgrafo
+induzido de G enquanto que I é um subgrafo mas não é induzido. 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 2: Diagrama dos grafos G, H e I.
+
+2.3. Exercícios.
+
+Exercício 17.Quantos subgrafos completos tem o grafo completo de ordem n?
+
+Exercício 18. Descubra um subgrafo induzido de 
+
+[[ V(G ) = {1,2,3,4,5,6,7,8} e
+
+E(G ) = {{1,2},{1,3},{2,3},{2,5},{3,6},{8,5},{8,6},{5,6},{3,4},{5,7}}
+]]
+
+1-regular e o maior número possível de arestas. (Qual a relação com a resolução do exercício 2?)
+
+
+
+=== 3. Clique, conjunto independente, grafo bipartido e corte ===
+
+3. Clique, conjunto independente, grafo bipartido e corte
+
+Se o subconjunto U ⊆ V (G) induz um grafo completo em G então chamamos U de clique em G. Mais especificamente, se
+G[U] é um grafo completo com k vértices então dizemos que U é um k-clique em G.
+
+O caso particular de um 3-clique num grafo G é chamado de triângulo de G.
+
+Por outro lado, todo subconjunto de vértices U ⊆ V (G) tal que G[U] = (U,∅) é chamado de conjunto independente
+de G, ou k-conjunto-independente no caso |U| = k.
+
+Exemplo 5.O subgrafo G′ do exemplo 3 é um 3-clique e G′′ do exemplo 3 é um 3-conjunto-independente.
+
+No grafo G do exemplo 1 os conjuntos {3,5,6} e {1,4,6,8} são independentes; no caso de {1,4,6,8} temos um
+conjunto independente de cardinalidade máxima pois não há naquele grafo conjunto independente com 5 ou mais
+vértices. Nesse mesmo grafo, {8}, {6,7} e {1,2,5} são cliques, o último de cardinalidade máxima.
+
+Observação 2 (leia esse aviso antes). O tamanho do maior clique e o tamanho do maior conjunto independente
+num grafo G são difíceis de serem calculados computacionalmente. Eles pertencem a classe dos problemas
+NP-difíceis. Uma conseqüência desse fato é que não é sabido se existem algoritmos cujo tempo de execução
+no pior caso é um polinômio em |V (G)| + |E(G)| para resolver esse problemas. A descoberta de um algoritmo
+com tempo de pior caso polinomial no tamanho de G, ou a prova de que ele não existe, é um dos problemas
+não-resolvidos mais importantes da atualidade, o problema P × NP. Trata-se de um dos 7 problemas do milênio,
+dos quais restam 6 não resolvidos, cada um com uma recompensa de US$1.000.000,00 para uma solução.
+
+Chamamos um grafo G de grafo bipartido se existem dois conjuntos independentes A e B em G que
+particionam V (G), isto é, tais que A ∩ B = ∅ e A ∪ B = V (G). Por exemplo, o seguinte grafo é bipartido
+
+[[ V (G) = {1,2,3,4,5,6,7,8}
+
+E (G) = {{1,6},{6,2},{3,7},{3,8},{7,4},{7,5}},
+]]
+
+pois V (G) = {1,2,3,4,5}∪{6,7,8} e tanto {1,2,3,4,5} quanto {6,7,8} são conjuntos independentes.
+
+Um grafo bipartido G com partes A e B é dito completo se tem |A|⋅|B| arestas, ou seja,
+E(G) = {{a, b}⊆ V (G): a ∈ A e b ∈ B}. Um grafo bipartido completo com partes de cardinalidade n e m é denotado por
+Kn,m .
+
+Sejam G um grafo, A e B ⊂ V (G) dois subconjuntos disjuntos em V (G). Definimos o subconjunto de
+arestas
+
+[[ { }
+E (A, B ) = {u,v} ∈ E (G ): u ∈ A e v ∈ B ;
+]]
+(11)
+
+e o subgrafo bipartido induzido por A e B é o grafo bipartido
+
+[[ ( )
+A ∪ B, E(A, B) .
+]]
+
+O conjunto de arestas E(A,A) é chamado de corte definido por A e, (11) por dessa forma podemos
+escrever
+
+[[ -- --
+E(G ) = E (G [A ]) ∪E (G [A ]) ∪E (A,A ).
+]]
+(12)
+
+Observação 3.Convencionamos que os grafos triviais e vazio são grafos bipartidos.
+
+3.1. Exercícios.
+
+Exercício 19. Mostre que em qualquer grafo G com pelo menos 6 vértices ou existe um 3-clique ou existe um
+3-conjunto-independente. (Dica: exercício 6 e princípio da casa dos pombos sobre EK6(v).)
+
+☚ 
+
+Exercício 20.Dado um grafo G, denotamos por α(G) a cardinalidade do maior conjunto independente em G,
+
+[[ { }
+α (G ) = max |A|: A ⊂ V(G ) ´e um conjunto independente .
+]]
+Prove que se d(G) > α(G) então G contém triângulo, para todo G.
+
+☚ 
+
+Exercício 21.Para todo grafo G, denotamos por ω(G) a cardinalidade do maior clique em G
+
+[[ ω(G ) = max {|A |: A ⊂ V (G) ´e um clique}.
+]]
+Prove que ω(G) = α(G).
+
+☚ 
+
+Exercício 22.Redefina para todo grafo G o parâmetro χ(G) dado no exercício 7 em função dos conjuntos
+independentes de G. Esse parâmetro de um grafo é conhecido na literatura como número cromático do grafo.
+
+Exercício 23.Prove que as duas desigualdades dadas a seguir valem para todo grafo G com pelo menos um
+vértice
+
+[[ ω (G ) ≤ χ(G) χ (G) ≥ |V(G-)|.
+α(G )
+]]
+(13)
+
+Exercício 24.Prove que E(A,B) = E(B,A), segundo a definição dada em (11).
+
+Exercício 25.Seja G = (A ∪ B,E) um grafo bipartido qualquer e suponha que |A| < |B|. É verdade que
+α(G) = |B|? Determine ω(G).
+
+Exercício 26.Prove que G é bipartido se e somente se χ(G) < 3.
+
+Exercício 27.Prove a afirmação da equação (12).
+
+☚ 
+
+Exercício 28.Dado um grafo G, defina para todo U ⊆ V (G) a vizinhança de U, denotada NG(U), por
+
+[[ ⋃
+NG (U) = NG (u).
+u∈U
+]]
+
+É verdade que |E(U,U)| = |NG(U)|? Justifique.
+
+☚ 
+
+Exercício 29.Um grafo G é dito k-partido, para k ∈ ℕ, se existem k conjuntos independentes A1, A2, …, Ak
+que particionam V (G), ou seja, V (G) = A1 ∪ A2 ∪
+[[ ⋅⋅⋅ ]]
+∪ Ak, o conjunto Ai é um conjunto independente em G
+para todo i ∈ {1,2,…,k} e Ai ∩ Aj = ∅ para quaisquer i e j distintos. Prove que dentre os grafos k-partidos
+(k ≥ 3) completos com n vértices o número máximo de arestas é atingido quando |Ai|−|Aj| ≤ 1 para todos
+i, j ∈ {1, 2, … , n} distintos.
+
+Exercício 30.Mostre que, se n = kq + r com 0 ≤ r < k, então o número de arestas do grafo do exercício anterior
+é
+
+[[ 1 (k − 1) (r )
+-- ----- (n2 − r2)+
+2 k 2
+]]
+
+e que esse número é limitado por
+
+[[ ( )
+≤ k −-1 n .
+k 2
+]]
+
+
+
+

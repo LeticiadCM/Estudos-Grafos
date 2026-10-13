@@ -1,0 +1,547 @@
+﻿=== 7. Percursos em grafos ===
+
+7. Percursos em grafos
+
+Nessa seção veremos algoritmos que formam a base para muitos algoritmos em grafos (para todos os que serão vistos
+nesse curso). O objetivo de um percurso num grafo é o seguinte: dado a representação de um grafo G = (V,E),
+sistematicamente visitar todos os vértices e todas as arestas desse grafo.
+
+Dado um vértice w em V , dizemos que o vértice u do grafo é alcançável por w em G se existe uma seqüência de
+vértices v1 , v2 , …,vm de G tal que
+
+- w = v1 ,
+
+- u = vm ,
+
+- vi e vi+1 são adjacentes, para todo i ∈{1,2,…,m − 1}.
+
+Definimos que w é alcançável por w em G, para todo w ∈ V .
+
+Uma seqüência de vértices como acima é chamada de passeio em G.
+
+7.1. Percurso genérico.
+
+O percurso num grafo G começa com as seguintes considerações: cada vértice está em um de dois estados possíveis em
+qualquer instante da execução: não-visitado ou visitado; cada aresta em E(u) está em um de dois estados: não-visitada a
+partir de u ou visitada a partir de u, para todo u ∈ V (G). De início todos os vértices de G estão não-visitado e todas as
+arestas não-visitada a partir de ambos os extremos.
+
+O seguinte algoritmo, que chamaremos de Visite, recebe um grafo G e um vértice qualquer v ∈ V (G) e visita todos os
+vértices alcançáveis a partir de v uma vez e visita todas as arestas induzidas por esses vértices a partir de
+cada extremo, portanto, visita cada aresta duas vezes. Para gerenciar essa visita o algoritmo Visite usa
+uma lista L na qual a busca, inserção e remoção de elementos é feita de maneira arbitrária e com custo
+constante.
+
+Visite
+[[ (G,v) ]]
+
+1 insira 
+[[ v ]]
+em 
+[[ L ]]
+e marque 
+[[ v ]]
+
+[[ visitado ]]
+;
+
+2 
+[[ enquanto ]]
+
+[[ L ⁄= ∅ ]]
+
+[[ fa¸ca ]]
+
+3 escolha 
+[[ u ∈ L ]]
+;
+
+4 
+[[ se ]]
+em 
+[[ EG (u) ]]
+há aresta não-visitada a partir de 
+[[ u ]]
+
+[[ ent˜ao ]]
+
+6 escolha 
+[[ {u,w} ∈ EG (u) ]]
+não-visitada a partir de 
+[[ u ]]
+;
+
+7 marque 
+[[ {u,w} ]]
+
+[[ visitada ]]
+a partir de 
+[[ u ]]
+;
+
+8 
+[[ se ]]
+
+[[ w ]]
+é não-visitado 
+[[ ent˜ao ]]
+
+9 insira 
+[[ w ]]
+em 
+[[ L ]]
+e marque 
+[[ w ]]
+
+[[ visitado ]]
+;
+
+10 
+[[ sen˜ao ]]
+remova 
+[[ u ]]
+de 
+[[ L ]]
+.
+
+Análise e correção do algoritmo Visite(G,v). No que segue faremos uma análise detalhada do algoritmo Visite(G,v). Até o fim
+da seção fixe um grafo G representado por uma lista de adjacências e um vértice v de G e considere uma execução de
+Visite(G,v).
+O seguinte resultado prova que Visite(G,v) faz o que foi prometido.
+
+Seja A o subconjunto dos vértice alcançáveis a partir de v.
+
+Teorema 3. Após Visite(G,v) cada vértice de A foi visitado uma vez e cada aresta de G[A] foi visitada duas vezes.
+
+Como conseqüência obtemos a complexidade de um percurso.
+
+Corolário 4. A complexidade do algoritmo é O(|A| + |E(G[A])|).
+
+A seguir provamos uma seqüência de resultados menores que culminam na prova desses resultados.
+
+Proposição 5. Cada vértice de G entra em L no máximo uma vez.
+
+Demonstração. Um vértice qualquer w ∈ V (G) é inserido em L na linha 1 ou 9. A condição para essas linhas serem executadas é
+que w seja não-visitado. Após a inserção, na linha 1 ou 9, o vértice w é marcado visitado, logo a condição para inserção de w em
+L passa a ser falsa. A proposição segue do fato de que um vértice visitado nunca se tornará não-visitado durante uma execução do
+algoritmos. □
+
+Proposição 6. A linha 3 é executada no máximo dG(w) + 1 vezes, para cada w ∈ V (G).
+
+Demonstração. Fixe um vértice w e assuma que w ∈ L. Para cada execução da linha 3 com u = w, se vale a condição da linha 4
+então o número de arestas não-visitadas a partir de w em E(w) diminui de um, senão w é removido de L. Como conseqüência serão
+0 arestas não-visitadas a partir de w após d(w) execuções mais 1 execução que resulta na remoção de w da lista L. O resultado
+segue da proposição anterior. □
+
+Corolário 7. O algoritmo Visite(G,v) termina.
+
+Demonstração. Por definição |V (G)|é finito. Pela proposição 5 cada vértice entra em L no máximo uma vez. Pela proposição 6
+após no máximo ∑
+u∈V (G)d(u) + 1 = 2|E| + |V | iterações do enquanto na linha 2 temos L = ∅. □
+
+Lema 8.Numa execução de Visite(G,v) todo vértice alcançável a partir de v é visitado.
+
+Demonstração. Seja w ∈ V (G) um vértice alcançável a partir de v. Por definição existe uma seqüência
+
+[[ e1,e2,...,em
+]]
+(16)
+
+de arestas de G tal que
+
+[[ v ∈ e1,w ∈ em e ei ´e adjacente a ei+1(∀i∈ {1,2,...,m − 1}).
+]]
+
+Vamos provar por indução em m que se w é alcançável a partir de v por uma seqüência de m arestas então w é visitado.
+
+Para a base da indução, suponha m = 1 e escreva e1 = {v,w}. Na linha 1 do algoritmo Visite(G,v) o vértice v é visitado e entra em L. Pelo
+corolário7 v é removido em algum momento da execução e antes disso a aresta e1 vai ser visitada a partir de v na linha 9, nesse ponto ou w já
+foi visitado ou vale a condição da linha 8 e w é visitado.
+
+Suponha (hipótese da indução) que todo vértice alcançável a partir de v por uma seqüência de m− 1 arestas é visitado. Seja w um vértice
+como em (16) .
+
+Escreva em = {x,w} com x ∈ em ∩ em−1. Por hipótese x foi visitado, portanto, antes de ser removido a aresta {x,w}∈ E(x) é visitada a
+partir de x e assim w é visitado, pelo mesmo argumento dado na hipótese de indução. □
+
+Corolário 9. Seja A o subconjunto dos vértices de V (G) alcançáveis a partir de v. Então cada aresta de G[A] é visitada duas vezes.
+
+Demonstração. Seja e = {x,y} uma aresta de G[A]. Como x,y ∈ A temos x ∈ L em algum momento da execução de Visite(G,v);
+antes de x ser removido de L a aresta e é visitada a partir de x. Analogamente, a aresta e é visitada a partir de y, logo a aresta é
+visitada duas vezes. □
+
+Desse corolário podemos concluir que a complexidade de Visite(G,v) é (linearmente) proporcional ao tamanho da representação, isto é,
+O(|A| + |E(G[A])|) (lembre-se que foi assumido custo constante para as operações em L). 
+
+Agora, é simples mostrar que o seguinte algoritmo percorre o grafo (V,E), visitando cada vértice uma única vez e
+visitando cada aresta duas vezes e com complexidade de tempo O(|V | + |E|).
+
+Visite
+[[ (G ) ]]
+
+[[ enquanto ]]
+há vértice não-visitado em 
+[[ V ]]
+
+[[ fa¸ca ]]
+
+escolha 
+[[ v ∈ V ]]
+não-visitado;
+
+insira 
+[[ v ]]
+em 
+[[ L ]]
+e marque 
+[[ v ]]
+
+[[ visitado ]]
+;
+
+[[ enquanto ]]
+
+[[ L ⁄= ∅ ]]
+
+[[ fa¸ca ]]
+
+escolha 
+[[ u ∈ L ]]
+;
+
+[[ se ]]
+em 
+[[ EG (u) ]]
+há aresta não-visitada a partir de 
+[[ u ]]
+
+[[ ent ˜ao ]]
+
+escolha 
+[[ {u,w} ∈ EG (u) ]]
+não-visitada a partir de 
+[[ u ]]
+;
+
+marque 
+[[ {u,w} ]]
+
+[[ visitada ]]
+a partir de 
+[[ u ]]
+;
+
+[[ se ]]
+
+[[ w ]]
+é não-visitado 
+[[ ent˜ao ]]
+
+insira 
+[[ w ]]
+em 
+[[ L ]]
+e marque 
+[[ w ]]
+
+[[ visitado ]]
+;
+
+[[ sen˜ao ]]
+remova 
+[[ u ]]
+de 
+[[ L ]]
+.
+
+7.2. Exercícios.
+
+Exercício 53.Justifique detalhadamente o custo O(1) nas linhas do algoritmo Visite(G,v).
+
+Exercício 54.Prove que se G está representado por uma matriz de adjacências então o algoritmo Visite tem
+complexidade O(|V (G)|2).
+
+Exercício 55.Escreva um algoritmo que recebe um grafo G e um subconjunto de vértices U e devolve as arestas
+no corte E(U, U). Determine a complexidade do algoritmo.
+
+Exercício 56. Seja G um grafo. Para simplificar, suponha que todo vértice de G é alcançável a partir de qualquer
+vértice dado. Para cada vértice temos dois estados possíveis: não-visitado ou visitado. De início todos os vértices
+de G estão não-visitado. Prove ou refute: o seguinte algoritmo visita todos os vértices de G.
+
+Visite-vertices
+[[ (G) ]]
+
+escolha um vértice 
+[[ v ]]
+não-visitado;
+
+insira 
+[[ v ]]
+em 
+[[ L ]]
+e marque 
+[[ v ]]
+
+[[ visitado ]]
+;
+
+[[ enquanto ]]
+houver aresta no corte 
+[[ E (L,V \ L) ]]
+
+[[ fa¸ca ]]
+
+escolha uma aresta 
+[[ e ]]
+no corte 
+[[ E(L, V \ L ) ]]
+;
+
+[[ se ]]
+
+[[ e ∩ V \ L ]]
+é não-visitado
+
+então insira 
+[[ e ∩ V \ L ]]
+em 
+[[ L ]]
+;
+
+marque 
+[[ e ∩ V \ L ]]
+visitado.
+
+Exercício 57.Determine a complexidade do algoritmo do exercício anterior.
+
+
+
+=== 8. Algoritmos de busca ===
+
+8. Algoritmos de busca
+
+Algoritmo de busca é como são chamados, usualmente, alguns dos algoritmos de percurso em grafos.
+
+Observação 8 (leia esse aviso antes). Se você está interessado em algoritmo de busca, então pode começar pelos
+algoritmos de busca descritos na wikipedia.
+
+Nessa seção veremos dois casos particulares do algoritmo de percurso visto acima obtidos quando definimos a política
+de gerenciamento da lista L. A estratégia geral de busca é, a partir do vértice v dado, se houver vértice u
+não-visitado então visite u e seus vizinhos não-visitados. Para visitar os vizinhos de u podemos destacar duas
+estratégias:
+
+8.1. Busca em Largura.
+
+primeiro visitamos cada vizinho novo de v, percorrendo N(v), e guardamos-o numa fila; quando não houver mais
+vizinhos marcamos v como visitado, pegamos o primeiro vértice da fila e repetimos o processo. Em outras palavras, a lista
+L é administrada como fila.
+
+Visite_em_Largura
+[[ (G,v ) ]]
+
+1 insira 
+[[ v ]]
+no fim da fila 
+[[ L ]]
+e marque 
+[[ v ]]
+
+[[ visitado ]]
+;
+
+2 
+[[ enquanto ]]
+
+[[ L ⁄= ∅ ]]
+
+[[ fa¸ca ]]
+
+3 seja 
+[[ u ∈ L ]]
+o primeiro vértice da fila;
+
+4 
+[[ se ]]
+em 
+[[ EG (u) ]]
+há aresta não-visitada a partir de 
+[[ u ]]
+
+[[ ent˜ao ]]
+
+6 escolha 
+[[ {u,w} ∈ EG (u) ]]
+não-visitada a partir de 
+[[ u ]]
+;
+
+7 marque 
+[[ {u,w} ]]
+
+[[ visitada ]]
+a partir de 
+[[ u ]]
+;
+
+8 
+[[ se ]]
+
+[[ w ]]
+é não-visitado 
+[[ ent˜ao ]]
+
+9 insira 
+[[ w ]]
+no fim da fila 
+[[ L ]]
+e marque 
+[[ w ]]
+
+[[ visitado ]]
+;
+
+10 
+[[ sen˜ao ]]
+remova 
+[[ u ]]
+da fila 
+[[ L ]]
+.
+
+Exemplo 12.Na figura 10 mostramos um esquema de percurso em largura supondo que os vértices estão
+armazenados em ordem crescente na lista de adjacências. As arestas destacadas indicam quando um vértice com
+a marca não-visitado foi visitado. 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 10: Exemplo de busca em largura.
+
+8.2. Busca em Profundidade.
+
+visitamos cada vizinho novo de v, percorrendo N(v), e guardamos-o numa pilha; quando não houver mais vizinhos
+marcamos v como visitado, pegamos o primeiro vértice da pilha e repetimos o processo.Em outras palavras, a lista L
+acima é administrada como pilha.
+
+Exemplo 13.Na figura 11 mostramos o esquema de um percurso em profundidade. As arestas destacadas indicam
+quando um vértice com a marca não-visitado foi visitado. 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 11: Exemplo de busca em profundidade.
+
+Exemplo 14.Por fim, a figura 12 compara as ordens em que os vértices foram descobertos em cada uma das
+buscas, largura e profundidade respectivamente. 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 12: Comparação das buscas em largura e em profundidade.
+
+Observação 9 (leia esse aviso antes). Veja as entradas no Wikipedia para busca em largura e para busca em
+profundidade.
+
+8.2.1. Busca em profundidade rotulada. A seguinte versão da busca em profundidade será muito útil adiante;
+chamaremos-a de busca em profundidade rotulada e a idéia é manter um contador (global) de operações na pilha e rotular
+cada vértices com dois valores inteiros: o valor do contador quando o vértice entrou na pilha e o o valor do contador
+quando o vértice saiu da pilha.
+A seguir damos uma versão recursiva para o procedimento Visite da busca rotulada, o qual recebe um grafo G dado por
+uma lista de adjacências e um vértice w ∈ V (G); no início temos cont = sai[v] = chega[v] = 0 e pai[v] = nil, para todo
+vértice v de G. 
+
+BP
+[[ (G,w) ]]
+
+[[ cont← cont + 1 ]]
+;
+
+[[ chega[w ] ← cont ]]
+;
+
+[[ paracada ]]
+
+[[ u ∈ N (w) ]]
+
+[[ fa¸ca ]]
+
+[[ se ]]
+
+[[ chega[u] = 0 ]]
+
+[[ ent˜ao ]]
+
+BP
+[[ (G, u) ]]
+;
+
+[[ pai[u ] ← w ]]
+;
+
+[[ cont← cont + 1 ]]
+;
+
+[[ sai[w] ← cont ]]
+.
+
+Proposição 10. Após uma execução de BP(G,w), dados u,v ∈ V (G) alcançáveis a partir de w, um e somente
+um dos itens abaixo vale para esse par de vértices
+
+(a) chega[u] < sai[u] < chega[v] < sai[v];
+
+(a’) chega[v] < sai[v] < chega[u] < sai[u];
+
+(b) chega[u] < chega[v] < sai[v] < sai[u];
+
+(c) chega[v] < chega[u] < sai[u] < sai[v].
+
+Demonstração. A prova é deixada como exercício. □
+
+Definimos, para todo t ∈ ℕ, a t-ésima iteração do vetor pai, denotada por pai(t), da seguinte maneira
+
+[[ {
+pai(t)[v] = v [ ] se t = 0
+pai(t−1) pai[v] se t > 0.
+]]
+(17)
+
+8.3. Exercícios.
+
+Exercício 58.Escreva uma versão não recursiva da busca em profundidade rotulada.
+
+Exercício 59.Prove a proposição 10.
+
+Exercício 60. Considere uma execução da busca rotulada BP(G,w). Para simplificar, considere que todo vértice de G é
+alcançável a partir de w. Prove as seguintes equivalências. Para quaisquer u,v ∈ V (G)
+
+[[ [ ]]
+chega[v],sai[v]
+[[ ] ]]
+∩
+[[ [ ]]
+chega[u],sai[u]
+[[ ] ]]
+= ∅ se e somente se não existe t ∈ ℕ tal que pai(t)[u] = v e não existe
+t′ ∈ ℕ tal que pai(t′)[v] = u;
+
+[[ [ ]]
+chega[v],sai[v]
+[[ ] ]]
+⊂
+[[ [ ]]
+chega[u],sai[u]
+[[ ] ]]
+se e somente se existe t ∈ ℕ tal que pai(t)[v] = u;
+
+[[ [ ]]
+chega[v],sai[v]
+[[ ] ]]
+⊃
+[[ [ ]]
+chega[u]sai[u]
+[[ ] ]]
+se e somente se existe t ∈ ℕ tal que pai(t)[u] = v.
+
+Exercício 61.Adapte o algoritmo do exercício 56 para que o percurso seja uma busca em largura. Repita para
+busca em profundidade.
+
+
+
+

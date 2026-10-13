@@ -1,0 +1,219 @@
+﻿=== 20. Circuitos hamiltonianos ===
+
+20. Circuitos hamiltonianos
+
+Um circuito C ⊆ G é um circuito hamiltoniano em G se V (C) = V (G).
+
+Exemplo 26.Um grafo que pode ser representado pelo seguinte diagrama é chamado de dodecaedro. O dodecaedro é um
+grafo hamiltoniano, em particular, foi o grafo que deu origem ao termo. 
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Um grafo G que contém circuito hamiltoniano é chamado grafo hamiltoniano.
+
+Uma condição necessária para um grafo ser hamiltoniano é que a remoção de um subconjunto de vértices resulta num
+número limitado de componentes conexas.
+
+Proposição 25. Se G é hamiltoniano, então c(G − S) ≤|S| para todo S ⊂ V (G) não-vazio.
+
+Demonstração. Basta notar que c(G − S) ≤ c(C − S) ≤|S| para todo circuito hamiltoniano C ⊆ G. □
+
+Vejamos um contra-exemplo para a recíproca do resultado acima. O grafo de Petersen, mostrado na
+figura abaixo, não é hamiltoniano. Podemos verificar, caso-a-caso, que a remoção de qualquer subconjunto
+próprio e não-vazio de vértices S, o número de componentes do grafo obtido é sempre menor ou igual a |S|.
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 23: Grafo de Petersen.
+
+Uma condição suficiente para um grafo ser hamiltoniano é o seguinte teorema.
+
+Teorema 26 (Teorema de Dirac, 1952). Para todo grafo G = (V,E) com n ≥ 3 vértices, se δ(G) ≥ n∕2 então G
+é hamiltoniano.
+
+Demonstração. Seja P = v0,…,vm o maior caminho em G e defina os conjuntos
+
+[[ { } { }
+A = vi ∈ V (P) : v0vi+1 ∈ E e B = vj ∈ V (P): v0vj ∈ E .
+]]
+(43)
+
+Observamos que A e B são subconjuntos de {v0,v1,…vm−1} com pelo menos n∕2 > (m− 1)∕2 vértices e pelo Princípio
+da Casa dos Pombos A ∩ B≠∅. Escolha vk ∈ A ∩ B 
+[FIGURA: diagrama no original, sem texto alternativo]
+
+e considere o circuito C = v0,vk+1,…,vm,vk,…,v0.
+
+Se C não é hamiltoniano então existem u ∈ V (G) − V (C) e vj ∈ V (C) tais que uvj ∈ E(G), pois G é conexo
+(exercício 12). Reescrevendo o circuito C acima como u0 = vj,u1,…,um,u0 então temos o caminho u,u0,u1,…,um com
+uma aresta a mais que P, absurdo. Logo C é hamiltoniano. □
+
+Como já foi dito anteriormente, grafos hamiltonianos não são, até o momento, bem caracterizados por uma
+propriedade não-trivial que possa ser verificada eficientemente; decidir se um grafo é hamiltoniano é um problema
+NP-completo.
+
+
+
+=== Exercícios ===
+
+Exercícios
+
+Exercício 146. Mostre que se G não é 2-conexo então G não é hamiltoniano.
+
+Exercício 147. Prove que se G é bipartido com bipartição V (G) = A ∪ B onde |A|≠|B|, então G não é
+hamiltoniano.
+
+Exercício 148. Mostre que o n-cubo é hamiltoniano.
+
+Exercício 149. Um caminho hamiltoniano em G é um caminho que passa por todos os vértices de G. Mostre
+que se G contém um caminho hamiltoniano então c(G − S) ≤|S| + 1 para todo subconjunto próprio de vértices
+S.
+
+Exercício 150. Prove que se G é tal que todo par de vértices u,v não-adjacentes vale d(u) + d(v) ≥|V (G)|− 1,
+então G contém um caminho hamiltoniano.
+
+Exercício 151. Prove: d(u) + d(v) ≥|V (G)| para todo par u,v de vértices não adjacentes, então G hamiltoniano
+se e somente se G + uv hamiltoniano.
+
+Exercício 152. Dê um exemplo de grafo com n vértices, grau mínimo 
+[[ ⌊n∕2⌋ ]]
+e não-hamiltoniano.
+
+Exercício 153. Suponha que existe um algoritmo 
+[[ A ]]
+(G,u,v) que determina em tempo polinomial um (u →
+v)-caminho mínimo no grafo dirigido com pesos reais nas arestas G. Mostre como usar esse algoritmo para
+determinar se G tem um circuito (orientado) hamiltoniano em tempo polinomial. (Dica: atribua peso −1 a todas
+as arestas do grafo e compute 
+[[ A ]]
+(G,u,v) para todo (v,u) ∈ E(G).)
+
+Exercício 154. Observamos que o problema de determinar se um grafo é hamiltoniano é NP-completo, portanto
+a existência de uma algoritmo 
+[[ A ]]
+como acima estabelece que P=NP.
+
+
+
+=== 21. Trilhas eulerianas ===
+
+21. Trilhas eulerianas
+
+É possível desenhar a figura abaixo sem tirar o lápis do papel e sem repetir nenhum traço? 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Vamos reformular essa pergunta na terminologia de Teoria dos Grafos. Dizemos que num grafo G = (V,E) uma
+seqüência alternada vértice–aresta–vértice que não repete arestas
+
+[[ v0e1v1 ...vk− 1ekvk,
+]]
+(44)
+
+com ei = {vi−1 ,vi}∈ E, para todo i ∈{1,2,…,k}, e ei≠ej para todo i≠j, é chamada de trilha.
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 24: Exemplo: 1a2b3c4d2 e 4d2b3c4e5f3 são trilhas no grafo.
+
+Se em (44) temos v0 = vk, então dizemos que a trilha é uma trilha fechada.
+
+Uma trilha que passa por todas as arestas do grafo é chamada de trilha euleriana e uma trilha fechada que passa por
+todas as arestas do grafo é chamada de trilha euleriana fechada.
+
+Um grafo que contenha uma trilha euleriana fechada é dito grafo euleriano.
+
+Teorema 27 (Teorema de Euler, 1735). Um grafo conexo é euleriano se, e somente se, todo vértice tem grau
+par.
+
+Demonstração. Se um grafo conexo é euleriano, então um vértice que ocorre k vezes na trilha euleriana fechada
+tem grau 2k.
+
+Por outro lado, suponha que um grafo conexo tem todos os seus vértice de grau par. Seja T = v0e1v1…vℓ−1eℓvℓ
+uma trilha com o maior número possível de arestas. Como todos os vértices têm grau par e a trilha contém todas
+as arestas que incidem nos vértices dos extremos da trilha T, temos que v0 = vℓ.
+
+Agora suponha que e é uma aresta que não aparece na trilha. Note que podemos assumir e = uvi para algum
+vi ∈ T, pois o grafo é conexo. Mas, isso implica que ueviei+1…eℓvℓe1v1…ei−1vi é uma trilha com mais arestas que
+T. Portanto, T passa por todas as arestas do grafo. □
+
+
+
+=== Exercícios ===
+
+Exercícios
+
+Exercício 155. Mostre que se G tem no máximo dois vértices de grau ímpar então contem uma trilha euleriana.
+
+Exercício 156. Mostre que se G é euleriano então LG (veja exercício 12.16, na página 13, para a definição de
+LG) é euleriano.
+
+Exercício 157. Mostre que se G é euleriano então LG é hamiltoniano.
+
+Dê um exemplo onde a recíproca não vale.
+
+Exercício 158. Um grafo euleriano pode ter uma aresta de corte?
+
+Exercício 159. Prove que um grafo conexo é euleriano se pode ser particionado em circuitos aresta-disjuntos.
+
+Exercício 160. O caso é a fortuna do bilionário Bob Leão Marinho. Ele foi assassinado em sua mansão e Ed
+Mort, o detetive internacionalmente conhecido, que nas horas vagas estuda Teoria dos Grafos, foi chamado para
+investigação. O mordomo afirma que viu o faxineiro entrar no salão da piscina (onde aconteceu o assassinato) e
+então, logo em seguida, saiu do salão da piscina pela mesma porta. O faxineiro, entretanto, diz que ele não pode
+ser o homem que o mordomo alega ter visto, já que ele entrou na mansão por uma das portas do salão da piscina,
+atravessou cada aposento, passando por cada cada porta da mansão exatamente uma vez, e deixou a casa pela
+outra porta do salão da piscina. Ed Mort verifica a planta da casa (veja figura abaixo). Dentro de algumas horas
+ele declara o caso resolvido. Quem você acredita ter matado Bob Leão Marinho? 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Exercício 161. O algoritmo de Fleury, de 1883, descobre uma trilha euleriana fechada se o grafo dado for euleriano.
+
+Fleury
+[[ (G) ]]
+
+escolha 
+[[ u∈ V (G) ]]
+;
+
+[[ enquanto ]]
+
+[[ ( E(G ) ⁄= ∅) ]]
+
+[[ fa¸ca ]]
+
+insira 
+[[ u ]]
+no final de 
+[[ S ]]
+;
+
+escolha 
+[[ e= {u, w} ∈ E(G ) ]]
+e, se for possível, de forma que 
+[[ G − e ]]
+tenha o mesmo número de componentes conexos que 
+[[ G ]]
+;
+
+[[ u←w ]]
+;
+
+[[ G←G−e ]]
+.
+
+Prove que se G é euleriano então a trilha definida pela seqüência vértices adjacentes S = u1,u2,…,uℓ construída pelo
+algoritmo é euleriana. Determine a complexidade do algoritmo.
+
+Exercício 162. A figura abaixo mostra a planta da Casa dos Espelhos, um labirinto em um parque de diversões que
+funciona de forma inusitada: depois que um visitante passa por uma porta, ela é automaticamente trancada. Considerando
+que todas as portas estão inicialmente abertas, determine se é sempre possível escapar da Casa dos Espelhos ou se
+alguém pode ficar trancafiado para sempre em algum quarto. Se este perigo for real, execute um algoritmo que ajuda a
+projetar um brinquedo mais seguro, mostrando que haverá sempre a possibilidade de escapar da Casa dos Espelhos. Você
+pode alterar a planta de acordo com o algoritmo e deve mostrar um percurso completo nesta nova planta em que um
+visitante pode escapar da Casa dos Espelhos de forma segura. (Dica: não modele cada porta da casa como um vértice de
+um grafo.) 
+[FIGURA: diagrama no original, sem texto alternativo]
+
+
+
+

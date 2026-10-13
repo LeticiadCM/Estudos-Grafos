@@ -1,0 +1,234 @@
+﻿=== 14. Árvores geradoras de custo mínimo em grafos com peso nas arestas ===
+
+14. Árvores geradoras de custo mínimo em grafos com peso nas arestas
+
+Dado um grafo conexo com pesos nas arestas G = (V,E,ρ), onde ρ: E → ℝ, definimos o custo de um subgrafo H ⊂ G
+como
+
+[[ c(H ) = ∑ ρ(e).
+
+e∈E(H)
+]]
+
+O problema no qual estaremos interessados a partir de agora é: qual é o custo do subgrafo gerador conexo de G “mais
+barato”? Em outras palavras, queremos determinar S ⊆ E(G) tal que
+
+[[ { }
+c(G[S]) = min c(T ): T ´e ´arvore geradora de G .
+]]
+
+Uma árvore geradora de G de custo mínimo também é chamada de árvore geradora mínima do grafo
+G.
+
+14.1. Exercícios.
+
+Exercício 104. Mostre que se e é uma aresta de peso mínimo em G então e pertence a alguma árvore geradora
+mínima.
+
+Exercício 105. Mostre que se e é uma aresta de peso máximo em G e pertence a um circuito de G então existe
+uma árvore geradora mínima de (V (G),E(G) \{e}) que também é uma árvore geradora mínima de G. Mostre
+que o mesmo vale para toda aresta de peso máximo de todo circuito de G.
+
+Exercício 106. Mostre que para qualquer U ⊂ V (G) não-vazio, a aresta de menor custo em E(U,U) tem que
+pertencer a toda árvore geradora mínima de G.
+
+Exercício 107. Considere a seguinte estratégia para computar uma árvore geradora de custo mínimo: dado um grafo
+conexo G = (V,E,ρ), mantemos um conjunto S (inicialmente vazio) de arestas e a cada passo escolhemos em
+{u, v} ∈ E \ S uma aresta boa para S, onde aresta boa para S significa que S ∪{{u,v}} está contido no conjunto de
+arestas de alguma árvore geradora mínima de G. O objetivo desse exercício e mostrar que no final as arestas de S
+induzem uma árvore geradora mínima de G. 
+AGM(G) 
+
+enquanto G[S] não é uma árvore geradora faça 
+descubra uma aresta f boa para S em E(G)\S, 
+inserir f em S; 
+devolva S.
+
+Suponha que sempre existe pelo menos uma aresta boa pra ser escolhida em cada iteração do enquanto. Prove que para
+qualquer G conexo, AGM(G) constrói uma árvore geradora mínima de G. (Dica: use o invariante S é subconjunto de
+alguma árvore geradora mínima de G antes de cada iteração do laço.)
+
+Exercício 108. Agora, o objetivo é provar a hipótese assumida no exercício acima de que sempre há uma aresta
+boa pra ser escolhida. Prove que se T é uma árvore geradora mínima de G e S ⊂ E(T) então para todo U ⊂ V (G)
+tal que o corte E(U,U) não contém arestas de S vale o seguinte: uma aresta {u,v} de custo mínimo no corte
+E(U, U ) é boa para S. (Dica: dados G,S,T como no enunciado, tome U e e ∈ E(U,U) como enunciado e considere
+2 casos, se e ∈ E(T) e se e ⁄∈ E(T).)
+
+Exercício 109. Seja T ⊂ G uma árvore geradora de um grafo G com peso nas arestas. Mostre que T é uma árvore
+geradora mínima se e somente se para toda e ∈ E(G) \ E(T), o único circuito C de T + e é tal que todas as
+arestas de C custam não mais que ρ(e).
+
+Exercício 110. Mostre que se para todo corte em G existe uma única aresta de custo mínimo no corte, então a
+árvore geradora de custo mínimo é única. A recíproca dessa afirmação vale? Justifique.
+
+Exercício 111. Seja G um grafo conexo com pesos positivos nas arestas. Para todo T árvore geradora mínima e
+todo caminho P em T, P é um caminho mínimo em G?
+
+
+
+=== 15. Algoritmo de Kruskal para árvore geradora mínima ===
+
+15. Algoritmo de Kruskal para árvore geradora mínima
+
+A idéia do algoritmo de Kruskal é bastante simples, ele é um algoritmo guloso: dado um grafo conexo com pesos nas
+arestas, a cada passo escolhemos a aresta mais barata dentre as que ainda não estão em S, desde que ela não forme
+circuito com as arestas já escolhidas:
+
+Kruskal(G)
+
+1 
+[[ F ]]
+<- fila das arestas em ordem não-decrescente de peso;
+
+2 
+[[ para cada ]]
+
+[[ e ∈ F ]]
+
+[[ fa¸ca ]]
+
+3 
+[[ se ]]
+
+[[ S ∪ {e} ]]
+não induz circuito então
+
+4 insira 
+[[ e ]]
+em 
+[[ S ]]
+;
+
+5 devolva 
+[[ S ]]
+.
+
+Correção do algoritmo de Kruskal. Vamos provar
+
+Teorema 19.O conjunto S devolvido pelo algoritmo de Kruskal induz uma árvore geradora mínima de G.
+
+Demonstração. Considere a seqüência S = (e1,e2,…,en−1) em que as arestas foram inseridas no conjunto S. Seja
+T uma árvore geradora mínima de G com o maior número possível de arestas em comum com S e vamos mostrar
+que E(T) = S.
+
+Se E(T)≠ S tomamos m = min{j : ej ⁄∈ E(T)}. Por definição T + em contém um circuito, nesse circuito deve
+existir uma aresta f que não está em S.
+
+S ∪{f} induz um circuito que não tem todas as arestas de e1,…,em−1, pois essas também pertencem a T. Como
+f não foi escolhida pelo algoritmo tem-se ρ(f) ≥ ρ(em).
+
+Logo c(T − f + em) ≤ c(T) e como T é de custo mínimo também T −f + em é de custo mínimo e, ainda, com
+mais arestas em comum com S que T, contrariando a escolha de T. □
+
+Análise de complexidade. Notemos que enquanto S evolui de ∅ até definir uma árvore geradora, esse conjunto é
+sempre uma subfloresta de G, ou seja, uma coleção de conjuntos disjuntos de vértices (componentes conexos)
+e o teste na linha 3 acima verifica se a aresta e = {x,y} não liga vértices do mesmo conjunto (caso contrário,
+teremos um circuito) e nesse caso, na linha 4, une o conjunto onde está o vértice x com o conjunto do vértice
+y.
+Assim, precisamos de estruturas de dados que, dinamicamente, representem e manipulem conjuntos disjuntos de modo eficiente.
+Estruturas como essa são conhecidas na literatura como estruturas para união-e-busca (union-find) ou estruturas de dados para
+conjuntos disjuntos. Essa estruturas mantém dinamicamente uma família de subconjuntos disjuntos onde um elemento de cada
+subconjunto é eleito como o representante do subconjunto e temos as operações
+
+make(x): cria o conjunto unitário {x};
+
+find(x): devolve o representante do conjunto ao qual x pertence;
+
+union(x,y): une os conjuntos que contém x e y.
+
+Kruskal(G)
+
+F ← fila das arestas em ordem não-decrescente de peso;para cada v em V(G) faça make(v);para cada u,v em F faça se find(u) é diferente de find(v) então insira u,v em S; union(u,v);devolva S.
+
+Dentre as estruturas de dados mais conhecidas para representar conjuntos disjuntos, chamamos a atenção para uma delas: a
+representação por floresta com união por rank e busca com compressão de caminhos. Essa representação com as heurísticas
+mencionadas tem um ótimo desempenho assintótico:
+
+Teorema 20. O tempo gasto com m operações num universo com n elementos é O((m + n) lg ∗(n)).
+
+Denotamos por lg ∗(n) o número de vezes que temos que iterar lg até que o valor obtido seja menor ou igual a 1, por exemplo,
+lg∗216 = 4.
+
+Nesse caso, o número de operações make, find e union no algoritmos de Kruskal é menor que 2(|E| + |V |), portanto o tempo do
+algoritmo é O((|E| + |V |) lg ∗|V |) para as operações (teorema 20) mais O(|E| log |E|) para a ordenação das arestas; resultando
+O(|E| log |E|). 
+
+Exercícios.
+
+Exercício 112. Mostre que para toda árvore geradora mínima T ⊂ G existe uma ordenação nas arestas de G tal
+que T é a árvore devolvida pelo algoritmo de Kruskal.
+
+Exercício 113. Suponha que todos os pesos das arestas de G são positivos. Mostre que qualquer subconjunto
+de arestas que induz um subgrafo conexo e tem peso total mínimo é uma árvore. Dê um exemplo com pesos
+não-positivos onde a conclusão não vale.
+
+Exercício 114. Escreva uma versão do algoritmo de Kruskal que, ao invés de ordenar as arestas por custo, usa uma
+fila de prioridades (heap, por exemplo) onde a maior prioridade é da aresta fora de S de menor custo. Determine
+a complexidade dessa implementação. Essa versão do algoritmo é mais eficiente?
+
+Exercício 115. Suponha que os pesos das arestas são inteiros de 1 até |V |. Quão rápido você consegue fazer o
+algoritmo de Kruskal? E se os pesos das arestas são inteiros de 1 até uma constante m?
+
+Exercício 116. Escreva um algoritmo que constrói uma árvore geradora mínima cuja aresta de maior peso tem
+peso mínimo dentre todas as árvores geradoras do grafo.
+
+
+
+=== 16. Algoritmo de Prim para árvore geradora mínima ===
+
+16. Algoritmo de Prim para árvore geradora mínima
+
+O algoritmo de Prim recebe G = (V,E,ρ) e devolve S ⊆ E tal que G[S] é uma árvore geradora mínima de um grafo
+conexo com pesos nas arestas G. O algoritmo de Prim parte de um conjunto unitário, digamos U = {v} para
+algum v ∈ V , e a cada rodada o algoritmo acrescenta a U o vértice de U que é extremo da aresta de menor
+custo em E(U, U), até que U = V . No final, as arestas escolhidas induzem uma árvore geradora mínima.
+
+Prim(G)
+
+1 escolha
+[[ v ]]
+;
+
+2 
+[[ U←{v} ]]
+;
+
+3 
+[[ enquanto ]]
+
+[[ U ⁄= V(G ) ]]
+
+[[ fa¸ca ]]
+
+4 seja 
+[[ {u,w } ]]
+uma aresta de peso mínimo em 
+[[ ---
+E (U , U ) ]]
+, com 
+[[ u ∈ U ]]
+;
+
+5 insira 
+[[ {u,w } ]]
+em 
+[[ S ]]
+;
+
+6 insira 
+[[ w ]]
+em 
+[[ U ]]
+;
+
+7 devolva 
+[[ S ]]
+.
+
+Exercício 117. Prove que o algoritmo de Prim está correto.
+
+Exercício 118. Com base na análise do algoritmo de Dijkstra, mostre que Prim tem complexidade O(|E|log|V |).
+
+
+
+

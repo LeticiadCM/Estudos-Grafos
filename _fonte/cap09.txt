@@ -1,0 +1,532 @@
+﻿=== 17. Emparelhamento ===
+
+17. Emparelhamento
+
+Num grafo G = (V,E), dizemos que M ⊆ E é um emparelhamento se as arestas de M são duas-a-duas não-adjacentes,
+ou seja, e ∩ f = ∅ para quaisquer e,f ∈ M. De modo equivalente, chamamos M de emparelhamento se G[M] é um
+subgrafo 1-regular.
+
+Exemplo 22.Considere o grafo dado pelo diagrama da figura 22 abaixo. O conjunto M = 
+[[ { ]]
+{2,4},{5,6}
+[[ } ]]
+é um
+emparelhamento. Observamos que pode haver vértices nos quais não há arestas do emparelhamento incidindo,
+como é o caso dos vértices 1 e 3. 
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 22: Emparelhamento M = 
+[[ { ]]
+{2,4},{5,6}
+[[ } ]]
+.
+
+Quando um vértice v pertence a alguma aresta e de um emparelhamento M dizemos que v é coberto por
+M. Dessa forma, pela definição de emparelhamento, quando v é coberto por M existe uma única aresta
+e ∈ E(v) ∩ M. Se um emparelhamento cobre V (G) então ele é chamado de emparelhamento perfeito em
+G.
+
+Há grafos que não admitem emparelhamento perfeito como, por exemplo, os circuitos de comprimento ímpar; de fato,
+qualquer emparelhamento em Cℓ tem no máximo 
+[[ ⌊ℓ∕2⌋ ]]
+arestas, logo circuitos de comprimento par admitem
+emparelhamento perfeito, mas os de comprimento ímpar não. No exemplo da figura 22 o emparelhamento
+
+[[ { ]]
+{1, 2}, {4, 5}, {3,6}
+[[ } ]]
+é perfeito, assim como o emparelhamento 
+[[ { ]]
+{1,2},{3,5},{4,6}
+[[ } ]]
+.
+
+Um emparelhamento em G com o maior número possível de arestas é chamado de emparelhamento máximo, isto é,
+um emparelhamento com 
+
+[[ { }
+μ (G ) = max |M |: M ´e emparelhamento em G
+]]
+(35)
+
+arestas.
+
+Exemplo 23.No caso dos circuitos Cℓ é fácil ver que μ(Cℓ) = 
+[[ ⌊ℓ∕2⌋ ]]
+. O mesmo vale para grafos completos
+μ(Kn ) = 
+[[ ⌊n∕2⌋ ]]
+. No caso de caminhos, μ(P2ℓ−1) = μ(P2ℓ) = ℓ para todo ℓ > 0.
+
+No estudo de emparelhamentos surge um tipo especial de caminho, onde as arestas alternam entre aresta do
+emparelhamento e aresta fora do emparelhamento. Um caminho P = x1,x2,…,xk, para k ≥ 1, em G cujas arestas alternam
+entre as arestas de E(G) \ M e as arestas de M isto é,
+
+[[ {
+{xi,xi+1 } ⁄∈ M se i ´e´impar e para todo i ∈ {1,2,...,k − 1}
+{xi,xi+1 } ∈ M se i ´e par,
+]]
+
+é chamado de M-alternante.
+
+Se os vértices extremos do caminho M-alternante não são cobertos por M então chamamos esse caminho
+de M-aumentante. Como o nome sugere, a existência de um caminho M-aumentante P em G significa
+que podemos obter um emparelhamento em G com mais arestas que M. De fato, a diferença simétrica
+M ⊕ E(P) = (M ∪E(P)) \ (M ∩E(P)) é um emparelhamento que cobre todos os vértices cobertos por M e ainda cobre
+os extremos de P.
+
+Exemplo 24.Na figura 22 temos M = 
+[[ { ]]
+{2,4},{5,6}
+[[ } ]]
+e o caminho M-aumentante P com E(P) = 
+[[ { ]]
+{1,2},{2,4},{4,5},{5,6},{6,3}
+[[ } ]]
+.
+A diferença simétrica desses conjuntos é
+
+[[ ({{2,4},{5,6}} ∪ {{1,2},{2,4},{4,5},{5,6},{6,3}} )\({ {2,4},{5,6}}∩ { {1,2},{2,4},{4,5},{5,6},{6,3}}) =
+{ }
+{1,2},{4,5},{6,3}
+]]
+
+que é um emparelhamento com uma aresta a mais que M.
+
+O seguinte teorema é uma caracterização de emparelhamento máximo em função dos caminhos aumentantes. Esse
+resultado é fundamental no projeto de um algoritmo eficiente que determina emparelhamentos máximos; mais adiante
+veremos esse algoritmo para grafos bipartidos.
+
+Teorema 21 (Teorema de Berge, 1957). Um emparelhamento M em G é máximo se, e somente se, G não contém
+caminho M-aumentante.
+
+Demonstração. Seja M um emparelhamento que não é máximo e M∗ um emparelhamento máximo. Considere o
+subgrafo induzido pelas arestas dos dois emparelhamentos H = G[M ∪ M∗]. Como Δ(H) ≤ 2 os componentes
+conexos de H são circuitos e caminhos (exercício 88).
+
+Os circuitos têm que ser de comprimento par, por definição de emparelhamento. Se todos os caminhos tiverem
+comprimento par então teremos |M| = |M∗|, logo existe um caminho P de comprimento ímpar e com mais arestas
+de M∗ o que implica que os extremos do caminho não são cobertos por M. Esse caminho é M-aumentante em G.
+
+Se P é M-aumentante então 
+
+[[ |M ⊕ E (P)| = ||(M( ∪ E (P))\ (M ∩) E((P))| )|
+= | M \ (M ∩E (P)) ∪ E (P) \(M ∩ E(P )) |
+= |M |− |M ∩ E (P)|+ |E(P )|− |M ∩ E (P )|
+
+= |M |− |M ∩ E (P)|+ |M ∩E (P )|+ 1
+= |M |+ 1.
+]]
+
+Resta provar que M ⊕ E(P) é emparelhamento. Suponha que não, então existem duas arestas de M ⊕ E(P)
+adjacentes, digamos que e,f ∈ M ⊕ E(P) com e ∩ f = x. Dessa forma, x deve ser um vértice interno em P,
+portanto, deve estar coberto por uma aresta g ∈ M, logo x ∈ e ∩ g e ambas arestas estão em M, absurdo.
+□
+
+Exercícios.
+
+Exercício 119. Prove a igualdade |M ⊕ E(P)| = |(M \ E(P)) ∪ (E(P) \ M)| usada na demonstração do teorema
+de Berge.
+
+Exercício 120. Determine o número de arestas num emparelhamento máximo nos grafos: Kn, Cn, Pn e Km,n.
+
+Exercício 121. Se M é um emparelhamento em um grafo G qualquer e se P é um caminho M-aumentante em
+G, mostre que M ⊕ E(P) também é um emparelhamento.
+
+Exercício 122. Prove que uma árvore qualquer tem no máximo um emparelhamento perfeito.
+
+Exercício 123. Considere um grafo qualquer G de n vértices. Mostre que um emparelhamento em G tem no
+máximo n∕2 arestas.
+
+Exercício 124. Mostre que o k-cubo admite emparelhamento perfeito, para todo k ≥ 2.
+
+Exercício 125. Duas pessoas jogam um jogo sobre um grafo G alternadamente selecionando vértices distintos
+v0 , v1 , v2 , … tais que, para i > 0, vi é adjacente a vi−1. O último jogador que conseguir selecionar um vértice vence
+o jogo.
+
+Mostre que o primeiro jogador tem uma estratégia para vencer o jogo se e somente se o grafo G não tem um
+emparelhamento perfeito.
+
+Exercício 126. Mostre que μ(G) = α(LG) (veja a definição de LG no exercício 16).
+
+Exercício 127. Prove que se M é emparelhamento em G então existe um emparelhamento máximo que cobre
+todos os vértices cobertos por M.
+
+Exercício 128. Denotemos ci(G) o número de componentes conexos do grafo G com um número ímpar de vértices.
+Mostre que se G tem um emparelhamento perfeito então ci(G − S) ≤|S| para todo conjunto S de vértices.
+
+
+
+=== 18. Emparelhamentos em grafos bipartidos ===
+
+18. Emparelhamentos em grafos bipartidos
+
+Por toda esta seção adotaremos que as partes de vértices independentes de um grafo bipartido G são denotadas por A e
+B.
+
+Oo teorema de Hall (1935), também conhecido como o teorema do casamento é devido ao matemático Philip Hall; é
+um resultado que dá uma condição necessária e suficiente que permite a seleção de um elemento distinto de cada um de
+uma coleção de conjuntos finitos: Seja S um conjunto de conjuntos finitos. Um sistema de representates de S é um
+conjunto X pro qual existe uma bijeção f : X → S tal que x ∈ f(x). Então S admite tal sistema se e sé
+se
+
+[[ || ⋃ ||
+para todo A ⊆ S |T | ≤ || A||
+|A∈T |
+]]
+
+O teorema tem muitas aplicações interessantes. Por exemplo, se dividimos um baralho em 13 montes de 4 cartas cada,
+então, usando o teorema de casamento, podemos mostrar que sempre é possível selecionar exatamente uma carta de cada
+pilha de modo que as 13 cartas selecionadas contêm exatamente uma carta de cada valor (Ás, 2, 3, …, rainha, rei). Mais
+abstratamente, seja G um grupo e H subgrupo finito de G. Então, o teorema de casamento pode ser usado para mostrar
+que existe um conjunto X tal que X é um tanto para o conjunto das classes laterais à esquerda quantoa direita de H em
+G.
+
+O seguinte resultado dá a condição necessária e suficiente para que exista um sistema de representantes reescrito em
+linguagem de teoria dos grafos.
+
+Teorema 22 (Teorema de Hall, 1935). Em todo grafo bipartido G = (A∪B,E) existe um emparelhamento que cobre A
+se, e somente se,
+
+[[ |N (S)| ≥ |S | para todo S ⊆ A.
+]]
+(36)
+
+Demonstração. Sejam G = (A ∪ B,E) um grafo bipartido, M um emparelhamento que cobre A e S ⊆ A. Para
+cada x ∈ S denote por vx o vértice de B tal que {x,vx}∈ M. Certamente, vx ∈ N(S). Ainda, se x ∈ S e y ∈ S
+com x≠ y então vx≠vy, logo |N(S)|≥|S|.
+
+Vamos provar por indução em |A| que se |N(S)|≥|S| para todo S ⊆ A então existe um emparelhamento que
+cobre A.
+
+Se |A| = 1 então facilmente constatamos que existe um emparelhamento que cobre A. Seja G = (A∪B,E) um
+grafo bipartido que satisfaz (36) e suponha que todo grafo bipartido (A′∪ B′,E) com |A′| < |A| que satisfaz a
+condição de Hall (36) tem um emparelhamento que cobre A.
+
+Caso 1: |NG (S)| > |S| para todo S ⊂ A não-vazio. Escolha uma aresta {a,b}∈ E e considere o grafo bipartido
+G′ = G − a − b sobre A′ = A \{a} e B′ = B \{b}. Nesse caso, para cada S ⊆ A′⊂ A vale que |NG′(S)|≥|S| e
+pela hipótese indutiva concluímos que existe M que cobre A′. Portanto M ∪{{a,b}} cobre A.
+
+Caso 2: |N(S)| = |S| para algum S ⊂ A não-vazio. O grafo bipartido induzido H = G[S ∪ N(S)] satisfaz
+a condição de Hall (os vizinhos de S em H são os mesmo vizinhos em G) e pela hipótese indutiva podemos
+concluir que existe um emparelhamento M em H que cobre S. Agora, considere o subgrafo bipartido induzido
+J = G[S ∪ NG (S)] e suponha que exista X ⊆S tal que no grafo J vale |NJ(X)| < |X|. Teremos no grafo G
+
+[[ |N (S ∪ X )| = |N (S)∪ N (X )| = |N (S )|+ |N (X )| < |S|+ |X |
+G H J H J
+]]
+contrariando a hipótese de G satisfazer a condição de Hall. Assim |NJ(X)| ≥ |X| para todo X ⊆ S e, pela
+hipótese indutiva, existe um emparelhamento M′ em J que cobre S. Para concluir a demonstração é suficiente
+observar que M ∪ M′é um emparelhamento em G que cobre A. □
+
+Corolário 23 (Forma defectiva do teorema de Hall). Em todo grafo bipartido G = (A∪B,E) existe um emparelhamento
+que cobre A a menos de d vértices se, e somente se,
+
+[[ |N(S )| ≥ |S |− d para todo S ⊆ A.
+]]
+(37)
+
+Exercícios.
+
+Exercício 129. Como foi dito na observação 2, determinar α(G) é um problema NP-difícil. Supoha que exista
+um algoritmo que recebe um grafo G e computa ν(G) em tempo polinomial e mostre como computar ν(G) em
+tempo polinomial.
+
+Exercício 130. Prove que se G é bipartido então existe um emparelhamento que cobre todos os vértices de grau
+Δ(G).
+
+Exercício 131. Prove que se G é bipartido e regular então G tem emparelhamento perfeito.
+
+Exercício 132. Seja G = (A ∪ B,E) um grafo bipartido com |A| = |B| = n. Mostre que se não existe um
+emparelhamento perfeito em G então existe um subconjunto S com |S|≤
+[[ ⌈n∕2⌉ ]]
+tal que |N(S)| = |S|− 1 e ou
+S ⊂ A ou S ⊂ B.(Dica: considere um conjunto T minimal violando a condição de Hall, dada pela equação (36).)
+
+Exercício 133. Prove a seguinte implicação da forma defectiva do teorema de Hall: Se |N(S)|≥|S|−d para todo
+S ⊂ A, então G contém um emparelhamento de cardinalidade |A|− d.
+
+Exercício 134. Prove que se o grafo bipartido G = (A ∪ B,E) é conexo contém exatamente um emparelhamento
+perfeito então contém uma aresta e tal que G − e é desconexo.
+
+Exercício 135. Seja G = (A ∪ B,E) um grafo bipartido e {A1,A2} uma partição de A e {B1,B2} uma partição
+de B. Mostre que se N(A1) ⊆ B1 então N(B2) ⊆ A2.
+
+Exercício 136. Seja G = (A ∪ B,E) um grafo bipartido e {A1,A2} uma partição de A e {B1,B2} uma partição
+de B. Mostre que se N(A1) ⊆ B1 então B1 ∪ A2 é uma cobertura.
+
+Exercício 137. Seja G = (A∪B,E) um grafo bipartido e M um emparelhamento em G. Seja U ⊂ V (G) o conjunto
+dos vértices cobertos por M e W o conjunto dos vértices de todos os caminhos M-alternantes que têm um dos
+extremos em A \ U. Prove que (B ∩ W) ∪ (A \ W) é uma cobertura em G.
+
+Exercício 138. Prove que todo emparelhamento máximo em G = (A ∪ B,E) tem cardinalidade
+
+[[ mUi⊆nA |A |− |U|+ |N (U)|.
+]]
+
+Exercício 139. Seja G = (A ∪ B,E) um grafo bipartido tal que |A| = |B|. Seja M a matriz indexada por A × B
+e definida por M(u,v) = 1 se uv é uma aresta de G e M(u,v) = 0 caso contrário. O permanente da matriz M
+é o número
+
+[[ ∑
+perm (M ) = M (u,π(u)),
+π
+]]
+onde a soma se estende a todas as bijeções π: A → B. Mostre que o permanente de M é igual ao número de
+emparelhamentos perfeitos em G.
+
+18.1. Algoritmo de Edmonds.
+
+O algoritmo abaixo recebe um grafo bipartido G = (A ∪ B,E) e devolve um emparelhamento que cobre A ou um
+subconjunto S ⊆ A tal que |N(S)| < |S| cuja existência é garantida pelo teorema de Hall. Assumimos que caminhos
+M-alternante têm um extremo descoberto em A.
+
+A idéia do algoritmo é construir caminhos alternantes a partir de um vértice não-coberto em A. Por exemplo, no grafo
+da figura abaixo, o algoritmo começa pelo vértice a1 não-coberto por M. O próximo passo é escolher um vizinho de a1. Se
+existir algum vizinho não coberto, então achamos um caminho aumentante, caso contrário uma aresta de M incide
+nesse vizinho e temos um caminho alternante, no exemplo a1,b1,a3. O próximo passo é continuar a busca a
+partir de um vizinho dos vértices da forma ai já escolhidos. Notemos, entretanto, que basta buscar tais
+vizinhos dentre os vértices ainda não escolhidos, no nosso exemplo, após o estágio representado pela figura (e)
+abaixo não há necessidade de considerar a aresta {a3,b5} pois o novo caminho alternante definido por essa
+aresta seria redundante para nossos propósitos. No estágio dado pela figura (f) chegamos a um caminho
+aumentante.
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Quando o algoritmo descobre um caminho aumentante, usa-o para obter um emparelhamento com mais arestas e
+recomeça o processo. Caso contrário, teremos construído caminhos alternantes que começam num vértice descoberto e
+todos terminam num vértice coberto. Os vértices desses caminhos definem um conjunto que viola a condição de Hall. Por
+exemplo, na figura abaixo o algoritmo começa pelo vértice não-coberto a4. Esse vértice tem os vizinhos b2 e b3 que estão
+cobertos pelas arestas a1b2 e a3b3 respectivamente. O vértice a1 já tem todos os seus vizinhos escolhidos, assim como a3, e
+não se pode mais estender os caminhos. Nesse caso N({a1,a3,a4}) = {b1,b2} e {a1,a3,a4}é um obstáculo para um
+emparelhamento cobrir A. 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Essa idéia está formalizada na seguite prova do teorema de Hall.
+
+Segunda demonstração do Teorem de Hall. Seja M um emparelhamento que cobre A e S ⊆ A. Para cada x ∈ S
+denote por vx o vértice de B tal que {x,vx} ∈ M. Certamente, vx ∈ N(S). Ainda, x ∈ S e y ∈ S com x≠y
+implicam em vx≠vy, logo |N(S)|≥|S|.
+
+Agora, para a recíproca, sejam G = (A ∪ B,E) um grafo bipartido tal que |N(S)|≥|S| para todo S ⊆ A e M
+um emparelhamento máximo em G. Suponha que M não cobre A e seja v ∈ A não coberto por M. Denote por C
+o subconjunto de A∪B formado por todos os vértices alcançáveis a partir de v por caminho M-alternante. Tome
+S = C ∩ A e T = C ∩ B.
+
+Certamente, T ⊂ N(S). Agora, se existe x ∈ S com um vizinho fora de T, digamos y ∈ B \ T, então x e y são
+ligados por um caminho M-aumentante, contrariando o fato de M se máximo, portanto, T = N(S) e |T| = |N(S)|.
+
+Como T e S −{v} são cobertos por M (justifique), temos |T| = |S|− 1, logo |N(S)| = |S|− 1 < |S| o que
+contraria a hipótese sobre G, logo M cobre A. □
+
+Em linguagem de algoritmos 
+
+Edmonds
+[[ (A,B,E ) ]]
+
+[[ M←∅ ]]
+
+2: 
+[[ se ]]
+existe 
+[[ u ∈ A ]]
+não coberto por 
+[[ M ]]
+
+[[ ent˜ao ]]
+
+[[ S← {u} ]]
+;
+
+[[ T← ∅ ]]
+;
+
+[[ sen˜ao ]]
+
+devolva 
+[[ M ]]
+;
+
+7: 
+[[ se ]]
+
+[[ N(S) = T ]]
+
+[[ ent˜ao ]]
+
+devolva S;
+
+[[ sen˜ao ]]
+
+escolha 
+[[ b ∈ N (S )− T ]]
+;
+
+[[ se ]]
+existe 
+[[ a ∈ V − S ]]
+tal que 
+[[ {a,b} ∈ M ]]
+
+[[ ent˜ao ]]
+
+insere 
+[[ a ]]
+em 
+[[ S ]]
+;
+
+insere 
+[[ b ]]
+em 
+[[ T ]]
+;
+
+volte para 7;
+
+[[ sen˜ao ]]
+
+[[ P← ]]
+caminho 
+[[ M ]]
+-aumentante de 
+[[ u ]]
+até 
+[[ b ]]
+;
+
+[[ M← M ⊕ E (P ) ]]
+;
+
+volte para 2;
+
+A correção do algoritmo segue da terceira prova do teorema de Hall.
+
+Análise da complexidade. O tempo para a busca de um caminho M-aumentante é O(|V | + |E|) (uma busca) no pior caso.
+Fazendo uma busca pra cada vértice resulta em O(|V |(|V | + |E|)).
+
+Exercícios.
+
+Exercício 140. Refaça os exercícios 2 e 18.
+
+Exercício 141. Uma escola secundária abriu vagas para contratação de 6 docentes para as seguintes áreas: Matemática,
+Química, Física, Biologia, Psicologia e Ecologia. Para que um(a) candidato(a) se inscreva ele(a) deve informar a área em
+que se graduou e as áreas correlatas em que se sente à vontade para lecionar. A escola recebeu seis inscrições para estas
+posições, da seguinte maneira:
+
+Candidato Áreas Matem.QuímicaFísicaBiol.Psicol.Ecol.
+Antônio × × 
+Bernardo × × × × 
+Cássia × × × 
+Débora × × × × 
+Evandro × × 
+Fernanda × × 
+
+Execute um algoritmo conhecido que determine o maior número de professores que a escola pode contratar.
+
+Exercício 142. Faça uma análise detalhada da complexidade do algoritmo de Edmonds.
+
+Exercício 143. Modifique o algoritmo Edmonds(A,B,E) para que ele devolva um emparelhamento máximo.
+
+Exercício 144. Seja B um grafo bipartido com bipartição A,B. Construa um grafo orientado D a partir de B
+orientando as arestas no sentido de X para Y . Agora, acrescente aos vértices de D dois novos vértices s e t, com
+s ligado a todos os vértices de X, no sentido de s para X, e com t ligado a todos os vértices de Y no sentido de
+Y para t.
+
+Suponha que esse grafo orientado D que você construiu modela uma rede de computadores onde cada aresta
+tem a capacidade de 1 unidade de transmissão. Mostre que o fluxo máximo de s para t é igual ao número máximo
+de arestas num emparelhamento em B.
+
+
+
+=== 19. Cobertura ===
+
+19. Cobertura
+
+Uma cobertura por vértices em um grafo G é um subconjunto U ⊆ V (G) tal que e∩U≠∅ para toda aresta e ∈ E, ou
+seja, toda aresta de G encontra U.
+
+Exemplo 25.No exemplo da figura abaixo temos o diagrama de um grafo bipartido, as arestas em destaque definem um
+emparelhamento M. O subconjunto de vértices {a1,a2,b3,b4}é uma cobertura pois todas as arestas do grafo incidem em
+pelo menos um desses vértices. 
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Uma cobertura mínima é uma cobertura com o menor número possível de vértices que é denotado por
+ν(G),
+
+[[ { }
+ν(G ) = min |U |: U ´e cobertura por v´ertices em G .
+]]
+(38)
+
+Teorema 24 (Teorema de König, 1931). Num grafo bipartido G = (A ∪ B,E) o tamanho de um emparelhamento
+máximo é igual ao tamanho de uma cobertura mínima, ou seja
+
+[[ μ (G) = ν(G).
+]]
+(39)
+
+Demonstração. Para qualquer cobertura U e qualquer emparelhamento M vale que toda aresta de M tem que ter pelo
+menos um extremo em U, portanto |M|≤|U|. Em particular,
+
+[[ μ (G ) ≤ ν(G).
+]]
+(40)
+
+Agora, considere M um emparelhamento máximo em G e vamos construir uma cobertura C ⊆ V (G) da seguinte
+maneira: para cada aresta {a,b}∈ M, onde a ∈ A e b ∈ B, escolhemos b para C se b é extremo de algum caminho
+M-alternante, caso contrário, escolhemos a. Note que dessa forma temos |C| = |M|.
+
+Se C for uma cobertura então ν ≤|C| e como |M|≤ μ temos ν ≤ μ.
+
+Vamos mostrar que C é uma cobertura. Considere uma aresta qualquer {a,b}∈ E(G), onde a ∈ A e b ∈ B, e vamos
+mostrar que essa aresta encontra C. Se {a,b}∈ M então a aresta encontra C. Vamos supor que {a,b} não é aresta de M.
+Como M é máximo, ou a ou b ou ambos são cobertos por M.
+
+Se M não cobre a então b pertence ao um caminho M-alternante P = a,b e como b é coberto por M, nesse caso,
+b ∈ C.
+
+Vamos supor que M cobre a e {a,b′}∈ M para algum b′∈ B, b′neqb. Agora, se a ⁄∈ C então b′∈ C, mas isso significa
+que b′ está no extremo de algum caminho M-alternante que chamamos de P. Se b está em P então b é extremo de algum
+caminho M-alternante e com isso b ∈ C. Caso contrário, também haverá um caminho M-alternante com extremo b: ou
+P, a, b no caso a ⁄∈ V (P), ou P′,b caso a pertence a P, onde P′ denota um subcaminho alternante de P com extremo em a.
+Em ambos os casos teremos b ∈ C pois não pode haver caminho M-aumentante G. Em todos os casos a aresta {a,b}
+encontra C, portanto,
+
+[[ μ (G ) ≥ ν(G).
+]]
+(41)
+
+Das equações (40) e (41) concluímos que ν(G) = μ(G). □
+
+Demonstração. Se existe um emparelhamento M que cobre A então tome H = (V (G),M). Para todo S ⊆ A
+temos |NG (S)|≥|NH(S)| = |S|.
+
+Agora, suponha que |N(S)|≥|S| para todo S ⊆ A. Seja U uma cobertura mínima em G e tome com A′ = A ∩ U e
+B′ = B ∩ U. Se não existe um emparelhamento que cobre A então |U| < |A| pelo teorema 24. Essa última desigualdade
+implica que |B′| < |A \ A′|. Ainda, não há arestas de A \ A′ para B \ B′, pois elas não estariam cobertas por U, ou seja
+N(A \ A′) ⊆ B′. Portanto
+
+[[ |N (A \ A′)| ≤ |B′| < |A \A ′|,
+]]
+(42)
+
+contrariando a hipótese. □
+
+Essa demonstração é bastante simples pois todo o trabalho já foi feito no Teorema de König. Vejamos uma
+demonstração que não depende de outros resultados.
+
+Observação 15. O teorema de König não vale para grafo não-bipartido, o motivo é computar a cobertura mínima
+é um problema NP-difícil (exercício 129) enquanto que μ pode ser computado em tempo polinomial (veja notas
+de aula do professor Richard Karp, um notável cientista da computação).
+
+Exercícios.
+
+Exercício 145. Na primeira prova que apresentamos do teorema de Hall deduzimos o resultado do teorema de
+König. Esses teoremas são, de fato, equivalentes. Demonstre o teorema de König (μ > ν) a partir do teorema de
+Hall.
+
+
+
+

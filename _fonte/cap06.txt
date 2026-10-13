@@ -1,0 +1,790 @@
+﻿=== 9. Caminhos e Circuitos ===
+
+9. Caminhos e Circuitos
+
+Um caminho é qualquer grafo ou subgrafo isomorfo a (V,E) dado por
+
+[[ V = {0,1,...,k}
+{ }
+E = {i,i+ 1}: i = 0,1,...,k − 1
+]]
+(18)
+
+para algum k ∈ ℕ. Um caminho pode ser representado, genericamente, pelo diagrama da figura 13. 
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 13: Representação genérica de um caminho.
+
+O caminho P definido em (18) também é denotado pela seqüência
+
+[[ P = 0,1,...,k ]]
+de
+seus vértices de modo que vértices consecutivos na seqüência são adjacentes e com o cuidado de todos os vértices serem
+distintos. Dizemos que os vértices 0 e k são os extremos de P e dizemos que os vértices 1,…,k − 1 são os vértices
+internos de P.
+
+O número de arestas num caminho é o comprimento desse caminho. Seguindo notação estabelecida na seção 1,
+denotamos por Pk+1 um caminho com k + 1 vértices, portanto com comprimento k.
+
+Exemplo 15.Considere o grafo G do diagrama na figura 14. O subgrafo induzido pelo conjunto {a,b,f,i}é um
+caminho, P = a,b,f,i, também o subgrafo (U,F) dado por U = {a,d,c,h,i} e F = {ad,dc,ch,hi}é um caminho,
+um P4 e um P5, respectivamente, se quisermos destacar o comprimento. O subgrafo induzido pelo conjunto de
+vértices {m} é um P1 e o subgrafo induzido pela aresta {j,l}é um P2. 
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 14: Exemplo de caminhos.
+
+Dizemos que os vértices u e v num grafo G são ligados por um caminho se existe um caminho P ⊆ G cujos extremos
+são u e v.
+
+Em um grafo G = (V,E), a distância entre dois vértices quaisquer u,v ∈ V , denotada por distG(u,v), é definida como
+o comprimento do menor caminho que liga esses vértices, isto é
+
+[[ distG (u,v ) = min {k ∈ ℕ : u,v s˜ao ligados por um caminho P k+1 ⊂ G},
+]]
+(19)
+
+quando existe algum caminho. Se u e v não são ligados por caminho em G, então convencionamos distG(u,v) = ∞, de
+modo que
+
+[[ n < ∞ e n + ∞ = ∞ para todo n ∈ ℕ.
+]]
+(20)
+
+Exemplo 16.No grafo do exemplo 15 temos distG(a,j) = ∞, distG(a,b) = 1, distG(a,i) = 3, distG(m,j) = ∞.
+Observe que o caminho de comprimento mínimo pode não ser único.
+
+Observação 10 (desigualdade triangular). Para todo G e todos u,v ∈ V (G) temos distG(u,v) = distG(v,u). Também
+segue da definição que distG(v,u) = 0 se e somente se u = v, e que vale a desigualdade triangular
+
+[[ dist(u,w ) ≤ dist(u,v)+ dist(v,w)
+]]
+(21)
+
+para quaisquer u,v,w ∈ V (G) distintos. Portanto, a distância define uma métrica em G.
+
+Definimos o diâmetro do grafo G como a maior distância entre dois vértices quaisquer de G, ou seja
+
+[[ diam (G) = max distG(u,v).
+u,v∈V (G )
+]]
+(22)
+
+Naturalmente, diam(G) = ∞ se existirem dois vértices no grafo G que não são ligados por caminho.
+
+Um circuito é qualquer grafo (V,E) da forma
+
+[[ V = {0,1,...,k}
+{ { }}
+E = {i,i+ 1}: i = 0,1,...,k − 1 }∪ {k,0
+]]
+(23)
+
+para algum k ≥ 2.
+
+Como no caso do caminho, para simplificar, o circuito definido em (23) também é denotado pela seqüência de seus
+vértices 
+
+[[ C = 0,1...,k,0 ]]
+com os
+cuidados de todos os vértices a menos do primeiro e do último serem distintos e de vértices consecutivos serem adjacentes.
+O número de arestas num circuito é o comprimento desse circuito e quando queremos destacar o comprimento
+denotamos um circuito de comprimento k por Ck.
+
+Exemplo 17.Consideremos o grafo G do exemplo 15 temos que C4 = G
+[[ [ ]]
+{b,d,e,g}
+[[ ] ]]
+é um circuito, bem como o
+subgrafo C5 = (V,E) definido por V = {a,b,d,e,g} e E = {ab,be,eg,gd,da}.
+
+Proposição 11. Todo grafo G contém um caminho de comprimento pelo menos δ(G) e, se δ(G) ≥ 2, um circuito
+de comprimento pelo menos δ(G) + 1.
+
+Demonstração. Seja P = x0,x1,…,xk o caminho mais longo em G. Temos que
+
+[[ NG (xk) ⊂ V (P ),
+]]
+(24)
+
+pois, caso contrário haveria caminho mais longo que P. Logo, |V (P)| > |NG(xk)| como |NG(xk)|≥ δ(G) segue que
+|E(P)| ≥ δ(G), isto é, um caminho do comprimento desejado.
+
+Agora, tratando do caso de circuito, devemos supor que δ(G) ≥ 2. Como o grau mínimo pelo menos dois o vértice xk
+tem um vizinho em P diferente de xk−1 e, assim, está bem definido o número
+
+[[ { }
+i = min j ∈ {0,1,...,k − 2} : xj ∈ NP (xk) ,
+]]
+(25)
+
+que é o menor índice em {0,1,…,k − 2} de um vértice vizinho de xk. Por (24) temos que o circuito xi,xi+1,…,xk,xi tem
+pelo menos δ(G) + 1 vértices. □
+
+Definimos a cintura do grafo G como o comprimento do menor circuito contido em G, ou seja 
+
+[[ cin (G ) = min{k ∈ ℕ : existe um circuito Ck ⊆ G },
+]]
+(26)
+
+quando existe um, se não existe convencionamos cin(G) = ∞.
+
+9.1. Exercícios.
+
+Exercício 62.É verdade que todo grafo com pelo menos três vértices, exatamente dois vértices de grau 1 e os
+demais vértices com grau 2 é um caminho?
+
+☚ 
+
+Exercício 63.
+Sejam P = u1 ,u2,…,uk e Q = v1,v2,…,vℓ duas seqüências de vértices de um grafo. Definimos a concatenação
+dessas seqüências como a seqüência dos vértices de P seguidos dos vértices de Q, denotada P,Q =
+u1 , u2 , … , uk , v1 ,v2,…,vℓ. Supondo que P e Q sejam caminhos no grafo, sob que condições a seqüência P,Q é
+caminho?
+
+Exercício 64.Prove a desigualdade triangular (equação (21)).
+
+Exercício 65.Escreva um algoritmo que recebe uma grafo G e decide se G é um caminho. Estabeleça a
+complexidade do algoritmo.
+
+Exercício 66.Escreva um algoritmo baseado numa busca em largura que recebe (V,E) e vértices v,w ∈ V e
+devolve dist G (w,v).
+
+Exercício 67.Prove que G é bipartido se e somente se G não contém circuito de comprimentos ímpar.
+
+Exercício 68.Seja G um grafo onde a distância entre qualquer par de vértices é finita. Mostre que se existem
+w ∈ V (G) e uv ∈ E(G) tais que dist(w,u) = dist(w,v) então G contém um circuito de comprimento ímpar.
+Mostre que cin (G) ≤ dist(w,u) + dist(w,v) + 1.
+
+Exercício 69.Mostre que a relação e ∼ f em E(G) dada por e = f ou existe um circuito C ⊂ G tal que e e f
+pertencem a E(C) é uma relação de equivalência.
+
+☚ 
+
+Exercício 70. Seja k um número natural. O k-cubo é o grafo cujo conjunto de vértices são as seqüencias binárias
+de k bits e dois vértices são adjacentes se e somente se as k-tuplas correspondentes diferem exatamente em uma
+posição. Determine o número de vértices, arestas, o diâmetro e a cintura do k-cubo. Determine os parâmetros α,
+ω e χ do k-cubo. 
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 15: Exemplo: o 3-cubo.
+
+☚ 
+
+Exercício 71. Seja k um número natural. O grafo de Fibonacci Fk é o grafo cujo conjunto de vértices são as
+seqüencias binárias de k bits sem bits 1 consecutivos e dois vértices são adjacentes se e somente se as k-tuplas
+correspondentes diferem exatamente em uma posição. Determine o número de vértices, arestas, o diâmetro e a
+cintura do Fk . Determine os parâmetros α, ω e χ do Fk.
+
+Exercício 72.Seja p um número primo e tome V = {0,1,…,p−1}. Defina o grafo bipartido 3-regular G = (A∪B,E)
+com A = V × {a} e B = V ×{b} (o que queremos é que A e B sejam duas cópias disjuntas de V , note que isso
+não é possível tomando A = V e B = V ). Cada vértice (x,a) ∈ A é adjacente aos vértices (x,b), (x + 1,b) e
+(x + y, b) de B onde y≠0,1 é fixo e a soma é feita módulo p.
+
+Prove que qualquer subgrafo induzido de G de ordem p + 1 contém um caminho de comprimento 2 quando
+y = 2, (p + 1)∕2,p − 1.
+
+Repita para qualquer y≠0,1.
+
+
+
+=== 10. Caminhos mínimos em grafos com pesos nas arestas ===
+
+10. Caminhos mínimos em grafos com pesos nas arestas
+
+Nesta seção consideramos grafos com peso nas arestas, esses grafos são definidos por uma terna (V,E,ρ) onde V e E são
+os usuais conjuntos de vértices e arestas, respectivamente, e ρ: E(G) → ℝ+ é uma função que atribui um peso a cada
+aresta de E (aqui, representando o comprimento da aresta).
+
+O comprimento de um caminho P = x0,x1,…,xk em (V,E,ρ) é a soma dos pesos (comprimentos) das arestas no
+caminho
+
+[[ k−1
+∑
+c(P ) = ρ(xi,xi+1),
+i=0
+]]
+
+e a distância entre dois vértices u e v é o comprimento do menor caminho que os liga,
+
+[[ dist(u,v) = min {c(P): P ´e um caminho que liga u a v}
+]]
+
+quando existe algum caminho, caso contrário convencionamos que dist(u,v) = ∞ tal que vale (20). Um caminho que liga u
+a v de comprimento dist(u,v) < ∞é chamado de caminho mínimo.
+
+Exemplo 18.O diagrama da figura 16 representa um grafo com pesos nas arestas. 
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 16: Diagrama de um grafo com peso nas arestas. A distância entre a e e é 10 e um caminho mínimo é
+a, c, b, d, f, e.
+
+No que segue vamos supor que os grafos são dados por lista de adjacências onde a lista de v contém os vértices
+u ∈ V (G) tais que {v,u}∈ E(G) junto com o peso ρ(u,v).
+
+Exemplo 19.Para o grafo G do exemplo 18 uma lista de adjacências é representada na figura 17. 
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 17: Lista de adjacências do grafo G no exemplo 18.
+
+10.1. Exercícios.
+
+Exercício 73.Seja G um grafo com peso nas arestas e s um vértice de G. Prove a seguinte variante da desigualdade
+triangular (21) : para todo {v,u}∈ E(G)
+
+[[ dist (s,u) ≤ dist (s,v)+ ρ(v,u).
+G G
+]]
+(27)
+
+Exercício 74. Suponha que v1,v2,…,vk é um caminho mínimo num grafo D. Prove que vi,…,vj é um caminho
+mínimo que liga vi e vj em D para quaisquer i, j com 1 ≤ i < j ≤ k.
+
+Exercício 75.Dados (V,E,ρ) e s ∈ V considere o problema de determinar dist(s,x) para todo x ∈ V com a
+seguinte estratégia: declare s visitado e em cada passo visite o vértice não visitado mais próximo de um vértice
+já visitado. Construa um exemplo de grafo com peso nas arestas que mostre que essa estratégia não funciona.
+
+
+
+=== 11. Algoritmo de Dijkstra para caminhos mínimos ===
+
+11. Algoritmo de Dijkstra para caminhos mínimos
+
+Suponha que são dados G = (V,E,ρ) e um vértice s ∈ V . As estruturas de dados que vamos usar são um vetor d, uma
+estrutura para representar um subconjunto S ⊆ V (pode ser um vetor de bits):
+
+S:em qualquer ponto da execução do algoritmo o conjunto S identifica os vértices v ∈ V que já têm a
+distância dist(s,v) computada;
+
+d[]:em qualquer ponto da execução do algoritmo d[v] armazena um valor que significa
+
+(a) ou a distância dist(s,v) de s para v, caso v ∈ S;
+
+(b) ou d[v] = ∞, caso v ainda não tenha sido visitado, ou foi mas não é alcançável;
+
+(c) ou ainda d[v] é o comprimento de algum caminho que liga s e v, caso v ∈S;
+
+O algoritmo abaixo recebe G e s como acima, determina distG(s,x), para todo x ∈ V (G) e funciona da seguinte
+forma.
+
+Inicie
+[[ (G,s) ]]
+
+seja 
+[[ S ]]
+subconjunto vazio de 
+[[ V (G) ]]
+;
+
+[[ paracada ]]
+
+[[ v ∈ V(G ) ]]
+
+[[ fa¸ca ]]
+
+[[ d[v] ← ∞ ]]
+;
+
+[[ d[s]←0 ]]
+;
+
+No início d[s] = 0 pois s está a distância 0 dele mesmo; para qualquer vértice v≠s temos d[v] = ∞;
+S = ∅.
+
+Num determinado momento da execução o conjunto S contém os vértices cujas distâncias já estão determinadas. Nesse
+ponto, escolhemos o vértice u ∈S que tem menor valor de d[]; u é o vértice de S (conjunto dos vértices com distância
+ainda não determinada pelo algoritmo) mais próximo do vértice de saída s, portanto, sua distância fica
+determinada pelo valor de d[u] e podemos inseri-lo em S. Em seguida, visitamos cada vizinho t de u (por (27)
+dist(s, t) ≤ d[u] + ρ(u,t)) e testamos se um caminho de menor comprimento foi encontrado, se for o caso então
+atualizamos d[]
+
+Relaxação
+[[ (u,t) ]]
+
+1 
+[[ se ]]
+
+[[ d[t] > d[u] + ρ(u,t) ]]
+
+[[ ent˜ao ]]
+
+2 
+[[ d[t] ← d[u] + ρ (u,t) ]]
+.
+
+Note que a condição na linha 1 do algoritmo acima é sempre falsa para t ∈ S. O algoritmo prossegue, até que
+S = V .
+
+Dijkstra
+[[ (G,s) ]]
+
+1 Inicie
+[[ (G, s) ]]
+;
+
+2 
+[[ enquanto ]]
+
+[[ S ⁄= V ]]
+
+[[ fa¸ca ]]
+
+3 
+[[ u ← ]]
+vértice de 
+[[ --
+S ]]
+com 
+[[ d[ ] ]]
+minimo;
+
+4 insira 
+[[ u ]]
+em 
+[[ S ]]
+;
+
+5 
+[[ para cada ]]
+
+[[ t ∈ N (u) ]]
+
+[[ fa¸ca ]]
+
+6 Relaxação
+[[ (u,t) ]]
+.
+
+Uma demonstração formal de que o algoritmo funciona, isto é, no final d[v] armazena as distâncias dist(s,v), para todo
+v ∈ V , segue facilmente do teorema 14 provado adiante. Esse algoritmo é conhecido como algoritmo de
+Dijkstra.
+
+Observação 11 (leia esse aviso antes). Veja a entrada no Wikipedia sobre o algoritmo de Dijkstra.
+
+Correção do algoritmo. Vamos mostrar que o algoritmo funciona corretamente.
+
+Proposição 12. Em qualquer momento da execução de Dijkstra(G,s) valem os seguintes fatos
+
+(a) d[v] ≥ dist(s,v) para todo v ∈ V e uma vez que d[v] = dist(s,v) o valor de d[v] nunca mais muda.
+
+(b) Se dist(s,v) = ∞ então d[v] = ∞ durante toda a execução.
+
+Demonstração. Para provar (a) vamos supor o contrário e assumir que u ∈ V é o primeiro vértice para o qual ocorreu que
+d[u] < dist(s,u) durante uma execução e seja v ∈ V o vértice que causou a mudança no valor de d[u] numa relaxação,
+assim a relaxação faz
+
+[[ d[u]=d[v]+ρ({u,v})
+]]
+(28)
+
+e, nesse momento da execução d[v] + ρ({u,v}) ≥ dist(s,v) + ρ({u,v}) pois u foi a primeira ocorrência do fato suposto, ou
+seja,
+
+[[ dist(s,u)> d[u]= d[v]+ ρ({u,v})≥ dist(s,v)+ ρ({u,v})
+]]
+
+contradizendo a desigualdade (27).
+
+Para provar (b) notemos que, por (a), d[v] ≥ dist(s,v) = ∞. □
+
+Proposição 13. Se P = s,x1,…,xk,v é um caminho mínimo e d[xk] = dist(s,xk) então após Relaxação(xk,v)
+teremos d[v] = dist(s,v).
+
+Demonstração. Após Relaxação(xk,v) temos d[v] ≤ d[xk]+ρ({xk,v}) = dist(s,xk)+ρ({xk,v}). Pelo exercício 74
+dist(s, xk ) + ρ({xk,v}) = dist(s,v), portanto, d[v] ≤ dist(s,v). Pela proposição 12(a), d[v] ≥ dist(s,v), portanto
+d[v] = dist (s, v). □
+
+Teorema 14. Antes de cada iteração do enquanto d[v] = dist(s,v) para todo v ∈ S.
+
+Demonstração. No início, antes da primeira iteração, temos S = ∅, portanto o teorema vale trivialmente.
+
+A prova é por contradição. Suponha que em algum momento da execução de Dijkstra(G,s) exista u ∈ S tal que
+d[u]≠ dist (s, u) e, sem perda de generalidade, suponha que u é o primeiro vértice inserido em S e com d[u]≠dist(s,u).
+Seja P um caminho mínimo com extremos s e u em G. Esse caminho existe pela proposição 12(b).
+
+Seja {x, y} ∈ E(G) a primeira aresta de P no sentido de s para u com x ∈ S e y ∈S no momento da execução
+imediatamente anterior a u entrar em S. Notemos que, nesse momento da execução, u≠s, logo S≠∅, é possível
+termos x = s e y = u mas x≠u.
+
+Agora, quando x entrou em S ocorreu Relaxação(G,x,y) o que fez com que d[y] = dist(s,y) pela proposição 13.
+
+Como os pesos não são negativos e P é mínimo dist(s,y) ≤ dist(s,u), ou seja
+
+[[ d[y]= dist(s,y)≤ dist(s,u)≤ d[u]
+]]
+onde a última desigualdade vem da proposição 12(a). Mas, d[u] ≤ d[y] pois ambos estão em S e u foi escolhido,
+assim d[u] = dist(s,u) e temos uma contradição. □
+
+A correção do algoritmo de Dijkstra segue facilmente do teorema acima; antes da última iteração do laço vale S = V (G) e
+a afirmação do teorema é que d[v] está correto para todo v ∈ V (G).
+
+Observação 12 (leia esse aviso antes). A prova desse teorema usa uma técnica de prova chamada de invariante do
+laço. Veja mais exemplos aqui e aqui.
+
+Análise de complexidade.
+Inicie(G,s) tem complexidade O(|V |) e Relaxação(u,t) custa O(1).
+
+A complexidade do algoritmo de Dijkstra depende de como é determinado o mínimo na linha 3. O laço da linha 2 será
+excutado uma vez para cada v ∈ V (G); a contribuição do laço da linha 2 para a complexidade do algoritmo
+é
+
+[[ ∑
+T3(u)+ T4(u) + T5,6(u)
+u∈V
+]]
+
+onde Ti (u) é o tempo gasto no linha i para u dado na linha 3. Se o mínimo é determinado fazendo comparações então em
+cada rodada o custo é |S|− 1, portanto,
+
+[[ |V |−1
+∑ ∑ 2
+T3(u) = (i− 1) = O (|V |).
+u∈V i=1
+]]
+
+Ademais ∑
+u∈V T4(u) = O(|V |) e
+
+[[ ∑ ∑ ∑
+T5,6(u ) = O(1) = O (|E |).
+u∈V u∈V v∈N(u)
+]]
+
+Logo ∑
+u∈V T3(u) + T4(u) + T5,6(u) = O(|V |2). Levando em conta a complexidade de da iicialização temos
+O(|V |) + O(|V |2) = O(|V |2).
+
+Outra possibilidade é usar fila de prioridades para determinar o mínimo: No caso de fila de prioridades implementada
+por heap binária O(|V |) é o tempo para construir uma fila de prioridade, portanto Inicie(G,s) tem complexidade O(|V |).
+A remoção da linha 3 tem o custo O(log(|S|)) de refazer a heap, logo T3(u) = O(log |V |) para todo u ∈ V .
+Inserção em S pode ser feita em tempo constante, ou seja, T4(u) = O(1). Agora, T5,6(u) pode ser escrita
+como
+
+[[ ∑
+T5,6(u) = T6(u).
+t∈N (u)
+]]
+
+Cada vez que a linha 6 de Dijkstra é executada pode ser necessária uma atualização da heap. Essa operação toma tempo
+O(log |V |). Logo
+
+[[ ( )
+∑T(u) + T (u)+ T (u) = ∑ (O (log|V |)+ O(1)+ ∑ O (log |V |)) = O ((|V |+ |E |)log |V |).
+3 4 5,6
+u∈V u∈V t∈N(u)
+]]
+
+11.1. Exercícios.
+
+Exercício 76.Construa um grafo com pesos que podem ser negativos e no qual algoritmo de Dijkstra devolve
+resposta errada.
+
+Exercício 77.Considere o seguinte algoritmo que recebe um grafo com pesos nas arestas e um par w,v de vértices
+desse grafo e devolve uma seqüência de vértices w = v1,v2,…,vk = v.
+
+Imprime_caminho_minimo
+[[ (G, w,v ) ]]
+
+seja 
+[[ S ]]
+subconjunto vazio de 
+[[ V (G ) ]]
+;
+
+[[ paracada ]]
+
+[[ v ∈ V (G) ]]
+
+[[ fa¸ca ]]
+
+[[ d[v]← ∞ ]]
+;
+
+[[ p[v]← nil ]]
+;
+
+[[ d[s]←0 ]]
+;
+
+[[ p[s]←nil ]]
+;
+
+construa uma fila de prioridades 
+[[ Q ]]
+com as prioridades dadas por 
+[[ d[ ] ]]
+;
+
+[[ enquanto ]]
+
+[[ Q ]]
+não-vazio 
+[[ fa¸ca ]]
+
+[[ u← extraixminimo (Q ) ]]
+;
+
+insira 
+[[ u ]]
+em 
+[[ S ]]
+;
+
+[[ para cada ]]
+
+[[ t ∈ N(u ) ]]
+
+[[ fa¸ca ]]
+
+[[ se ]]
+
+[[ d[t] > d[u] + ρ(u,t) ]]
+
+[[ ent ˜ao ]]
+
+[[ d[t] ← d[u] + ρ(u,t) ]]
+;
+
+[[ p[t] ← u ]]
+;
+
+[[ enquanto ]]
+
+[[ p[v] ]]
+é diferente de nil 
+[[ fa¸ca ]]
+
+empilhe 
+[[ v ]]
+em 
+[[ L ]]
+;
+
+[[ v← p[v] ]]
+;
+
+imprima 
+[[ w ]]
+;
+
+[[ enquanto ]]
+
+[[ L ]]
+é não-vazia 
+[[ fa¸ca ]]
+
+imprima (desempilhe
+[[ (L) ]]
+).
+
+Prove que a resposta de Imprime_caminho_minimo(G,w,v) é um caminho mínimo que liga w e v.
+
+Exercício 78.Dado um grafo D com pesos ρ: E(D) → [0,1] que representam a probabilidade de uma aresta
+não falhar; a probabilidade de um caminho em D estar operacional é o produto das probabilidades das arestas
+desse caminho (i.e., estamos supondo independência das probabilidades de não falhar). Escreva um algoritmo para
+descobrir o caminho mais seguro entre dois vértices. Prove que o algoritmo está correto.
+
+Exercício 79.Seja D = (V,E,ρ) um grafo com peso ρ: E →{0,1,…,m} nas arestas, m ∈ ℕ. Modifique Dijkstra
+para computar caminhos mínimos em tempo O(m|V | + |E|).
+
+Exercício 80 (Algoritmo de Bellman–Ford). O algoritmo de Bellman-Ford recebe um grafo com pesos G =
+(V, E, ρ), onde ρ pode assumir valores negativos e um vértice s, devolve um valor booleano indicando a
+não-existência em G de um circuito negativo alcançável a partir de s. No caso do valor devolvido ser verdadeiro,
+o algoritmo computou corretamente as distâncias distG(s,v) para todo v ∈ V .
+
+Bellman--Ford
+[[ (G,s) ]]
+
+Inicie
+[[ (G,s) ]]
+;
+
+repita 
+[[ |V|− 1 ]]
+vezes
+
+[[ para cada ]]
+
+[[ u ]]
+em 
+[[ V ]]
+
+[[ fa¸ca ]]
+
+[[ para cada ]]
+
+[[ w ]]
+em 
+[[ N (u) ]]
+
+[[ fa¸ca ]]
+
+Relaxação
+[[ (u,w) ]]
+;
+
+[[ paracada ]]
+
+[[ u ]]
+em 
+[[ V ]]
+
+[[ fa¸ca ]]
+
+[[ paracada ]]
+
+[[ w ]]
+em 
+[[ N (u) ]]
+faca
+
+[[ se ]]
+
+[[ d[w] > d[u] + ρ(u,w ) ]]
+
+[[ ent˜ao ]]
+
+devolva falso,
+
+devolva verdadeiro.
+
+Seja G um grafo com pesos nas arestas, possivelmente negativo. Prove que independente do número de vezes que a
+Relaxação foi executado, sempre valem:
+
+(a) dist G (s,w) ≤ distG(s,u) + ρ(u,w), para toda aresta {u,w}∈ E(G);
+
+(b) d[v] ≥ distG(s,v) para todo v ∈ V (G), e uma vez que vale a igualdade o valor de d[v] não muda após qualquer
+execução de Relaxação;
+
+(c) se distG(s,v) = ∞ então d[v] = ∞;
+
+(d) se s, …,u,w caminho mínimo e d[u] = distG(s,u) então Relaxação(u,w) resulta em d[w] = distG(s,w);
+
+(e) seja s = v0,v1,v2,…,vk−1,vk = w um caminho mínimo. Se ocorrem as relaxações em (v0,v1), (v1,v2),…,
+(vk−1 , vk ), nessa ordem e com possíveis outras relaxações intermediárias, então teremos no final da seqüência
+d[w] = distG(s,w).
+
+(f) Prove que o algoritmo de Bellman–Ford devolve o valor booleano prometido;
+
+(g) conclua que o algoritmo de Bellman–Ford funciona corretamente.
+
+Observação 13 (leia esse aviso antes). Veja as entradas no Wikipedia para algoritmo de Bellman–Ford.
+
+Exercício 81.Prove que a complexidade do algoritmo de Bellman–Ford é O(|V ||E|).
+
+Exercício 82 (Algoritmo de Floyd-Warshall). Seja G = (V,E,ρ) um grafo com pesos nas arestas representado pela
+matriz
+
+[[ (
+|{ 0 se i = j
+aij = ρ(i,j) se {i,j} ∈ E
+|(
+∞ caso contr´ario.
+]]
+
+A seguinte estratégia determina distG(i,j) para todos i,j ∈ V usando uma técnica para projeto de algoritmos conhecida
+como programação dinâmica: Para todo k ∈{0,1,…,|V |} denotamos por [k] o subconjunto {1,2,…,k}⊆ V , com [0] = ∅.
+Dizemos que o caminho P = i,v0,…,vt,j é um [k]-caminho se o seus vértices internos v0,…,vt pertencem a [k]. Com isso
+podemos definir uma variante da distância que chamaremos de [k]-distância entre i e j como o comprimento do menor
+[k]-caminho que liga i a j e é denotada por distk(i,j), com dist0(i,j) = aij.
+
+[FIGURA: diagrama no original, sem texto alternativo]
+
+Figura 18: O único [0]-caminho que liga 3 e 4 é 3,4; os [1]-caminhos que ligam 3 e 4 são 3,4 e 3,1,4; os [2]-caminhos
+que ligam 3 e 4 são 3,4, 3,1,4, 3,2,4, 3,1,2,4 e 3,2,1,4, esses são também todos os [3]-caminhos e [4]-caminhos
+que ligam 3 e 4. No grafo representado acima, d0(3,4) = 5, d1(3,4) = 4 e d2(3,4) = d3(3,4) = d4(3,4) = 3.
+Também, d0 (1,2) = d1(1,2) = d2(1,2) = 10, d3(1,2) = 4 e d4(1,2) = 3. 
+
+Por definição, a [k + 1]-distância é o comprimento do menor [k + 1]-caminho e a [k]-distância é o comprimento do
+menor [k]-caminho; a diferença entre esses caminhos é que no primeiro, os [k + 1]-caminhos, é possível que o vértice k + 1
+seja vértice interno e no segundo não, pois [k + 1] = [k] ∪{k + 1}. Dessa forma,
+
+[[ distk+1(i,j) = min {distk(i,j),distk(i,k + 1) + distk(k + 1,j)}.
+]]
+(29)
+
+Resumindo: 
+
+Floyd-Warshall
+[[ (G ) ]]
+
+[[ paracada ]]
+
+[[ i ]]
+e 
+[[ j ]]
+em V 
+[[ fa¸ca ]]
+
+[[ d0(i,j) ← aij ]]
+;
+
+[[ paracada ]]
+
+[[ k ∈ {1,2,...,|V |} ]]
+
+[[ fa¸ca ]]
+
+[[ paracada ]]
+
+[[ i ]]
+e 
+[[ j ]]
+em V 
+[[ fa¸ca ]]
+
+[[ dk(i,j) ← min { dk−1(i,j), dk−1(i,k) + dk−1(k,j)} ]]
+.
+
+Prove que o tempo de execução é O(|V |3) e que o algoritmo está correto (segue de (29)).
+
+Observação 14 (leia esse aviso antes). Veja a entrada no Wikipedia para algoritmo de Floyd–Warshall.
+
+Exercício 83.Determine di(j,k) para toda terna (i,j,k) ∈ V 3 no grafo da figura 18.
+
+Exercício 84.A seguinte versão do algoritmo de Floyd–Warshall funciona corretamente? 
+
+Floyd-Warshall
+[[ (G) ]]
+
+[[ paracada ]]
+
+[[ i ]]
+e 
+[[ j ]]
+em V 
+[[ fa¸ca ]]
+
+[[ d(i,j) ← a
+ij ]]
+;
+
+[[ paracada ]]
+
+[[ k ∈ {1,2,...,|V |} ]]
+
+[[ fa¸ca ]]
+
+[[ para cada ]]
+
+[[ i ]]
+e 
+[[ j ]]
+em V 
+[[ fa¸ca ]]
+
+[[ d(i,j) ← min { d (i,j), dk−1(i,k ) + d(k,j)} ]]
+.
+
+Exercício 85.Fecho transitivo: Se D = (V,E) é um grafo dirigido então o fecho transitivo de D é o grafo
+D∗ = (V, E∗ ) onde
+
+[[ ∗ { }
+E = (i,j): existe um caminho dirigido de i para j em D .
+]]
+Escreva um algoritmo de tempo O(|V |3) para determinar o fecho transitivo de um grafo.
+
+
+
+
