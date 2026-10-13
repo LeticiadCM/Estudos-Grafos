@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2. Subgrafos, cliques, conjuntos independentes e cortes — Teoria dos Grafos</title>
+<meta name="description" content="Subgrafos e subgrafos induzidos, cliques e conjuntos independentes com os parâmetros α, ω e χ, grafos bipartidos e k-partidos completos e o corte E(A, Ā), com 14 exercícios resolvidos.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo 2 · Subgrafos e parâmetros</span>
+    <h1>Subgrafos, cliques, conjuntos independentes e cortes</h1>
+    <p class="lead">
+      Aqui o grafo deixa de ser um objeto único e passa a ser uma coleção de pedaços que podemos recortar e comparar.
+      Ao terminar, você saberá decidir se um grafo é subgrafo de outro, distinguir subgrafo de subgrafo <i>induzido</i>,
+      calcular e estimar os parâmetros <span class="m">α(<i>G</i>)</span>, <span class="m">ω(<i>G</i>)</span> e
+      <span class="m">χ(<i>G</i>)</span>, reconhecer grafos bipartidos e <span class="m"><i>k</i></span>-partidos completos e
+      usar o corte <span class="m"><i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)</span> para quebrar
+      <span class="m"><i>E</i>(<i>G</i>)</span> em três blocos disjuntos.
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> subgrafo · subgrafo gerador · induzido por vértices e por arestas · clique · conjunto independente · α, ω, χ · bipartido e <span class="m"><i>K</i><sub><i>n</i>,<i>m</i></sub></span> · <span class="m"><i>k</i></span>-partido completo · corte</span>
+      <span><b>Exercícios:</b> 14 com resolução (17 a 30)</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#como-usar">Como usar</a>
+        <a href="#s2">2. Subgrafos</a>
+        <a class="sub" href="#s2-def">Definição e exemplos</a>
+        <a class="sub" href="#s2-gerador">Subgrafo gerador</a>
+        <a class="sub" href="#s2-indv">Induzido por vértices</a>
+        <a class="sub" href="#s2-inde">Induzido por arestas</a>
+        <a class="sub" href="#s2-receita">Receita: é subgrafo? é induzido?</a>
+        <a href="#ex1">Exercícios 17 e 18</a>
+        <a href="#s3">3. Clique, independente, bipartido e corte</a>
+        <a class="sub" href="#s3-clique">Clique, triângulo e ω(G)</a>
+        <a class="sub" href="#s3-indep">Conjunto independente e α(G)</a>
+        <a class="sub" href="#s3-dual">A dualidade pelo complemento</a>
+        <a class="sub" href="#s3-crom">χ(G) como partição em independentes</a>
+        <a class="sub" href="#s3-bip">Grafos bipartidos e K<sub>n,m</sub></a>
+        <a class="sub" href="#s3-kpart">k-partidos e balanceamento</a>
+        <a class="sub" href="#s3-corte">E(A,B), corte e a decomposição de E(G)</a>
+        <a class="sub" href="#s3-resumo">Resumo do bloco</a>
+        <a href="#ex2">Exercícios 19 a 30</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <!-- ============================ COMO USAR ============================ -->
+      <section class="chapter" id="como-usar">
+        <div class="box tip">
+          <div class="h">Como aproveitar este material</div>
+          <ol>
+            <li><b>Leia a teoria do bloco</b> — ela contém exatamente o que os exercícios seguintes exigem, nada além.</li>
+            <li><b>Tente o exercício sem abrir nada.</b> Se travar, use o botão <i>Dica</i> (quando existir) antes da resposta.</li>
+            <li><b>Só então abra <i>Mostrar resposta</i></b> e compare o seu raciocínio com o argumento apresentado.</li>
+          </ol>
+          <p>As respostas ficam ocultas por padrão. O botão no topo da página abre ou fecha todas de uma vez, e a impressão da página já sai com tudo aberto.</p>
+        </div>
+        <p>
+          Este capítulo continua do <a href="01-definicoes-e-grau.html">capítulo 1</a> e usa sem cerimônia as notações de lá:
+          <span class="m"><i>V</i>(<i>G</i>)</span>, <span class="m"><i>E</i>(<i>G</i>)</span>,
+          <span class="m"><span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span>,
+          <span class="m"><i>N</i>(<i>v</i>)</span>, <span class="m"><i>d</i>(<i>v</i>)</span>, <span class="m">δ</span>, <span class="m">Δ</span>,
+          <span class="m"><span class="ovl"><i>d</i></span>(<i>G</i>)</span> (grau médio),
+          <span class="m"><i>K</i><sup><i>n</i></sup></span> (grafo completo) e
+          <span class="m"><span class="ovl"><i>G</i></span></span> (complemento).
+        </p>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 2 ============================ -->
+      <section class="chapter" id="s2">
+        <h2><span class="num">§2</span> Subgrafos</h2>
+        <p class="sub-lead">Objetivo do bloco: recortar pedaços de um grafo, distinguir os três tipos de recorte (qualquer, gerador e induzido) e contar recortes com uma propriedade dada.</p>
+
+        <h3 id="s2-def">2.1 A ideia e a definição</h3>
+        <p>
+          Quase toda pergunta interessante em teoria dos grafos é da forma “<i>este</i> grafo contém <i>aquele</i> padrão?”.
+          Para formular isso precisamos de uma noção de “pedaço”. A ideia é a mais simples possível: um pedaço de
+          <span class="m"><i>G</i></span> é um grafo cujos vértices e arestas já estavam em <span class="m"><i>G</i></span>.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · subgrafo</div>
+          <p>
+            O grafo <span class="m"><i>H</i></span> é um <b>subgrafo</b> do grafo <span class="m"><i>G</i></span> se, e somente se,
+            <span class="m"><i>V</i>(<i>H</i>) ⊆ <i>V</i>(<i>G</i>)</span> e <span class="m"><i>E</i>(<i>H</i>) ⊆ <i>E</i>(<i>G</i>)</span>.
+            Nesse caso escrevemos <span class="m"><i>H</i> ⊆ <i>G</i></span>.
+          </p>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · são três condições, não duas</div>
+          <p>
+            A definição começa com “o grafo <span class="m"><i>H</i></span>”. Então, antes de comparar conjuntos, é preciso que
+            <span class="m"><i>H</i></span> <b>seja um grafo</b>: toda aresta de <span class="m"><i>H</i></span> tem de ser um par
+            de vértices <i>de</i> <span class="m"><i>H</i></span>. Esquecer isso é o erro clássico do bloco.
+          </p>
+        </div>
+        <p>
+          Vamos usar como referência o mesmo grafo do Exemplo&nbsp;1 do capítulo 1:
+        </p>
+        <div class="eq"><div class="body">
+          <i>V</i>(<i>G</i>) = {1, 2, 3, 4, 5, 6, 7, 8}<br>
+          <i>E</i>(<i>G</i>) = { {1,2}, {1,5}, {2,5}, {3,4}, {6,7} }
+        </div></div>
+        <figure>
+          <svg class="dg" viewBox="0 0 560 200" role="img" aria-label="Grafo de referência G: triângulo sobre 1, 2 e 5, aresta entre 3 e 4, aresta entre 6 e 7, e vértice isolado 8">
+            <g>
+              <line class="e" x1="70" y1="55" x2="165" y2="55"/>
+              <line class="e" x1="70" y1="55" x2="117" y2="140"/>
+              <line class="e" x1="165" y1="55" x2="117" y2="140"/>
+              <line class="e" x1="265" y1="55" x2="265" y2="145"/>
+              <line class="e" x1="365" y1="55" x2="460" y2="55"/>
+            </g>
+            <g class="v"><circle cx="70" cy="55" r="17"/><text x="70" y="55">1</text></g>
+            <g class="v"><circle cx="165" cy="55" r="17"/><text x="165" y="55">2</text></g>
+            <g class="v"><circle cx="117" cy="140" r="17"/><text x="117" y="140">5</text></g>
+            <g class="v"><circle cx="265" cy="55" r="17"/><text x="265" y="55">3</text></g>
+            <g class="v"><circle cx="265" cy="145" r="17"/><text x="265" y="145">4</text></g>
+            <g class="v"><circle cx="365" cy="55" r="17"/><text x="365" y="55">6</text></g>
+            <g class="v"><circle cx="460" cy="55" r="17"/><text x="460" y="55">7</text></g>
+            <g class="v"><circle cx="510" cy="145" r="17"/><text x="510" y="145">8</text></g>
+          </svg>
+          <figcaption><b>Figura 1.</b> O grafo de referência <span class="m"><i>G</i></span>. Ele reaparece em quase todos os exemplos deste capítulo — guarde o desenho.</figcaption>
+        </figure>
+
+        <div class="box def">
+          <div class="h">Exemplo 3 · quatro candidatos, dois aprovados</div>
+          <p><b>São</b> subgrafos de <span class="m"><i>G</i></span>:</p>
+          <div class="eq"><div class="body">
+            <i>G</i>′ = ( {1,2,5}, { {1,5}, {5,2}, {1,2} } )&nbsp;&nbsp;&nbsp;e&nbsp;&nbsp;&nbsp;<i>G</i>″ = ( {3,5,6}, ∅ )
+          </div></div>
+          <p><b>Não são</b> subgrafos de <span class="m"><i>G</i></span>:</p>
+          <div class="eq"><div class="body">
+            <i>H</i> = ( {1,2,3}, { {1,2}, {3,4} } ),&nbsp;&nbsp;
+            <i>I</i> = ( {1,2,3,4,9}, { {1,2}, {3,4} } ),&nbsp;&nbsp;
+            <i>J</i> = ( {1,2,3,4,8}, { {1,2}, {3,4}, {1,8} } )
+          </div></div>
+          <div class="scroll">
+          <table class="tbl livre">
+            <thead><tr><th>Candidato</th><th>Por que falha</th></tr></thead>
+            <tbody>
+              <tr><td><span class="m"><i>H</i></span></td><td><b>Não é grafo.</b> A aresta <span class="m">{3,4}</span> usa o vértice 4, que não está em <span class="m"><i>V</i>(<i>H</i>) = {1,2,3}</span>.</td></tr>
+              <tr><td><span class="m"><i>I</i></span></td><td>É grafo, mas <span class="m"><i>V</i>(<i>I</i>) ⊄ <i>V</i>(<i>G</i>)</span>: o vértice 9 não existe em <span class="m"><i>G</i></span>.</td></tr>
+              <tr><td><span class="m"><i>J</i></span></td><td>É grafo e <span class="m"><i>V</i>(<i>J</i>) ⊆ <i>V</i>(<i>G</i>)</span>, mas <span class="m"><i>E</i>(<i>J</i>) ⊄ <i>E</i>(<i>G</i>)</span>: <span class="m">{1,8} ∉ <i>E</i>(<i>G</i>)</span>.</td></tr>
+            </tbody>
+          </table>
+          </div>
+          <p>
+            Note que <span class="m"><i>G</i>″ = ({3,5,6}, ∅)</span> é subgrafo: três vértices soltos, sem nenhuma aresta.
+            Um subgrafo não precisa “herdar” aresta alguma.
+          </p>
+        </div>
+
+        <h3 id="s2-gerador">2.2 Subgrafo gerador</h3>
+        <div class="box def">
+          <div class="h">Definição · subgrafo gerador</div>
+          <p>
+            Um subgrafo <span class="m"><i>H</i> ⊆ <i>G</i></span> com <span class="m"><i>V</i>(<i>H</i>) = <i>V</i>(<i>G</i>)</span>
+            é um <b>subgrafo gerador</b> de <span class="m"><i>G</i></span>.
+          </p>
+        </div>
+        <p>
+          Isto é: um subgrafo gerador mantém <i>todos</i> os vértices e escolhe um subconjunto das arestas. É o tipo de recorte que
+          aparece em árvores geradoras e em emparelhamentos perfeitos. Em <span class="m"><i>G</i></span> da Figura 1 existem
+          <span class="m">2<sup>5</sup> = 32</span> subgrafos geradores, um para cada subconjunto das 5 arestas.
+        </p>
+
+        <h3 id="s2-indv">2.3 Subgrafo induzido por um subconjunto de vértices</h3>
+        <p>
+          O recorte mais importante é o que não deixa escolha nenhuma: fixamos um conjunto de vértices e ficamos com
+          <b>todas</b> as arestas de <span class="m"><i>G</i></span> que couberem dentro dele.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · subgrafo induzido por <span class="m"><i>U</i></span></div>
+          <p>Se <span class="m"><i>U</i> ⊆ <i>V</i>(<i>G</i>)</span>, o <b>subgrafo induzido por <span class="m"><i>U</i></span></b>, denotado <span class="m"><i>G</i>[<i>U</i>]</span>, é</p>
+          <div class="eq"><div class="body">
+            <i>G</i>[<i>U</i>] = ( <i>U</i>, &nbsp;{ {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) : <i>u</i> ∈ <i>U</i> e <i>v</i> ∈ <i>U</i> } ).
+          </div></div>
+        </div>
+        <div class="box tip">
+          <div class="h">Intuição</div>
+          <p>
+            Apague de <span class="m"><i>G</i></span> os vértices que estão fora de <span class="m"><i>U</i></span> e, com eles,
+            toda aresta que os tocava. O que sobra é <span class="m"><i>G</i>[<i>U</i>]</span>. Não há liberdade: dado
+            <span class="m"><i>U</i></span>, o grafo <span class="m"><i>G</i>[<i>U</i>]</span> é único. Por isso um grafo de ordem
+            <span class="m"><i>n</i></span> tem exatamente <span class="m">2<sup><i>n</i></sup></span> subgrafos induzidos por
+            vértices (um por subconjunto de <span class="m"><i>V</i></span>), mas em geral <i>muito</i> mais subgrafos.
+          </p>
+        </div>
+        <p>
+          Na Figura 1: <span class="m"><i>G</i>[{1,2,5}] = <i>G</i>′</span> (o triângulo inteiro) e
+          <span class="m"><i>G</i>[{3,5,6}] = <i>G</i>″</span> (três vértices sem arestas, porque nenhum dos pares
+          <span class="m">{3,5}</span>, <span class="m">{3,6}</span>, <span class="m">{5,6}</span> é aresta de <span class="m"><i>G</i></span>).
+        </p>
+
+        <div class="box def">
+          <div class="h">Exemplo 4 · induzido × não induzido</div>
+          <p>
+            O original ilustra esta distinção com um diagrama que não pôde ser recuperado; o exemplo abaixo foi <b>construído para
+            esta versão</b> e cumpre o mesmo papel. Tome
+          </p>
+          <div class="eq"><div class="body">
+            <i>V</i>(<i>G</i>) = {1,2,3,4,5},&nbsp;&nbsp;<i>E</i>(<i>G</i>) = { {1,2}, {2,3}, {3,4}, {4,5}, {5,1}, {1,3} }.
+          </div></div>
+          <p>
+            Então <span class="m"><i>H</i> = <i>G</i>[{1,2,3}]</span> é subgrafo <b>induzido</b>, enquanto
+            <span class="m"><i>I</i> = ( {1,2,3}, { {1,2}, {2,3} } )</span> é subgrafo mas <b>não</b> é induzido: os vértices de
+            <span class="m"><i>I</i></span> são os mesmos de <span class="m"><i>H</i></span>, mas <span class="m"><i>I</i></span>
+            deixou de fora a aresta <span class="m">{1,3}</span>, que <span class="m"><i>G</i></span> oferece.
+          </p>
+          <div class="figrow">
+            <figure>
+              <svg class="dg" viewBox="0 0 260 240" role="img" aria-label="Grafo G do exemplo 4: ciclo de cinco vértices com a corda entre 1 e 3">
+                <g>
+                  <line class="e" x1="130" y1="30" x2="225" y2="105"/>
+                  <line class="e" x1="225" y1="105" x2="190" y2="210"/>
+                  <line class="e" x1="190" y1="210" x2="70" y2="210"/>
+                  <line class="e" x1="70" y1="210" x2="35" y2="105"/>
+                  <line class="e" x1="35" y1="105" x2="130" y2="30"/>
+                  <line class="e" x1="130" y1="30" x2="190" y2="210"/>
+                </g>
+                <g class="v"><circle cx="130" cy="30" r="16"/><text x="130" y="30">1</text></g>
+                <g class="v"><circle cx="225" cy="105" r="16"/><text x="225" y="105">2</text></g>
+                <g class="v"><circle cx="190" cy="210" r="16"/><text x="190" y="210">3</text></g>
+                <g class="v"><circle cx="70" cy="210" r="16"/><text x="70" y="210">4</text></g>
+                <g class="v"><circle cx="35" cy="105" r="16"/><text x="35" y="105">5</text></g>
+              </svg>
+              <figcaption><b>Figura 2a.</b> <span class="m"><i>G</i></span>: 5 vértices, 6 arestas.</figcaption>
+            </figure>
+            <figure>
+              <svg class="dg" viewBox="0 0 260 240" role="img" aria-label="Subgrafo induzido por 1, 2 e 3: triângulo com as três arestas">
+                <g>
+                  <line class="e match" x1="130" y1="30" x2="225" y2="105"/>
+                  <line class="e match" x1="225" y1="105" x2="190" y2="210"/>
+                  <line class="e match" x1="130" y1="30" x2="190" y2="210"/>
+                </g>
+                <g class="v"><circle cx="130" cy="30" r="16"/><text x="130" y="30">1</text></g>
+                <g class="v"><circle cx="225" cy="105" r="16"/><text x="225" y="105">2</text></g>
+                <g class="v"><circle cx="190" cy="210" r="16"/><text x="190" y="210">3</text></g>
+              </svg>
+              <figcaption><b>Figura 2b.</b> <span class="m"><i>H</i> = <i>G</i>[{1,2,3}]</span>: induzido, logo leva as <b>três</b> arestas disponíveis.</figcaption>
+            </figure>
+            <figure>
+              <svg class="dg" viewBox="0 0 260 240" role="img" aria-label="Subgrafo não induzido com vértices 1, 2 e 3 e apenas duas arestas">
+                <g>
+                  <line class="e" x1="130" y1="30" x2="225" y2="105"/>
+                  <line class="e" x1="225" y1="105" x2="190" y2="210"/>
+                </g>
+                <g class="v open"><circle cx="130" cy="30" r="16"/><text x="130" y="30">1</text></g>
+                <g class="v open"><circle cx="225" cy="105" r="16"/><text x="225" y="105">2</text></g>
+                <g class="v open"><circle cx="190" cy="210" r="16"/><text x="190" y="210">3</text></g>
+              </svg>
+              <figcaption><b>Figura 2c.</b> <span class="m"><i>I</i></span>: subgrafo legítimo, mas <b>não</b> induzido — falta <span class="m">{1,3}</span>.</figcaption>
+            </figure>
+          </div>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--ok)"></i>arestas obrigatórias no subgrafo induzido</span>
+          </div>
+        </div>
+
+        <h3 id="s2-inde">2.4 Subgrafo induzido por um subconjunto de arestas</h3>
+        <p>
+          Também podemos fazer o recorte começando pelas arestas. Aí são os <i>vértices</i> que ficam determinados: entram
+          exatamente os que aparecem em alguma aresta escolhida.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · subgrafo induzido por <span class="m"><i>M</i></span></div>
+          <p>
+            Se <span class="m"><i>M</i> = {<i>e</i><sub>1</sub>, <i>e</i><sub>2</sub>, …, <i>e</i><sub><i>m</i></sub>} ⊆ <i>E</i>(<i>G</i>)</span>,
+            o <b>subgrafo induzido por <span class="m"><i>M</i></span></b>, denotado <span class="m"><i>G</i>[<i>M</i>]</span>, tem
+            como conjunto de vértices <span class="m"><i>e</i><sub>1</sub> ∪ <i>e</i><sub>2</sub> ∪ ⋅⋅⋅ ∪ <i>e</i><sub><i>m</i></sub></span>
+            e como conjunto de arestas o próprio <span class="m"><i>M</i></span>:
+          </p>
+          <div class="eq"><div class="body">
+            <i>G</i>[<i>M</i>] = <span>(</span> <span class="sum"><span class="o">⋃</span><span class="l"><i>i</i>=1..<i>m</i></span></span> <i>e</i><sub><i>i</i></sub>, &nbsp;<i>M</i> <span>)</span>.
+          </div></div>
+        </div>
+        <p>
+          Cada aresta é um conjunto de dois vértices, então a união das arestas é literalmente o conjunto dos extremos usados.
+          Consequência: <span class="m"><i>G</i>[<i>M</i>]</span> <b>nunca tem vértice isolado</b> — todo vértice dele está em pelo
+          menos uma aresta de <span class="m"><i>M</i></span>.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 260 240" role="img" aria-label="Subgrafo induzido pelas arestas 1-2 e 3-4: quatro vértices e duas arestas, o vértice 5 ausente">
+            <g>
+              <line class="e match" x1="130" y1="30" x2="225" y2="105"/>
+              <line class="e match" x1="190" y1="210" x2="70" y2="210"/>
+            </g>
+            <g class="v"><circle cx="130" cy="30" r="16"/><text x="130" y="30">1</text></g>
+            <g class="v"><circle cx="225" cy="105" r="16"/><text x="225" y="105">2</text></g>
+            <g class="v"><circle cx="190" cy="210" r="16"/><text x="190" y="210">3</text></g>
+            <g class="v"><circle cx="70" cy="210" r="16"/><text x="70" y="210">4</text></g>
+          </svg>
+          <figcaption>
+            <b>Figura 3.</b> No grafo da Figura 2a, tome <span class="m"><i>M</i> = { {1,2}, {3,4} }</span>. Então
+            <span class="m"><i>G</i>[<i>M</i>] = ( {1,2,3,4}, <i>M</i> )</span>: o vértice 5 desaparece por não tocar
+            <span class="m"><i>M</i></span>. Compare com <span class="m"><i>G</i>[{1,2,3,4}]</span>, que tem os mesmos vértices mas
+            <b>quatro</b> arestas (<span class="m">{1,2}, {2,3}, {3,4}, {1,3}</span>).
+          </figcaption>
+        </figure>
+
+        <h3 id="s2-receita">2.5 Receita: é subgrafo? é induzido?</h3>
+        <div class="box rec">
+          <div class="h">Receita · como atacar esse tipo de exercício</div>
+          <ol>
+            <li><b>É grafo?</b> Toda aresta de <span class="m"><i>H</i></span> é um par de elementos de <span class="m"><i>V</i>(<i>H</i>)</span>? Se não, pare: não é nem grafo.</li>
+            <li><b>Vértices.</b> Confira <span class="m"><i>V</i>(<i>H</i>) ⊆ <i>V</i>(<i>G</i>)</span>.</li>
+            <li><b>Arestas.</b> Confira <span class="m"><i>E</i>(<i>H</i>) ⊆ <i>E</i>(<i>G</i>)</span>, aresta por aresta.</li>
+            <li><b>É gerador?</b> Só se <span class="m"><i>V</i>(<i>H</i>) = <i>V</i>(<i>G</i>)</span>.</li>
+            <li><b>É induzido por vértices?</b> Compare <span class="m"><i>E</i>(<i>H</i>)</span> com <span class="m"><i>E</i>(<i>G</i>[<i>V</i>(<i>H</i>)])</span>. Se faltar uma única aresta de <span class="m"><i>G</i></span> entre dois vértices de <span class="m"><i>H</i></span>, não é induzido.</li>
+            <li><b>Para contar recortes:</b> escolha <i>quem</i> determina o recorte. Subgrafos induzidos por vértices ↔ subconjuntos de <span class="m"><i>V</i></span>; subgrafos geradores ↔ subconjuntos de <span class="m"><i>E</i></span>; subgrafos induzidos por arestas ↔ subconjuntos <b>não vazios</b> de <span class="m"><i>E</i></span> (e o vazio, se quiser incluir o grafo vazio).</li>
+          </ol>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · “induzido” é uma restrição, não um bônus</div>
+          <p>
+            Exigir que o subgrafo seja induzido <b>diminui</b> o que você pode encontrar. Muitas vezes o maior subgrafo com uma
+            propriedade é bem maior que o maior subgrafo <i>induzido</i> com a mesma propriedade — é exatamente o que acontece no
+            exercício 18.
+          </p>
+        </div>
+
+        <div class="box def">
+          <div class="h">Resumo do bloco em cinco linhas</div>
+          <ul>
+            <li><span class="m"><i>H</i> ⊆ <i>G</i></span>: <span class="m"><i>H</i></span> é grafo, <span class="m"><i>V</i>(<i>H</i>) ⊆ <i>V</i>(<i>G</i>)</span> e <span class="m"><i>E</i>(<i>H</i>) ⊆ <i>E</i>(<i>G</i>)</span>.</li>
+            <li><b>Gerador:</b> mesmos vértices, arestas à escolha.</li>
+            <li><b>Induzido por <span class="m"><i>U</i></span>:</b> vértices à escolha, arestas obrigatórias — todas as de <span class="m"><i>G</i></span> dentro de <span class="m"><i>U</i></span>.</li>
+            <li><b>Induzido por <span class="m"><i>M</i></span>:</b> arestas à escolha, vértices obrigatórios — os extremos de <span class="m"><i>M</i></span>, sem isolados.</li>
+            <li>Ordem <span class="m"><i>n</i></span> ⟹ exatamente <span class="m">2<sup><i>n</i></sup></span> subgrafos induzidos por vértices.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================ EXERCÍCIOS 17–18 ============================ -->
+      <section class="chapter" id="ex1">
+        <div class="ex-head">
+          <h3>Exercícios 17 e 18</h3>
+          <button class="toggle" type="button" data-scope="#ex1" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: contar subgrafos com uma propriedade e procurar um subgrafo induzido regular de tamanho máximo.</p>
+        </div>
+
+        <!-- Ex 17 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 17</span><div class="stmt">
+            <p>Quantos subgrafos completos tem o grafo completo de ordem <span class="m"><i>n</i></span>?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h17" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a17" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h17"><div class="plab">Dica</div>
+            <p>Um subgrafo completo não tem liberdade nenhuma na escolha das arestas: escolhido o conjunto de vértices, o conjunto de arestas está determinado. Então a pergunta é sobre quantos conjuntos de vértices existem.</p>
+          </div>
+          <div class="panel answer" id="a17"><div class="plab">Resolução</div>
+            <p><b>Resposta:</b> <span class="m">2<sup><i>n</i></sup></span>.</p>
+            <p><b>Passo 1 — traduzir “subgrafo completo”.</b> Seja <span class="m"><i>K</i><sup><i>n</i></sup> = (<i>V</i>, <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span>)</span> com <span class="m">|<i>V</i>| = <i>n</i></span>. Um subgrafo completo é um <span class="m"><i>H</i> ⊆ <i>K</i><sup><i>n</i></sup></span> tal que <span class="m"><i>H</i></span> é completo, isto é,</p>
+            <div class="eq"><div class="body">
+              <i>E</i>(<i>H</i>) = <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i>(<i>H</i>)</span><span>2</span></span><span class="p">)</span></span>.
+            </div></div>
+            <p><b>Passo 2 — a bijeção.</b> Defina a aplicação que leva <span class="m"><i>U</i> ⊆ <i>V</i></span> no grafo <span class="m"><i>H</i><sub><i>U</i></sub> = (<i>U</i>, <span class="binom"><span class="p">(</span><span class="s"><span><i>U</i></span><span>2</span></span><span class="p">)</span></span>)</span>. Ela está bem definida e é uma bijeção entre os subconjuntos de <span class="m"><i>V</i></span> e os subgrafos completos de <span class="m"><i>K</i><sup><i>n</i></sup></span>:</p>
+            <ul>
+              <li><b>Cada <span class="m"><i>H</i><sub><i>U</i></sub></span> é subgrafo completo.</b> É completo por construção, e é subgrafo porque <span class="m"><i>U</i> ⊆ <i>V</i></span> e todo par de elementos de <span class="m"><i>U</i></span> também é par de elementos de <span class="m"><i>V</i></span>, logo <span class="m"><span class="binom"><span class="p">(</span><span class="s"><span><i>U</i></span><span>2</span></span><span class="p">)</span></span> ⊆ <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span>. (Em <span class="m"><i>K</i><sup><i>n</i></sup></span> nenhuma aresta “falta”, e é isso que faz a inclusão ser automática.)</li>
+              <li><b>É injetora.</b> <span class="m"><i>U</i> ≠ <i>U</i>′ ⟹ <i>H</i><sub><i>U</i></sub> ≠ <i>H</i><sub><i>U</i>′</sub></span>, pois os conjuntos de vértices já diferem.</li>
+              <li><b>É sobrejetora.</b> Se <span class="m"><i>H</i></span> é subgrafo completo, tome <span class="m"><i>U</i> = <i>V</i>(<i>H</i>)</span>; a condição do Passo 1 diz exatamente que <span class="m"><i>H</i> = <i>H</i><sub><i>U</i></sub></span>.</li>
+            </ul>
+            <p><b>Passo 3 — contar.</b> O número de subconjuntos de um conjunto de <span class="m"><i>n</i></span> elementos é <span class="m">2<sup><i>n</i></sup></span>. Separando por ordem <span class="m"><i>k</i></span> do subgrafo, obtemos a mesma conta pelo binômio de Newton:</p>
+            <div class="eq"><div class="body">
+              <span class="sum"><span class="o">∑</span><span class="l"><i>k</i>=0..<i>n</i></span></span>
+              <span class="binom"><span class="p">(</span><span class="s"><span><i>n</i></span><span><i>k</i></span></span><span class="p">)</span></span> = 2<sup><i>n</i></sup>
+            </div></div>
+            <p><b>Conferência com <span class="m"><i>n</i> = 3</span>.</b> Os subgrafos completos de <span class="m"><i>K</i><sup>3</sup></span> sobre <span class="m">{1,2,3}</span> são: <span class="m">(∅,∅)</span>; três de ordem 1; três de ordem 2 (cada aresta com seus extremos); e o próprio <span class="m"><i>K</i><sup>3</sup></span>. Total <span class="m">1 + 3 + 3 + 1 = 8 = 2<sup>3</sup></span> ✔</p>
+            <div class="box warn">
+              <div class="h">Convenção usada</div>
+              <p>
+                Contamos o grafo vazio <span class="m">(∅, ∅)</span> como completo: a condição <span class="m"><i>E</i> = <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span> vale trivialmente quando <span class="m"><i>V</i> = ∅</span>. Se o enunciado exigir pelo menos um vértice, a resposta é <span class="m">2<sup><i>n</i></sup> − 1</span>; se exigir pelo menos uma aresta, <span class="m">2<sup><i>n</i></sup> − <i>n</i> − 1</span>.
+              </p>
+            </div>
+            <p>
+              <b>Observação que será útil no §3.</b> Todo subgrafo completo de <span class="m"><i>K</i><sup><i>n</i></sup></span> é
+              <i>induzido</i>, porque em <span class="m"><i>K</i><sup><i>n</i></sup></span> todas as arestas possíveis existem. Dito de
+              outro modo: os subgrafos completos de um grafo <span class="m"><i>G</i></span> correspondem aos <b>cliques</b> de
+              <span class="m"><i>G</i></span> — e em <span class="m"><i>K</i><sup><i>n</i></sup></span> todo conjunto de vértices é
+              clique.
+            </p>
+          </div>
+        </article>
+
+        <!-- Ex 18 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 18</span><div class="stmt">
+            <p>Descubra um subgrafo induzido de</p>
+            <div class="eq"><div class="body">
+              <i>V</i>(<i>G</i>) = {1,2,3,4,5,6,7,8}<br>
+              <i>E</i>(<i>G</i>) = { {1,2}, {1,3}, {2,3}, {2,5}, {3,6}, {8,5}, {8,6}, {5,6}, {3,4}, {5,7} }
+            </div></div>
+            <p>que seja 1-regular e com o maior número possível de arestas. (Qual a relação com a resolução do exercício 2 do capítulo 1?)</p>
+            <figure>
+              <svg class="dg" viewBox="0 0 500 250" role="img" aria-label="Diagrama do grafo do exercício 18 com oito vértices e dez arestas">
+                <g>
+                  <line class="e" x1="100" y1="40" x2="210" y2="40"/>
+                  <line class="e" x1="100" y1="40" x2="100" y2="130"/>
+                  <line class="e" x1="210" y1="40" x2="100" y2="130"/>
+                  <line class="e" x1="210" y1="40" x2="330" y2="80"/>
+                  <line class="e" x1="100" y1="130" x2="30" y2="205"/>
+                  <line class="e" x1="100" y1="130" x2="215" y2="200"/>
+                  <line class="e" x1="330" y1="80" x2="215" y2="200"/>
+                  <line class="e" x1="330" y1="80" x2="340" y2="190"/>
+                  <line class="e" x1="330" y1="80" x2="450" y2="40"/>
+                  <line class="e" x1="215" y1="200" x2="340" y2="190"/>
+                </g>
+                <g class="v"><circle cx="100" cy="40" r="16"/><text x="100" y="40">1</text></g>
+                <g class="v"><circle cx="210" cy="40" r="16"/><text x="210" y="40">2</text></g>
+                <g class="v"><circle cx="100" cy="130" r="16"/><text x="100" y="130">3</text></g>
+                <g class="v"><circle cx="30" cy="205" r="16"/><text x="30" y="205">4</text></g>
+                <g class="v"><circle cx="330" cy="80" r="16"/><text x="330" y="80">5</text></g>
+                <g class="v"><circle cx="215" cy="200" r="16"/><text x="215" y="200">6</text></g>
+                <g class="v"><circle cx="450" cy="40" r="16"/><text x="450" y="40">7</text></g>
+                <g class="v"><circle cx="340" cy="190" r="16"/><text x="340" y="190">8</text></g>
+              </svg>
+              <figcaption><b>Figura 9.</b> O grafo <span class="m"><i>G</i></span> do exercício: triângulo <span class="m">{1,2,3}</span>, triângulo <span class="m">{5,6,8}</span>, as ligações <span class="m">{2,5}</span> e <span class="m">{3,6}</span> e os pendentes 4 e 7.</figcaption>
+            </figure>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h18" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a18" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h18"><div class="plab">Dica</div>
+            <p>Se <span class="m"><i>u</i> ∈ <i>U</i></span> e <span class="m"><i>G</i>[<i>U</i>]</span> é 1-regular, então <span class="m"><i>U</i></span> contém <b>exatamente um</b> vizinho de <span class="m"><i>u</i></span> — ou seja, <span class="m"><i>U</i></span> deixou de fora <span class="m"><i>d</i>(<i>u</i>) − 1</span> vizinhos. Olhe os vértices de grau alto (3 e 5, ambos de grau 4) e conte quantas exclusões eles custam.</p>
+          </div>
+          <div class="panel answer" id="a18"><div class="plab">Resolução</div>
+            <p><b>Passo 0 — o que se pede.</b> Queremos <span class="m"><i>U</i> ⊆ <i>V</i>(<i>G</i>)</span> tal que <span class="m"><i>G</i>[<i>U</i>]</span> seja 1-regular, maximizando o número de arestas. Num grafo 1-regular cada vértice tem exatamente um vizinho, logo as arestas formam um pareamento perfeito de <span class="m"><i>U</i></span> e</p>
+            <div class="eq"><div class="body">|<i>E</i>(<i>G</i>[<i>U</i>])| = <span class="frac"><span>|<i>U</i>|</span><span>2</span></span>.</div></div>
+            <p>Maximizar arestas é, então, maximizar <span class="m">|<i>U</i>|</span> (que precisa ser par).</p>
+            <p><b>Passo 1 — graus de <span class="m"><i>G</i></span>.</b></p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th><i>v</i></th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr></thead>
+              <tbody>
+                <tr><td><i>d</i>(<i>v</i>)</td><td>2</td><td>3</td><td>4</td><td>1</td><td>4</td><td>3</td><td>1</td><td>2</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>Soma <span class="m">= 2+3+4+1+4+3+1+2 = 20 = 2 · 10</span> ✔ (conferência pelo teorema do aperto de mão, com <span class="m">|<i>E</i>(<i>G</i>)| = 10</span>).</p>
+            <p><b>Passo 2 — <span class="m">|<i>U</i>| = 8</span> e <span class="m">|<i>U</i>| = 6</span> são impossíveis.</b> Chame de <i>exclusão</i> cada vértice fora de <span class="m"><i>U</i></span>. Se <span class="m"><i>u</i> ∈ <i>U</i></span>, o grau de <span class="m"><i>u</i></span> em <span class="m"><i>G</i>[<i>U</i>]</span> é o número de vizinhos de <span class="m"><i>u</i></span> que ficaram em <span class="m"><i>U</i></span>; para valer 1, é preciso excluir <span class="m"><i>d</i>(<i>u</i>) − 1</span> vizinhos de <span class="m"><i>u</i></span>.</p>
+            <ul>
+              <li><span class="m">|<i>U</i>| = 8</span>: <span class="m"><i>U</i> = <i>V</i>(<i>G</i>)</span> e <span class="m"><i>G</i>[<i>U</i>] = <i>G</i></span>, que não é 1-regular (o vértice 3 tem grau 4).</li>
+              <li><span class="m">|<i>U</i>| = 6</span>: há exatamente <b>2</b> exclusões. Se <span class="m">3 ∈ <i>U</i></span>, seria preciso excluir 3 dos seus 4 vizinhos <span class="m">{1,2,4,6}</span> — não cabe em 2 exclusões. Logo <span class="m">3 ∉ <i>U</i></span>, e resta 1 exclusão. Se <span class="m">5 ∈ <i>U</i></span>, seria preciso excluir 3 dos seus 4 vizinhos <span class="m">{2,6,7,8}</span> — também não cabe. Logo <span class="m">5 ∉ <i>U</i></span>, e as duas exclusões são exatamente 3 e 5, ou seja <span class="m"><i>U</i> = {1,2,4,6,7,8}</span>. Mas o único vizinho de 4 é 3, que foi excluído: em <span class="m"><i>G</i>[<i>U</i>]</span> o vértice 4 tem grau 0. Contradição.</li>
+            </ul>
+            <p>Portanto <span class="m">|<i>U</i>| ≤ 4</span> e o número de arestas é <b>no máximo 2</b>.</p>
+            <p><b>Passo 3 — atingir o máximo.</b> Tome <span class="m"><i>U</i> = {3,4,5,7}</span>. Os pares dentro de <span class="m"><i>U</i></span> são <span class="m">{3,4}</span> ✓ aresta, <span class="m">{5,7}</span> ✓ aresta, e <span class="m">{3,5}, {3,7}, {4,5}, {4,7}</span>, nenhum deles aresta de <span class="m"><i>G</i></span>. Assim</p>
+            <div class="eq"><div class="body"><i>G</i>[{3,4,5,7}] = ( {3,4,5,7}, { {3,4}, {5,7} } ),</div></div>
+            <p>que é 1-regular com 2 arestas — o máximo. Outras soluções: <span class="m"><i>U</i> = {3,4,5,8}</span> e <span class="m"><i>U</i> = {1,2,6,8}</span> (confira nos dois casos que os quatro pares “cruzados” não são arestas).</p>
+            <figure>
+              <svg class="dg" viewBox="0 0 500 250" role="img" aria-label="O mesmo grafo com os vértices 3, 4, 5 e 7 destacados e as arestas 3-4 e 5-7 em realce">
+                <g>
+                  <line class="e faint" x1="100" y1="40" x2="210" y2="40"/>
+                  <line class="e faint" x1="100" y1="40" x2="100" y2="130"/>
+                  <line class="e faint" x1="210" y1="40" x2="100" y2="130"/>
+                  <line class="e faint" x1="210" y1="40" x2="330" y2="80"/>
+                  <line class="e faint" x1="100" y1="130" x2="215" y2="200"/>
+                  <line class="e faint" x1="330" y1="80" x2="215" y2="200"/>
+                  <line class="e faint" x1="330" y1="80" x2="340" y2="190"/>
+                  <line class="e faint" x1="215" y1="200" x2="340" y2="190"/>
+                  <line class="e match" x1="100" y1="130" x2="30" y2="205"/>
+                  <line class="e match" x1="330" y1="80" x2="450" y2="40"/>
+                </g>
+                <g class="v open"><circle cx="100" cy="40" r="16"/><text x="100" y="40">1</text></g>
+                <g class="v open"><circle cx="210" cy="40" r="16"/><text x="210" y="40">2</text></g>
+                <g class="v hl2"><circle cx="100" cy="130" r="16"/><text x="100" y="130">3</text></g>
+                <g class="v hl2"><circle cx="30" cy="205" r="16"/><text x="30" y="205">4</text></g>
+                <g class="v hl2"><circle cx="330" cy="80" r="16"/><text x="330" y="80">5</text></g>
+                <g class="v open"><circle cx="215" cy="200" r="16"/><text x="215" y="200">6</text></g>
+                <g class="v hl2"><circle cx="450" cy="40" r="16"/><text x="450" y="40">7</text></g>
+                <g class="v open"><circle cx="340" cy="190" r="16"/><text x="340" y="190">8</text></g>
+              </svg>
+              <div class="legend">
+                <span><i style="background:var(--c3)"></i>vértices de <span class="m"><i>U</i></span></span>
+                <span><i class="ln" style="background:var(--ok)"></i>arestas de <span class="m"><i>G</i>[<i>U</i>]</span></span>
+                <span><i class="ln" style="background:var(--edge)"></i>arestas apagadas pelo recorte</span>
+              </div>
+              <figcaption><b>Figura 10.</b> <span class="m"><i>U</i> = {3,4,5,7}</span> induz um subgrafo 1-regular. Nenhuma aresta cinza tem os dois extremos destacados — é isso que faz o recorte ser induzido <i>e</i> 1-regular.</figcaption>
+            </figure>
+            <p class="kicker">Relação com o exercício 2 do capítulo 1</p>
+            <p>
+              O conjunto de arestas de um subgrafo 1-regular é precisamente um <b>emparelhamento</b>: arestas duas a duas sem
+              extremo em comum. No exercício 2 procurávamos um emparelhamento que cobrisse as 4 amigas, isto é, um subgrafo
+              1-regular <i>gerador</i> daquele grafo bipartido. É o mesmo objeto, com uma exigência diferente:
+            </p>
+            <div class="scroll">
+            <table class="tbl livre">
+              <thead><tr><th>Pedido</th><th>Significa</th><th>Neste grafo <span class="m"><i>G</i></span></th></tr></thead>
+              <tbody>
+                <tr><td>subgrafo 1-regular</td><td>emparelhamento</td><td>máximo 4 arestas: <span class="m">{ {1,2}, {3,4}, {5,7}, {6,8} }</span> cobre os 8 vértices</td></tr>
+                <tr><td>subgrafo 1-regular <b>induzido</b></td><td>emparelhamento induzido</td><td>máximo 2 arestas, como provado acima</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              O emparelhamento perfeito <span class="m">{ {1,2}, {3,4}, {5,7}, {6,8} }</span> dá um subgrafo 1-regular <i>gerador</i>
+              de <span class="m"><i>G</i></span>, mas ele não é induzido: <span class="m"><i>G</i>[<i>V</i>(<i>G</i>)] = <i>G</i></span>
+              tem 10 arestas, não 4. A moral do exercício é o aviso da seção 2.5 — exigir “induzido” pode custar caro: 4 arestas
+              caem para 2.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 3 ============================ -->
+      <section class="chapter" id="s3">
+        <h2><span class="num">§3</span> Clique, conjunto independente, grafo bipartido e corte</h2>
+        <p class="sub-lead">Objetivo do bloco: usar subgrafos induzidos para definir os parâmetros <span class="m">α</span>, <span class="m">ω</span> e <span class="m">χ</span>, reconhecer grafos bipartidos e <span class="m"><i>k</i></span>-partidos, e decompor <span class="m"><i>E</i>(<i>G</i>)</span> por um corte.</p>
+
+        <p>
+          Os dois recortes mais extremos que se pode pedir a um subgrafo induzido são os dois casos degenerados: <b>todas</b> as
+          arestas possíveis presentes, ou <b>nenhuma</b>. Cada um recebe um nome, e cada um gera um parâmetro numérico do grafo.
+        </p>
+
+        <h3 id="s3-clique">3.1 Clique, triângulo e o parâmetro <span class="m">ω(<i>G</i>)</span></h3>
+        <div class="box def">
+          <div class="h">Definição · clique</div>
+          <p>
+            Se <span class="m"><i>U</i> ⊆ <i>V</i>(<i>G</i>)</span> induz um grafo completo em <span class="m"><i>G</i></span> —
+            isto é, se <span class="m"><i>G</i>[<i>U</i>]</span> é completo — chamamos <span class="m"><i>U</i></span> de
+            <b>clique</b> em <span class="m"><i>G</i></span>. Se além disso <span class="m">|<i>U</i>| = <i>k</i></span>, dizemos
+            que <span class="m"><i>U</i></span> é um <b><span class="m"><i>k</i></span>-clique</b>. Um 3-clique é um
+            <b>triângulo</b> de <span class="m"><i>G</i></span>.
+          </p>
+          <p>
+            O <b>tamanho do maior clique</b> é denotado <span class="m">ω(<i>G</i>)</span>:
+          </p>
+          <div class="eq"><div class="body">
+            ω(<i>G</i>) = max { |<i>A</i>| : <i>A</i> ⊆ <i>V</i>(<i>G</i>) é um clique }
+          </div></div>
+        </div>
+        <p>
+          Em termos práticos: <span class="m"><i>U</i></span> é clique quando seus vértices são <b>dois a dois adjacentes</b>.
+          Verificar um clique é conferir <span class="m"><span class="binom"><span class="p">(</span><span class="s"><span>|<i>U</i>|</span><span>2</span></span><span class="p">)</span></span></span> pares, um por um.
+        </p>
+
+        <h3 id="s3-indep">3.2 Conjunto independente e o parâmetro <span class="m">α(<i>G</i>)</span></h3>
+        <div class="box def">
+          <div class="h">Definição · conjunto independente</div>
+          <p>
+            Todo <span class="m"><i>U</i> ⊆ <i>V</i>(<i>G</i>)</span> tal que <span class="m"><i>G</i>[<i>U</i>] = (<i>U</i>, ∅)</span>
+            é chamado de <b>conjunto independente</b> de <span class="m"><i>G</i></span>, ou
+            <b><span class="m"><i>k</i></span>-conjunto-independente</b> quando <span class="m">|<i>U</i>| = <i>k</i></span>.
+            O tamanho do maior conjunto independente é
+          </p>
+          <div class="eq"><div class="body">
+            α(<i>G</i>) = max { |<i>A</i>| : <i>A</i> ⊆ <i>V</i>(<i>G</i>) é um conjunto independente }
+          </div></div>
+        </div>
+        <p>
+          Ou seja: <span class="m"><i>U</i></span> é independente quando seus vértices são <b>dois a dois não adjacentes</b>.
+          Note que a definição exige <span class="m"><i>G</i>[<i>U</i>]</span> sem arestas, e não apenas “<span class="m"><i>U</i></span>
+          sem arestas escolhidas” — aqui o fato de o subgrafo ser <i>induzido</i> é essencial.
+        </p>
+
+        <div class="box def">
+          <div class="h">Exemplo 5 · no grafo de referência da Figura 1</div>
+          <p>
+            O subgrafo <span class="m"><i>G</i>′ = <i>G</i>[{1,2,5}]</span> do Exemplo 3 é um 3-clique (um triângulo), e
+            <span class="m"><i>G</i>″ = <i>G</i>[{3,5,6}]</span> é um 3-conjunto-independente. Ainda na Figura 1:
+          </p>
+          <ul>
+            <li><b>Independentes:</b> <span class="m">{3,5,6}</span> e <span class="m">{1,4,6,8}</span>. O segundo tem cardinalidade máxima: qualquer conjunto de 5 vértices contém dois do triângulo <span class="m">{1,2,5}</span>, ou 3 e 4 juntos, ou 6 e 7 juntos. Logo <span class="m">α(<i>G</i>) = 4</span>.</li>
+            <li><b>Cliques:</b> <span class="m">{8}</span>, <span class="m">{6,7}</span> e <span class="m">{1,2,5}</span>, o último de cardinalidade máxima. Logo <span class="m">ω(<i>G</i>) = 3</span>.</li>
+          </ul>
+          <div class="figrow">
+            <figure>
+              <svg class="dg" viewBox="0 0 560 200" role="img" aria-label="Grafo de referência com o clique 1, 2, 5 destacado">
+                <g>
+                  <line class="e match" x1="70" y1="55" x2="165" y2="55"/>
+                  <line class="e match" x1="70" y1="55" x2="117" y2="140"/>
+                  <line class="e match" x1="165" y1="55" x2="117" y2="140"/>
+                  <line class="e" x1="265" y1="55" x2="265" y2="145"/>
+                  <line class="e" x1="365" y1="55" x2="460" y2="55"/>
+                </g>
+                <g class="v hl2"><circle cx="70" cy="55" r="17"/><text x="70" y="55">1</text></g>
+                <g class="v hl2"><circle cx="165" cy="55" r="17"/><text x="165" y="55">2</text></g>
+                <g class="v hl2"><circle cx="117" cy="140" r="17"/><text x="117" y="140">5</text></g>
+                <g class="v open"><circle cx="265" cy="55" r="17"/><text x="265" y="55">3</text></g>
+                <g class="v open"><circle cx="265" cy="145" r="17"/><text x="265" y="145">4</text></g>
+                <g class="v open"><circle cx="365" cy="55" r="17"/><text x="365" y="55">6</text></g>
+                <g class="v open"><circle cx="460" cy="55" r="17"/><text x="460" y="55">7</text></g>
+                <g class="v open"><circle cx="510" cy="145" r="17"/><text x="510" y="145">8</text></g>
+              </svg>
+              <figcaption><b>Figura 4a.</b> Clique máximo <span class="m">{1,2,5}</span>: três vértices dois a dois adjacentes. <span class="m">ω(<i>G</i>) = 3</span>.</figcaption>
+            </figure>
+            <figure>
+              <svg class="dg" viewBox="0 0 560 200" role="img" aria-label="Grafo de referência com o conjunto independente 1, 4, 6, 8 destacado">
+                <g>
+                  <line class="e faint" x1="70" y1="55" x2="165" y2="55"/>
+                  <line class="e faint" x1="70" y1="55" x2="117" y2="140"/>
+                  <line class="e faint" x1="165" y1="55" x2="117" y2="140"/>
+                  <line class="e faint" x1="265" y1="55" x2="265" y2="145"/>
+                  <line class="e faint" x1="365" y1="55" x2="460" y2="55"/>
+                </g>
+                <g class="v hl"><circle cx="70" cy="55" r="17"/><text x="70" y="55">1</text></g>
+                <g class="v open"><circle cx="165" cy="55" r="17"/><text x="165" y="55">2</text></g>
+                <g class="v open"><circle cx="117" cy="140" r="17"/><text x="117" y="140">5</text></g>
+                <g class="v open"><circle cx="265" cy="55" r="17"/><text x="265" y="55">3</text></g>
+                <g class="v hl"><circle cx="265" cy="145" r="17"/><text x="265" y="145">4</text></g>
+                <g class="v hl"><circle cx="365" cy="55" r="17"/><text x="365" y="55">6</text></g>
+                <g class="v open"><circle cx="460" cy="55" r="17"/><text x="460" y="55">7</text></g>
+                <g class="v hl"><circle cx="510" cy="145" r="17"/><text x="510" y="145">8</text></g>
+              </svg>
+              <figcaption><b>Figura 4b.</b> Conjunto independente máximo <span class="m">{1,4,6,8}</span>: nenhuma aresta entre eles. <span class="m">α(<i>G</i>) = 4</span>.</figcaption>
+            </figure>
+          </div>
+          <div class="legend">
+            <span><i style="background:var(--c3)"></i>clique</span>
+            <span><i style="background:var(--c2)"></i>conjunto independente</span>
+          </div>
+        </div>
+
+        <div class="box warn">
+          <div class="h">Observação 2 · leia este aviso antes de tentar “calcular” α e ω</div>
+          <p>
+            O tamanho do maior clique e o do maior conjunto independente são <b>difíceis de calcular computacionalmente</b>: os dois
+            problemas pertencem à classe dos <b>NP-difíceis</b>. Uma consequência é que não se sabe se existem algoritmos cujo tempo
+            de execução no pior caso seja um polinômio em <span class="m">|<i>V</i>(<i>G</i>)| + |<i>E</i>(<i>G</i>)|</span> para
+            resolvê-los. Achar um algoritmo polinomial, ou provar que ele não existe, é o problema <b>P × NP</b> — um dos sete
+            problemas do milênio (dos quais restam seis em aberto), cada um com recompensa de US$ 1.000.000,00.
+          </p>
+          <p>
+            Na prática do curso isso significa: para <b>calcular</b> <span class="m">α</span> ou <span class="m">ω</span> de um
+            grafo dado, você exibe um conjunto (limite inferior) <i>e</i> prova que nada maior funciona (limite superior). Não há
+            fórmula.
+          </p>
+        </div>
+
+        <h3 id="s3-dual">3.3 A dualidade pelo complemento</h3>
+        <div class="box tip">
+          <div class="h">Intuição · clique e independente são a mesma coisa vista do outro lado</div>
+          <p>
+            “Dois a dois adjacentes” em <span class="m"><i>G</i></span> é exatamente “dois a dois <b>não</b> adjacentes” em
+            <span class="m"><span class="ovl"><i>G</i></span></span>. Logo <b>clique em <span class="m"><i>G</i></span> = conjunto
+            independente em <span class="m"><span class="ovl"><i>G</i></span></span></b>, e daí
+            <span class="m">ω(<i>G</i>) = α(<span class="ovl"><i>G</i></span>)</span> e
+            <span class="m">α(<i>G</i>) = ω(<span class="ovl"><i>G</i></span>)</span>. É o conteúdo do exercício 21, e é o truque que
+            permite transportar qualquer teorema sobre cliques para um teorema sobre conjuntos independentes.
+          </p>
+        </div>
+        <p>
+          Conferência na Figura 1: <span class="m">ω(<i>G</i>) = 3</span>, e de fato o maior conjunto independente de
+          <span class="m"><span class="ovl"><i>G</i></span></span> tem 3 vértices — são justamente os vértices de
+          <span class="m">{1,2,5}</span>, que no complemento perderam todas as arestas entre si.
+        </p>
+
+        <h3 id="s3-crom">3.4 <span class="m">χ(<i>G</i>)</span>, relido como partição em conjuntos independentes</h3>
+        <p>
+          No capítulo 1 (exercícios 1 e 7) <span class="m">χ(<i>G</i>)</span> apareceu como “o menor número de caixas”, ou seja, o
+          menor número de cores em uma pintura dos vértices em que <b>vértices adjacentes recebem cores diferentes</b>. Traduzindo
+          para a linguagem deste capítulo: cada classe de cor é um conjunto de vértices dois a dois não adjacentes, isto é, um
+          <b>conjunto independente</b>.
+        </p>
+        <div class="box def">
+          <div class="h">Definição equivalente · número cromático</div>
+          <div class="eq"><div class="body">
+            χ(<i>G</i>) = min { <i>k</i> : <i>V</i>(<i>G</i>) = <i>V</i><sub>1</sub> ∪ ⋅⋅⋅ ∪ <i>V</i><sub><i>k</i></sub>, com os <i>V</i><sub><i>i</i></sub> disjuntos e cada <i>V</i><sub><i>i</i></sub> independente }
+          </div></div>
+          <p>
+            É a demonstração pedida no exercício 22. Com essa leitura, três fatos ficam imediatos:
+            <span class="m">χ(<i>K</i><sup><i>n</i></sup>) = <i>n</i></span> (nenhum par pode partilhar classe),
+            <span class="m">χ(<i>G</i>) = 1</span> se e só se <span class="m"><i>G</i></span> não tem arestas e
+            <span class="m"><i>V</i>(<i>G</i>) ≠ ∅</span>, e <span class="m">χ(<i>G</i>) = 0</span> só para o grafo vazio.
+          </p>
+        </div>
+        <div class="box rec">
+          <div class="h">Receita · as duas cotas para <span class="m">χ</span> (exercício 23)</div>
+          <ol>
+            <li><b>Pelo clique:</b> <span class="m">χ(<i>G</i>) ≥ ω(<i>G</i>)</span> — um clique gasta uma cor por vértice.</li>
+            <li><b>Pela contagem:</b> <span class="m">χ(<i>G</i>) ≥ |<i>V</i>(<i>G</i>)| ∕ α(<i>G</i>)</span> — cada classe cabe em no máximo <span class="m">α(<i>G</i>)</span> vértices, então são necessárias pelo menos <span class="m"><i>n</i>∕α</span> classes.</li>
+            <li><b>Limite superior:</b> exiba uma partição concreta. Se o valor coincide com uma das cotas, você achou <span class="m">χ</span> exatamente.</li>
+          </ol>
+          <p>
+            Na Figura 1: <span class="m">ω = 3</span> e <span class="m"><i>n</i>∕α = 8∕4 = 2</span>, então a primeira cota é melhor
+            e dá <span class="m">χ ≥ 3</span>; a partição
+            <span class="m">{1,3,6,8} ∪ {2,4,7} ∪ {5}</span> usa 3 classes independentes, logo <span class="m">χ(<i>G</i>) = 3</span> ✔
+          </p>
+        </div>
+
+        <h3 id="s3-bip">3.5 Grafos bipartidos e <span class="m"><i>K</i><sub><i>n</i>,<i>m</i></sub></span></h3>
+        <div class="box def">
+          <div class="h">Definição · grafo bipartido</div>
+          <p>
+            Um grafo <span class="m"><i>G</i></span> é <b>bipartido</b> se existem dois conjuntos independentes
+            <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span> em <span class="m"><i>G</i></span> que
+            <b>particionam</b> <span class="m"><i>V</i>(<i>G</i>)</span>, isto é, com
+            <span class="m"><i>A</i> ∩ <i>B</i> = ∅</span> e <span class="m"><i>A</i> ∪ <i>B</i> = <i>V</i>(<i>G</i>)</span>.
+            Os conjuntos <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span> são as <b>partes</b> de
+            <span class="m"><i>G</i></span>.
+          </p>
+        </div>
+        <p>
+          Dito em uma frase: toda aresta tem uma ponta em cada parte, e nenhuma aresta fica dentro de uma parte. Por exemplo,
+          o grafo
+        </p>
+        <div class="eq"><div class="body">
+          <i>V</i>(<i>G</i>) = {1,2,3,4,5,6,7,8}<br>
+          <i>E</i>(<i>G</i>) = { {1,6}, {6,2}, {3,7}, {3,8}, {7,4}, {7,5} }
+        </div></div>
+        <p>
+          é bipartido, pois <span class="m"><i>V</i>(<i>G</i>) = {1,2,3,4,5} ∪ {6,7,8}</span> e tanto
+          <span class="m">{1,2,3,4,5}</span> quanto <span class="m">{6,7,8}</span> são independentes.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 440 330" role="img" aria-label="Grafo bipartido com a parte 1 a 5 à esquerda e a parte 6, 7, 8 à direita, seis arestas cruzando">
+            <g>
+              <line class="e" x1="75" y1="30" x2="340" y2="65"/>
+              <line class="e" x1="75" y1="100" x2="340" y2="65"/>
+              <line class="e" x1="75" y1="170" x2="340" y2="170"/>
+              <line class="e" x1="75" y1="170" x2="340" y2="275"/>
+              <line class="e" x1="75" y1="240" x2="340" y2="170"/>
+              <line class="e" x1="75" y1="310" x2="340" y2="170"/>
+            </g>
+            <g class="v c1"><circle cx="75" cy="30" r="16"/><text x="75" y="30">1</text></g>
+            <g class="v c1"><circle cx="75" cy="100" r="16"/><text x="75" y="100">2</text></g>
+            <g class="v c1"><circle cx="75" cy="170" r="16"/><text x="75" y="170">3</text></g>
+            <g class="v c1"><circle cx="75" cy="240" r="16"/><text x="75" y="240">4</text></g>
+            <g class="v c1"><circle cx="75" cy="310" r="16"/><text x="75" y="310">5</text></g>
+            <g class="v c4"><circle cx="340" cy="65" r="16"/><text x="340" y="65">6</text></g>
+            <g class="v c4"><circle cx="340" cy="170" r="16"/><text x="340" y="170">7</text></g>
+            <g class="v c4"><circle cx="340" cy="275" r="16"/><text x="340" y="275">8</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c1)"></i>parte <span class="m"><i>A</i> = {1,2,3,4,5}</span></span>
+            <span><i style="background:var(--c4)"></i>parte <span class="m"><i>B</i> = {6,7,8}</span></span>
+          </div>
+          <figcaption><b>Figura 5.</b> O que observar: toda aresta atravessa de um lado a outro. Desenhar as partes em duas colunas é o modo padrão de <i>exibir</i> a bipartição — e exibir a bipartição é a maneira de provar que um grafo é bipartido.</figcaption>
+        </figure>
+        <div class="box def">
+          <div class="h">Definição · bipartido completo <span class="m"><i>K</i><sub><i>n</i>,<i>m</i></sub></span></div>
+          <p>
+            Um grafo bipartido <span class="m"><i>G</i></span> com partes <span class="m"><i>A</i></span> e
+            <span class="m"><i>B</i></span> é <b>completo</b> se tem <span class="m">|<i>A</i>| ⋅ |<i>B</i>|</span> arestas, ou seja
+          </p>
+          <div class="eq"><div class="body">
+            <i>E</i>(<i>G</i>) = { {<i>a</i>, <i>b</i>} ⊆ <i>V</i>(<i>G</i>) : <i>a</i> ∈ <i>A</i> e <i>b</i> ∈ <i>B</i> }.
+          </div></div>
+          <p>
+            Um grafo bipartido completo com partes de cardinalidade <span class="m"><i>n</i></span> e <span class="m"><i>m</i></span>
+            é denotado <span class="m"><i>K</i><sub><i>n</i>,<i>m</i></sub></span>.
+          </p>
+        </div>
+        <figure>
+          <svg class="dg" viewBox="0 0 420 305" role="img" aria-label="Grafo bipartido completo K 3,4 com doze arestas">
+            <g>
+              <line class="e" x1="80" y1="100" x2="330" y2="45"/>
+              <line class="e" x1="80" y1="100" x2="330" y2="125"/>
+              <line class="e" x1="80" y1="100" x2="330" y2="205"/>
+              <line class="e" x1="80" y1="100" x2="330" y2="285"/>
+              <line class="e" x1="80" y1="165" x2="330" y2="45"/>
+              <line class="e" x1="80" y1="165" x2="330" y2="125"/>
+              <line class="e" x1="80" y1="165" x2="330" y2="205"/>
+              <line class="e" x1="80" y1="165" x2="330" y2="285"/>
+              <line class="e" x1="80" y1="230" x2="330" y2="45"/>
+              <line class="e" x1="80" y1="230" x2="330" y2="125"/>
+              <line class="e" x1="80" y1="230" x2="330" y2="205"/>
+              <line class="e" x1="80" y1="230" x2="330" y2="285"/>
+            </g>
+            <g class="v c1"><circle cx="80" cy="100" r="15"/><text x="80" y="100">a</text></g>
+            <g class="v c1"><circle cx="80" cy="165" r="15"/><text x="80" y="165">b</text></g>
+            <g class="v c1"><circle cx="80" cy="230" r="15"/><text x="80" y="230">c</text></g>
+            <g class="v c4"><circle cx="330" cy="45" r="15"/><text x="330" y="45">1</text></g>
+            <g class="v c4"><circle cx="330" cy="125" r="15"/><text x="330" y="125">2</text></g>
+            <g class="v c4"><circle cx="330" cy="205" r="15"/><text x="330" y="205">3</text></g>
+            <g class="v c4"><circle cx="330" cy="285" r="15"/><text x="330" y="285">4</text></g>
+          </svg>
+          <figcaption><b>Figura 6.</b> <span class="m"><i>K</i><sub>3,4</sub></span>: todas as <span class="m">3 · 4 = 12</span> arestas entre as partes, nenhuma dentro delas. Aqui <span class="m">α = 4</span> (a parte maior), <span class="m">ω = 2</span> e <span class="m">χ = 2</span>.</figcaption>
+        </figure>
+        <div class="box warn">
+          <div class="h">Observação 3 · convenção sobre os casos degenerados</div>
+          <p>
+            Convencionamos que os grafos <b>trivial</b> (um único vértice) e <b>vazio</b> (<span class="m">(∅,∅)</span>) são
+            bipartidos. Isso é consistente com a definição: nada exige que as partes sejam não vazias, então basta tomar
+            <span class="m"><i>A</i> = <i>V</i>(<i>G</i>)</span> e <span class="m"><i>B</i> = ∅</span> — dois conjuntos
+            independentes disjuntos cuja união é <span class="m"><i>V</i>(<i>G</i>)</span>. Mais geralmente, <b>todo grafo sem
+            arestas é bipartido</b>. Guarde essa convenção: ela é o que faz o exercício 26 funcionar nos casos
+            <span class="m">χ(<i>G</i>) ≤ 1</span>.
+          </p>
+        </div>
+        <div class="box tip">
+          <div class="h">Três maneiras de dizer a mesma coisa</div>
+          <p>
+            <span class="m"><i>G</i></span> é bipartido ⟺ <span class="m"><i>V</i>(<i>G</i>)</span> se parte em 2 conjuntos
+            independentes ⟺ <span class="m">χ(<i>G</i>) ≤ 2</span>. A última equivalência é o exercício 26 e é a forma mais útil na
+            prática: para mostrar que um grafo <b>não</b> é bipartido, exiba um triângulo (ou, mais geralmente, um ciclo de
+            comprimento ímpar). O grafo da Figura 1, por exemplo, não é bipartido, porque
+            <span class="m">ω = 3</span> obriga <span class="m">χ ≥ 3</span>.
+          </p>
+        </div>
+
+        <h3 id="s3-kpart">3.6 Grafos <span class="m"><i>k</i></span>-partidos e a intuição do balanceamento</h3>
+        <div class="box def">
+          <div class="h">Definição · <span class="m"><i>k</i></span>-partido e <span class="m"><i>k</i></span>-partido completo</div>
+          <p>
+            Um grafo <span class="m"><i>G</i></span> é <b><span class="m"><i>k</i></span>-partido</b>,
+            <span class="m"><i>k</i> ∈ ℕ</span>, se existem <span class="m"><i>k</i></span> conjuntos independentes
+            <span class="m"><i>A</i><sub>1</sub>, …, <i>A</i><sub><i>k</i></sub></span> que particionam
+            <span class="m"><i>V</i>(<i>G</i>)</span>: a união é <span class="m"><i>V</i>(<i>G</i>)</span>, cada
+            <span class="m"><i>A</i><sub><i>i</i></sub></span> é independente e
+            <span class="m"><i>A</i><sub><i>i</i></sub> ∩ <i>A</i><sub><i>j</i></sub> = ∅</span> para
+            <span class="m"><i>i</i> ≠ <i>j</i></span>. É <b>completo</b> quando <i>toda</i> aresta possível entre partes distintas
+            está presente.
+          </p>
+        </div>
+        <p>
+          Bipartido é o caso <span class="m"><i>k</i> = 2</span>; e <span class="m"><i>G</i></span> é
+          <span class="m"><i>k</i></span>-partido para algum <span class="m"><i>k</i></span> se e somente se
+          <span class="m">χ(<i>G</i>) ≤ <i>k</i></span>. Num <span class="m"><i>k</i></span>-partido completo com partes de
+          tamanhos <span class="m"><i>a</i><sub>1</sub>, …, <i>a</i><sub><i>k</i></sub></span> (somando
+          <span class="m"><i>n</i></span>), as arestas são exatamente os pares que <b>não</b> estão dentro de uma mesma parte:
+        </p>
+        <div class="eq"><div class="body">
+          |<i>E</i>| = <span class="binom"><span class="p">(</span><span class="s"><span><i>n</i></span><span>2</span></span><span class="p">)</span></span> −
+          <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=1..<i>k</i></span></span>
+          <span class="binom"><span class="p">(</span><span class="s"><span><i>a</i><sub><i>i</i></sub></span><span>2</span></span><span class="p">)</span></span>
+          &nbsp;=&nbsp; <span class="frac"><span>1</span><span>2</span></span>
+          <span>(</span> <i>n</i><sup>2</sup> − <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=1..<i>k</i></span></span> <i>a</i><sub><i>i</i></sub><sup>2</sup> <span>)</span>
+        </div><div class="tag">(★)</div></div>
+        <p>
+          A segunda forma sai da primeira usando
+          <span class="m"><span class="binom"><span class="p">(</span><span class="s"><span><i>a</i></span><span>2</span></span><span class="p">)</span></span> = <span class="frac"><span><i>a</i><sup>2</sup> − <i>a</i></span><span>2</span></span></span>
+          e <span class="m">∑<i>a</i><sub><i>i</i></sub> = <i>n</i></span>. A fórmula (★) é a chave dos exercícios 29 e 30:
+          <b>com <span class="m"><i>n</i></span> e <span class="m"><i>k</i></span> fixos, maximizar arestas é minimizar
+          <span class="m">∑<i>a</i><sub><i>i</i></sub><sup>2</sup></span></b>.
+        </p>
+        <div class="box tip">
+          <div class="h">Intuição do balanceamento</div>
+          <p>
+            Uma soma de quadrados com soma fixa é mínima quando as parcelas são iguais: concentrar vértices numa parte grande
+            desperdiça muitas arestas, porque os pares <i>dentro</i> de uma parte são justamente os proibidos. Uma parte com
+            <span class="m"><i>a</i></span> vértices proíbe
+            <span class="m"><span class="binom"><span class="p">(</span><span class="s"><span><i>a</i></span><span>2</span></span><span class="p">)</span></span></span>
+            pares, e esse número cresce como <span class="m"><i>a</i><sup>2</sup></span>. Portanto o melhor é deixar as partes o
+            mais <b>equilibradas</b> possível — no máximo um vértice de diferença entre duas partes quaisquer.
+          </p>
+        </div>
+        <div class="figrow">
+          <figure>
+            <svg class="dg" viewBox="0 0 280 260" role="img" aria-label="Grafo 3-partido completo balanceado com partes de tamanho 2, 2 e 2, com doze arestas">
+              <g>
+                <line class="e" x1="140" y1="30" x2="227" y2="80"/>
+                <line class="e" x1="140" y1="30" x2="227" y2="180"/>
+                <line class="e" x1="140" y1="30" x2="53" y2="180"/>
+                <line class="e" x1="140" y1="30" x2="53" y2="80"/>
+                <line class="e" x1="227" y1="80" x2="227" y2="180"/>
+                <line class="e" x1="227" y1="80" x2="140" y2="230"/>
+                <line class="e" x1="227" y1="80" x2="53" y2="80"/>
+                <line class="e" x1="227" y1="180" x2="140" y2="230"/>
+                <line class="e" x1="227" y1="180" x2="53" y2="180"/>
+                <line class="e" x1="140" y1="230" x2="53" y2="180"/>
+                <line class="e" x1="140" y1="230" x2="53" y2="80"/>
+                <line class="e" x1="53" y1="180" x2="53" y2="80"/>
+              </g>
+              <g class="v c1"><circle cx="140" cy="30" r="16"/><text x="140" y="30">1</text></g>
+              <g class="v c3"><circle cx="227" cy="80" r="16"/><text x="227" y="80">2</text></g>
+              <g class="v c4"><circle cx="227" cy="180" r="16"/><text x="227" y="180">3</text></g>
+              <g class="v c1"><circle cx="140" cy="230" r="16"/><text x="140" y="230">4</text></g>
+              <g class="v c3"><circle cx="53" cy="180" r="16"/><text x="53" y="180">5</text></g>
+              <g class="v c4"><circle cx="53" cy="80" r="16"/><text x="53" y="80">6</text></g>
+            </svg>
+            <figcaption><b>Figura 8a.</b> Partes <span class="m">{1,4}, {2,5}, {3,6}</span> (mesma cor = mesma parte). <span class="m">∑<i>a</i><sub><i>i</i></sub><sup>2</sup> = 12</span> e <span class="m">|<i>E</i>| = (36 − 12)∕2 = 12</span> — o máximo com <span class="m"><i>n</i> = 6</span> e <span class="m"><i>k</i> = 3</span>.</figcaption>
+          </figure>
+          <figure>
+            <svg class="dg" viewBox="0 0 280 260" role="img" aria-label="Grafo 3-partido completo desbalanceado com partes de tamanho 4, 1 e 1, com nove arestas">
+              <g>
+                <line class="e" x1="55" y1="35" x2="200" y2="100"/>
+                <line class="e" x1="55" y1="98" x2="200" y2="100"/>
+                <line class="e" x1="55" y1="161" x2="200" y2="100"/>
+                <line class="e" x1="55" y1="224" x2="200" y2="100"/>
+                <line class="e" x1="55" y1="35" x2="200" y2="180"/>
+                <line class="e" x1="55" y1="98" x2="200" y2="180"/>
+                <line class="e" x1="55" y1="161" x2="200" y2="180"/>
+                <line class="e" x1="55" y1="224" x2="200" y2="180"/>
+                <line class="e" x1="200" y1="100" x2="200" y2="180"/>
+              </g>
+              <g class="v c1"><circle cx="55" cy="35" r="16"/><text x="55" y="35">1</text></g>
+              <g class="v c1"><circle cx="55" cy="98" r="16"/><text x="55" y="98">2</text></g>
+              <g class="v c1"><circle cx="55" cy="161" r="16"/><text x="55" y="161">3</text></g>
+              <g class="v c1"><circle cx="55" cy="224" r="16"/><text x="55" y="224">4</text></g>
+              <g class="v c3"><circle cx="200" cy="100" r="16"/><text x="200" y="100">5</text></g>
+              <g class="v c4"><circle cx="200" cy="180" r="16"/><text x="200" y="180">6</text></g>
+            </svg>
+            <figcaption><b>Figura 8b.</b> Partes <span class="m">{1,2,3,4}, {5}, {6}</span>. <span class="m">∑<i>a</i><sub><i>i</i></sub><sup>2</sup> = 18</span> e <span class="m">|<i>E</i>| = (36 − 18)∕2 = 9</span> — três arestas a menos, pelo desequilíbrio.</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="s3-corte">3.7 <span class="m"><i>E</i>(<i>A</i>,<i>B</i>)</span>, corte e a decomposição de <span class="m"><i>E</i>(<i>G</i>)</span></h3>
+        <div class="box def">
+          <div class="h">Definição · arestas entre dois conjuntos</div>
+          <p>
+            Sejam <span class="m"><i>G</i></span> um grafo e <span class="m"><i>A</i>, <i>B</i> ⊆ <i>V</i>(<i>G</i>)</span> dois
+            subconjuntos <b>disjuntos</b>. Definimos
+          </p>
+          <div class="eq"><div class="body">
+            <i>E</i>(<i>A</i>, <i>B</i>) = { {<i>u</i>, <i>v</i>} ∈ <i>E</i>(<i>G</i>) : <i>u</i> ∈ <i>A</i> e <i>v</i> ∈ <i>B</i> }
+          </div><div class="tag">(11)</div></div>
+          <p>
+            e o <b>subgrafo bipartido induzido por <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span></b> é o grafo
+            bipartido <span class="m">( <i>A</i> ∪ <i>B</i>, &nbsp;<i>E</i>(<i>A</i>, <i>B</i>) )</span>.
+          </p>
+        </div>
+        <div class="box def">
+          <div class="h">Definição · corte</div>
+          <p>
+            Para <span class="m"><i>A</i> ⊆ <i>V</i>(<i>G</i>)</span>, escreva
+            <span class="m"><span class="ovl"><i>A</i></span> = <i>V</i>(<i>G</i>) \ <i>A</i></span>. O conjunto de arestas
+            <span class="m"><i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)</span> é chamado de <b>corte definido por
+            <span class="m"><i>A</i></span></b>. Com ele podemos escrever
+          </p>
+          <div class="eq"><div class="body">
+            <i>E</i>(<i>G</i>) = <i>E</i>(<i>G</i>[<i>A</i>]) ∪ <i>E</i>(<i>G</i>[<span class="ovl"><i>A</i></span>]) ∪ <i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)
+          </div><div class="tag">(12)</div></div>
+        </div>
+        <p>
+          A leitura de (12) é a de uma classificação: escolhido <span class="m"><i>A</i></span>, cada aresta de
+          <span class="m"><i>G</i></span> está em exatamente uma de três situações — <b>dentro</b> de
+          <span class="m"><i>A</i></span>, <b>dentro</b> de <span class="m"><span class="ovl"><i>A</i></span></span>, ou
+          <b>atravessando</b> de um lado para o outro. Como as três situações são mutuamente exclusivas, a união é disjunta e vale
+          também a igualdade de contagem
+        </p>
+        <div class="eq"><div class="body">
+          |<i>E</i>(<i>G</i>)| = |<i>E</i>(<i>G</i>[<i>A</i>])| + |<i>E</i>(<i>G</i>[<span class="ovl"><i>A</i></span>])| + |<i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)|.
+        </div></div>
+        <figure>
+          <svg class="dg" viewBox="0 0 520 270" role="img" aria-label="Grafo com o conjunto A de três vértices à esquerda e seu complemento de quatro vértices à direita; as quatro arestas do corte aparecem tracejadas">
+            <g>
+              <line class="e" x1="75" y1="55" x2="75" y2="140"/>
+              <line class="e" x1="75" y1="140" x2="75" y2="225"/>
+              <line class="e" x1="285" y1="50" x2="285" y2="140"/>
+              <line class="e" x1="285" y1="140" x2="285" y2="230"/>
+              <line class="e" x1="285" y1="50" x2="430" y2="140"/>
+              <line class="e" x1="285" y1="230" x2="430" y2="140"/>
+              <line class="e cut" x1="75" y1="55" x2="285" y2="50"/>
+              <line class="e cut" x1="75" y1="140" x2="285" y2="50"/>
+              <line class="e cut" x1="75" y1="140" x2="285" y2="140"/>
+              <line class="e cut" x1="75" y1="225" x2="285" y2="230"/>
+            </g>
+            <text class="lbl" x="75" y="18">A</text>
+            <text class="lbl" x="357" y="18">V \ A</text>
+            <g class="v c1"><circle cx="75" cy="55" r="16"/><text x="75" y="55">1</text></g>
+            <g class="v c1"><circle cx="75" cy="140" r="16"/><text x="75" y="140">2</text></g>
+            <g class="v c1"><circle cx="75" cy="225" r="16"/><text x="75" y="225">3</text></g>
+            <g class="v c4"><circle cx="285" cy="50" r="16"/><text x="285" y="50">4</text></g>
+            <g class="v c4"><circle cx="285" cy="140" r="16"/><text x="285" y="140">5</text></g>
+            <g class="v c4"><circle cx="285" cy="230" r="16"/><text x="285" y="230">6</text></g>
+            <g class="v c4"><circle cx="430" cy="140" r="16"/><text x="430" y="140">7</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c1)"></i><span class="m"><i>A</i> = {1,2,3}</span></span>
+            <span><i style="background:var(--c4)"></i><span class="m"><span class="ovl"><i>A</i></span> = {4,5,6,7}</span></span>
+            <span><i class="ln" style="background:var(--c2)"></i>corte <span class="m"><i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)</span></span>
+          </div>
+          <figcaption>
+            <b>Figura 7.</b> As arestas tracejadas em vermelho formam o corte. Conferência de (12):
+            <span class="m">|<i>E</i>(<i>G</i>[<i>A</i>])| = 2</span> (as arestas <span class="m">{1,2}</span> e <span class="m">{2,3}</span>),
+            <span class="m">|<i>E</i>(<i>G</i>[<span class="ovl"><i>A</i></span>])| = 4</span> e
+            <span class="m">|<i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)| = 4</span>, totalizando
+            <span class="m">2 + 4 + 4 = 10 = |<i>E</i>(<i>G</i>)|</span> ✔
+          </figcaption>
+        </figure>
+        <div class="box warn">
+          <div class="h">Atenção · três armadilhas do corte</div>
+          <ul>
+            <li><span class="m"><i>E</i>(<i>A</i>,<i>B</i>)</span> só está definido para <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span> <b>disjuntos</b>.</li>
+            <li>A notação é <b>simétrica</b>: <span class="m"><i>E</i>(<i>A</i>,<i>B</i>) = <i>E</i>(<i>B</i>,<i>A</i>)</span>, porque arestas são conjuntos e <span class="m">{<i>u</i>,<i>v</i>} = {<i>v</i>,<i>u</i>}</span> (exercício 24).</li>
+            <li><span class="m">|<i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)|</span> conta <b>arestas</b>, não vértices. Um mesmo vértice de <span class="m"><span class="ovl"><i>A</i></span></span> pode receber várias arestas do corte — é o que derruba a igualdade proposta no exercício 28.</li>
+          </ul>
+        </div>
+
+        <h3 id="s3-resumo">3.8 Resumo do bloco</h3>
+        <div class="box def">
+          <div class="h">O essencial em nove linhas</div>
+          <ul>
+            <li><b>Clique:</b> <span class="m"><i>U</i></span> com <span class="m"><i>G</i>[<i>U</i>]</span> completo; <span class="m">ω(<i>G</i>)</span> = maior clique. Triângulo = 3-clique.</li>
+            <li><b>Independente:</b> <span class="m"><i>U</i></span> com <span class="m"><i>G</i>[<i>U</i>] = (<i>U</i>,∅)</span>; <span class="m">α(<i>G</i>)</span> = maior independente.</li>
+            <li><b>Dualidade:</b> <span class="m">ω(<i>G</i>) = α(<span class="ovl"><i>G</i></span>)</span> e <span class="m">α(<i>G</i>) = ω(<span class="ovl"><i>G</i></span>)</span>.</li>
+            <li><b>Cromático:</b> <span class="m">χ(<i>G</i>)</span> = menor número de classes independentes que particionam <span class="m"><i>V</i>(<i>G</i>)</span>.</li>
+            <li><b>Cotas:</b> <span class="m">χ(<i>G</i>) ≥ ω(<i>G</i>)</span> e <span class="m">χ(<i>G</i>) ≥ |<i>V</i>(<i>G</i>)| ∕ α(<i>G</i>)</span>.</li>
+            <li><b>Bipartido</b> ⟺ duas partes independentes ⟺ <span class="m">χ(<i>G</i>) ≤ 2</span>. Trivial e vazio são bipartidos.</li>
+            <li><b><span class="m"><i>K</i><sub><i>n</i>,<i>m</i></sub></span>:</b> bipartido completo, <span class="m"><i>n</i> ⋅ <i>m</i></span> arestas.</li>
+            <li><b><span class="m"><i>k</i></span>-partido completo:</b> <span class="m">|<i>E</i>| = (<i>n</i><sup>2</sup> − ∑<i>a</i><sub><i>i</i></sub><sup>2</sup>)∕2</span>; máximo com partes equilibradas.</li>
+            <li><b>Corte:</b> <span class="m"><i>E</i>(<i>G</i>)</span> é a união disjunta de <span class="m"><i>E</i>(<i>G</i>[<i>A</i>])</span>, <span class="m"><i>E</i>(<i>G</i>[<span class="ovl"><i>A</i></span>])</span> e <span class="m"><i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)</span>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================ EXERCÍCIOS 19–30 ============================ -->
+      <section class="chapter" id="ex2">
+        <div class="ex-head">
+          <h3>Exercícios 19 a 30</h3>
+          <button class="toggle" type="button" data-scope="#ex2" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: casa dos pombos com cliques e independentes, relações entre α, ω e χ, propriedades do corte e contagem de arestas em grafos <span class="m"><i>k</i></span>-partidos completos.</p>
+        </div>
+
+        <!-- Ex 19 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 19</span><div class="stmt">
+            <p>Mostre que em qualquer grafo <span class="m"><i>G</i></span> com pelo menos 6 vértices ou existe um 3-clique ou existe um 3-conjunto-independente. <i>(Dica do original: exercício 6 do capítulo 1 e princípio da casa dos pombos sobre <span class="m"><i>E</i><sub><i>K</i><sup>6</sup></sub>(<i>v</i>)</span>.)</i></p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h19" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a19" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h19"><div class="plab">Dica</div>
+            <p>Fixe 6 vértices e um deles, <span class="m"><i>v</i></span>. As 5 arestas de <span class="m"><i>K</i><sup>6</sup></span> que saem de <span class="m"><i>v</i></span> se dividem em “arestas de <span class="m"><i>G</i></span>” e “arestas de <span class="m"><span class="ovl"><i>G</i></span></span>” (exercício 6: <span class="m"><i>G</i> ∪ <span class="ovl"><i>G</i></span> = <i>K</i><sup>6</sup></span>). Pela casa dos pombos, um dos dois grupos tem pelo menos 3 arestas. Trabalhe com esses 3 vizinhos (ou 3 não vizinhos) de <span class="m"><i>v</i></span>.</p>
+          </div>
+          <div class="panel answer" id="a19"><div class="plab">Resolução</div>
+            <p><b>Passo 0 — reduzir a 6 vértices.</b> Se <span class="m">|<i>V</i>(<i>G</i>)| ≥ 6</span>, escolha <span class="m"><i>W</i> ⊆ <i>V</i>(<i>G</i>)</span> com <span class="m">|<i>W</i>| = 6</span> e trabalhe em <span class="m"><i>G</i>[<i>W</i>]</span>. Um clique ou um independente de <span class="m"><i>G</i>[<i>W</i>]</span> também é clique ou independente de <span class="m"><i>G</i></span>, porque <span class="m"><i>G</i>[<i>W</i>]</span> é <b>induzido</b>: as adjacências entre vértices de <span class="m"><i>W</i></span> são as mesmas nos dois grafos. Podemos, portanto, supor <span class="m">|<i>V</i>(<i>G</i>)| = 6</span>.</p>
+            <p><b>Passo 1 — casa dos pombos em um vértice.</b> Fixe <span class="m"><i>v</i> ∈ <i>V</i>(<i>G</i>)</span> e considere os outros 5 vértices. Pelo exercício 6 do capítulo 1, <span class="m"><i>G</i> ∪ <span class="ovl"><i>G</i></span> = <i>K</i><sup>6</sup></span>, e <span class="m"><i>E</i>(<i>G</i>)</span> e <span class="m"><i>E</i>(<span class="ovl"><i>G</i></span>)</span> são disjuntos. Assim as 5 arestas de <span class="m"><i>E</i><sub><i>K</i><sup>6</sup></sub>(<i>v</i>)</span> ficam repartidas em duas “gavetas”: as que são arestas de <span class="m"><i>G</i></span> e as que são arestas de <span class="m"><span class="ovl"><i>G</i></span></span>. Como <span class="m">5 > 2 · 2</span>, alguma gaveta recebe pelo menos <span class="m">⌈5∕2⌉ = 3</span> arestas.</p>
+            <p><b>Passo 2 — caso A: <span class="m"><i>v</i></span> tem 3 vizinhos.</b> Sejam <span class="m"><i>a</i>, <i>b</i>, <i>c</i> ∈ <i>N</i><sub><i>G</i></sub>(<i>v</i>)</span> distintos.</p>
+            <figure>
+              <svg class="dg" viewBox="0 0 340 230" role="img" aria-label="Vértice v ligado a três vértices a, b e c; os três pares entre a, b e c aparecem tracejados por serem desconhecidos">
+                <g>
+                  <line class="e" x1="60" y1="115" x2="235" y2="40"/>
+                  <line class="e" x1="60" y1="115" x2="270" y2="115"/>
+                  <line class="e" x1="60" y1="115" x2="235" y2="190"/>
+                  <line class="e cut" x1="235" y1="40" x2="270" y2="115"/>
+                  <line class="e cut" x1="270" y1="115" x2="235" y2="190"/>
+                  <line class="e cut" x1="235" y1="40" x2="235" y2="190"/>
+                </g>
+                <g class="v hl"><circle cx="60" cy="115" r="17"/><text x="60" y="115">v</text></g>
+                <g class="v"><circle cx="235" cy="40" r="17"/><text x="235" y="40">a</text></g>
+                <g class="v"><circle cx="270" cy="115" r="17"/><text x="270" y="115">b</text></g>
+                <g class="v"><circle cx="235" cy="190" r="17"/><text x="235" y="190">c</text></g>
+              </svg>
+              <div class="legend">
+                <span><i class="ln" style="background:var(--edge)"></i>aresta que existe em <span class="m"><i>G</i></span></span>
+                <span><i class="ln" style="background:var(--c2)"></i>par de status desconhecido</span>
+              </div>
+              <figcaption><b>Figura 11.</b> Caso A. Se algum par tracejado for aresta, ele fecha triângulo com <span class="m"><i>v</i></span>; se nenhum for, <span class="m">{<i>a</i>,<i>b</i>,<i>c</i>}</span> é independente.</figcaption>
+            </figure>
+            <ul>
+              <li>Se algum dos pares <span class="m">{<i>a</i>,<i>b</i>}</span>, <span class="m">{<i>b</i>,<i>c</i>}</span>, <span class="m">{<i>a</i>,<i>c</i>}</span> é aresta de <span class="m"><i>G</i></span> — digamos <span class="m">{<i>a</i>,<i>b</i>}</span> — então <span class="m">{<i>v</i>,<i>a</i>,<i>b</i>}</span> é um 3-clique, pois <span class="m">{<i>v</i>,<i>a</i>}</span>, <span class="m">{<i>v</i>,<i>b</i>}</span> e <span class="m">{<i>a</i>,<i>b</i>}</span> são todas arestas.</li>
+              <li>Se nenhum dos três pares é aresta, então <span class="m">{<i>a</i>,<i>b</i>,<i>c</i>}</span> é um 3-conjunto-independente.</li>
+            </ul>
+            <p><b>Passo 3 — caso B: <span class="m"><i>v</i></span> tem 3 não vizinhos.</b> Sejam <span class="m"><i>a</i>, <i>b</i>, <i>c</i></span> distintos, nenhum adjacente a <span class="m"><i>v</i></span> em <span class="m"><i>G</i></span>. O argumento é o espelho do anterior:</p>
+            <ul>
+              <li>Se algum par entre <span class="m"><i>a</i>, <i>b</i>, <i>c</i></span> <b>não</b> é aresta — digamos <span class="m">{<i>a</i>,<i>b</i>} ∉ <i>E</i>(<i>G</i>)</span> — então <span class="m">{<i>v</i>,<i>a</i>,<i>b</i>}</span> é um 3-conjunto-independente.</li>
+              <li>Se os três pares são arestas, <span class="m">{<i>a</i>,<i>b</i>,<i>c</i>}</span> é um 3-clique.</li>
+            </ul>
+            <p>Em todos os casos obtivemos um 3-clique ou um 3-conjunto-independente. <span style="font-weight:700">□</span></p>
+            <p><b>O número 6 é o melhor possível.</b> Com 5 vértices a conclusão falha: no ciclo <span class="m"><i>C</i><sub>5</sub></span> (Figura 12), dois vértices adjacentes quaisquer têm o terceiro vizinho comum ausente, de modo que <span class="m">ω = 2</span>, e qualquer 3 vértices incluem um par adjacente, de modo que <span class="m">α = 2</span>.</p>
+            <figure>
+              <svg class="dg" viewBox="0 0 260 240" role="img" aria-label="Ciclo de cinco vértices, sem triângulo e sem três vértices independentes">
+                <g>
+                  <line class="e" x1="130" y1="30" x2="222" y2="97"/>
+                  <line class="e" x1="222" y1="97" x2="187" y2="205"/>
+                  <line class="e" x1="187" y1="205" x2="73" y2="205"/>
+                  <line class="e" x1="73" y1="205" x2="38" y2="97"/>
+                  <line class="e" x1="38" y1="97" x2="130" y2="30"/>
+                </g>
+                <g class="v"><circle cx="130" cy="30" r="16"/><text x="130" y="30">1</text></g>
+                <g class="v"><circle cx="222" cy="97" r="16"/><text x="222" y="97">2</text></g>
+                <g class="v"><circle cx="187" cy="205" r="16"/><text x="187" y="205">3</text></g>
+                <g class="v"><circle cx="73" cy="205" r="16"/><text x="73" y="205">4</text></g>
+                <g class="v"><circle cx="38" cy="97" r="16"/><text x="38" y="97">5</text></g>
+              </svg>
+              <figcaption><b>Figura 12.</b> <span class="m"><i>C</i><sub>5</sub></span>: <span class="m">ω(<i>C</i><sub>5</sub>) = α(<i>C</i><sub>5</sub>) = 2</span>. Portanto 5 vértices não bastam — o enunciado precisa de 6.</figcaption>
+            </figure>
+            <p>Na linguagem da teoria de Ramsey, o que acabamos de provar é <span class="m"><i>R</i>(3,3) ≤ 6</span>, e o <span class="m"><i>C</i><sub>5</sub></span> mostra que <span class="m"><i>R</i>(3,3) = 6</span>.</p>
+          </div>
+        </article>
+
+        <!-- Ex 20 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 20</span><div class="stmt">
+            <p>Dado um grafo <span class="m"><i>G</i></span>, denotamos por <span class="m">α(<i>G</i>)</span> a cardinalidade do maior conjunto independente em <span class="m"><i>G</i></span>,</p>
+            <div class="eq"><div class="body">α(<i>G</i>) = max { |<i>A</i>| : <i>A</i> ⊆ <i>V</i>(<i>G</i>) é um conjunto independente }.</div></div>
+            <p>Prove que se <span class="m"><span class="ovl"><i>d</i></span>(<i>G</i>) > α(<i>G</i>)</span> então <span class="m"><i>G</i></span> contém triângulo, para todo <span class="m"><i>G</i></span>. (Aqui <span class="m"><span class="ovl"><i>d</i></span>(<i>G</i>)</span> é o grau médio, definido em (6) no capítulo 1.)</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h20" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a20" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h20"><div class="plab">Dica</div>
+            <p>Prove a contrapositiva. Num grafo <b>sem</b> triângulo, o que se pode dizer do conjunto <span class="m"><i>N</i>(<i>v</i>)</span> de vizinhos de um vértice qualquer?</p>
+          </div>
+          <div class="panel answer" id="a20"><div class="plab">Resolução</div>
+            <p>Provamos a <b>contrapositiva</b>: se <span class="m"><i>G</i></span> não contém triângulo, então <span class="m"><span class="ovl"><i>d</i></span>(<i>G</i>) ≤ α(<i>G</i>)</span>.</p>
+            <p><b>Passo 1 — sem triângulo, vizinhança é independente.</b> Seja <span class="m"><i>v</i> ∈ <i>V</i>(<i>G</i>)</span>. Suponha que dois vizinhos distintos <span class="m"><i>x</i>, <i>y</i> ∈ <i>N</i>(<i>v</i>)</span> fossem adjacentes. Então <span class="m">{<i>v</i>,<i>x</i>}</span>, <span class="m">{<i>v</i>,<i>y</i>}</span> e <span class="m">{<i>x</i>,<i>y</i>}</span> seriam arestas e <span class="m">{<i>v</i>,<i>x</i>,<i>y</i>}</span> um triângulo — contra a hipótese. Logo</p>
+            <div class="eq"><div class="body"><i>N</i>(<i>v</i>) é um conjunto independente, para todo <i>v</i> ∈ <i>V</i>(<i>G</i>).</div></div>
+            <p><b>Passo 2 — daí sai a cota.</b> Pela definição de <span class="m">α</span> como <i>máximo</i> sobre os independentes, e como <span class="m">|<i>N</i>(<i>v</i>)| = <i>d</i>(<i>v</i>)</span>,</p>
+            <div class="eq"><div class="body"><i>d</i>(<i>v</i>) = |<i>N</i>(<i>v</i>)| ≤ α(<i>G</i>) &nbsp;&nbsp;para todo <i>v</i> ∈ <i>V</i>(<i>G</i>),</div></div>
+            <p>ou seja <span class="m">Δ(<i>G</i>) ≤ α(<i>G</i>)</span>. Pelo exercício 9 do capítulo 1, o grau médio fica entre o mínimo e o máximo, portanto</p>
+            <div class="eq"><div class="body"><span class="ovl"><i>d</i></span>(<i>G</i>) ≤ Δ(<i>G</i>) ≤ α(<i>G</i>).</div></div>
+            <p><b>Conclusão.</b> Provamos “sem triângulo <span class="m">⟹</span> <span class="m"><span class="ovl"><i>d</i></span>(<i>G</i>) ≤ α(<i>G</i>)</span>”. A contrapositiva é exatamente o enunciado: se <span class="m"><span class="ovl"><i>d</i></span>(<i>G</i>) > α(<i>G</i>)</span>, então <span class="m"><i>G</i></span> contém triângulo. <span style="font-weight:700">□</span></p>
+            <div class="box tip">
+              <div class="h">Duas observações</div>
+              <ul>
+                <li>O argumento prova a versão <b>mais forte</b> <span class="m">Δ(<i>G</i>) > α(<i>G</i>) ⟹ <i>G</i> contém triângulo</span>, já que <span class="m"><span class="ovl"><i>d</i></span> ≤ Δ</span>. A versão com grau médio é a que costuma ser útil, porque o grau médio se calcula direto de <span class="m">|<i>V</i>|</span> e <span class="m">|<i>E</i>|</span>: <span class="m"><span class="ovl"><i>d</i></span>(<i>G</i>) = 2|<i>E</i>|∕|<i>V</i>|</span>.</li>
+                <li>A recíproca é <b>falsa</b>: o triângulo <span class="m"><i>K</i><sup>3</sup></span> tem <span class="m"><span class="ovl"><i>d</i></span> = 2</span> e <span class="m">α = 1</span> (ok, <span class="m">2 > 1</span>), mas o grafo formado por um triângulo mais 10 vértices isolados contém triângulo e tem <span class="m"><span class="ovl"><i>d</i></span> = 6∕13 < 1 ≤ α = 11</span>. Ter triângulo não obriga grau médio alto.</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <!-- Ex 21 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 21</span><div class="stmt">
+            <p>Para todo grafo <span class="m"><i>G</i></span>, denotamos por <span class="m">ω(<i>G</i>)</span> a cardinalidade do maior clique em <span class="m"><i>G</i></span>,</p>
+            <div class="eq"><div class="body">ω(<i>G</i>) = max { |<i>A</i>| : <i>A</i> ⊆ <i>V</i>(<i>G</i>) é um clique }.</div></div>
+            <p>Prove que <span class="m">ω(<i>G</i>) = α(<span class="ovl"><i>G</i></span>)</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h21" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a21" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h21"><div class="plab">Dica</div>
+            <p>Não compare os números diretamente. Prove primeiro a afirmação sobre <b>conjuntos</b>: <span class="m"><i>U</i></span> é clique em <span class="m"><i>G</i></span> se e somente se <span class="m"><i>U</i></span> é independente em <span class="m"><span class="ovl"><i>G</i></span></span>. Dois máximos sobre a mesma família de conjuntos são iguais.</p>
+          </div>
+          <div class="panel answer" id="a21"><div class="plab">Resolução</div>
+            <p><i>(Nota: na extração do original a barra de complemento sobre o segundo <span class="m"><i>G</i></span> se perdeu, resultando em “<span class="m">ω(<i>G</i>) = α(<i>G</i>)</span>”, que é falso — no triângulo <span class="m">ω = 3</span> e <span class="m">α = 1</span>. O enunciado correto é o acima, com o complemento.)</i></p>
+            <p><b>Passo 1 — a afirmação de conjuntos.</b> Seja <span class="m"><i>U</i> ⊆ <i>V</i>(<i>G</i>) = <i>V</i>(<span class="ovl"><i>G</i></span>)</span>. Afirmo:</p>
+            <div class="eq"><div class="body"><i>U</i> é clique em <i>G</i> &nbsp;⟺&nbsp; <i>U</i> é conjunto independente em <span class="ovl"><i>G</i></span>.</div></div>
+            <p>De fato, para <span class="m"><i>u</i> ≠ <i>v</i></span> em <span class="m"><i>U</i></span>, a definição de complemento dá</p>
+            <div class="eq"><div class="body">{<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) &nbsp;⟺&nbsp; {<i>u</i>,<i>v</i>} ∉ <i>E</i>(<span class="ovl"><i>G</i></span>).</div></div>
+            <p>Então:</p>
+            <ul>
+              <li><span class="m"><i>U</i></span> clique em <span class="m"><i>G</i></span> significa <span class="m"><i>G</i>[<i>U</i>]</span> completo, isto é, <b>todo</b> par de <span class="m"><i>U</i></span> está em <span class="m"><i>E</i>(<i>G</i>)</span>;</li>
+              <li>pela equivalência acima, isso é o mesmo que <b>nenhum</b> par de <span class="m"><i>U</i></span> estar em <span class="m"><i>E</i>(<span class="ovl"><i>G</i></span>)</span>, isto é, <span class="m"><span class="ovl"><i>G</i></span>[<i>U</i>] = (<i>U</i>, ∅)</span>, que é a definição de <span class="m"><i>U</i></span> independente em <span class="m"><span class="ovl"><i>G</i></span></span>.</li>
+            </ul>
+            <p><b>Passo 2 — passar aos máximos.</b> O Passo 1 diz que as duas famílias de conjuntos coincidem:</p>
+            <div class="eq"><div class="body">
+              { <i>U</i> ⊆ <i>V</i> : <i>U</i> é clique em <i>G</i> } = { <i>U</i> ⊆ <i>V</i> : <i>U</i> é independente em <span class="ovl"><i>G</i></span> }.
+            </div></div>
+            <p>Máximos de <span class="m">|<i>U</i>|</span> sobre famílias iguais são iguais, logo <span class="m">ω(<i>G</i>) = α(<span class="ovl"><i>G</i></span>)</span>. <span style="font-weight:700">□</span></p>
+            <p><b>Corolário.</b> Aplicando o resultado a <span class="m"><span class="ovl"><i>G</i></span></span> e usando <span class="m"><span class="ovl"><span class="ovl"><i>G</i></span></span> = <i>G</i></span>, obtemos também <span class="m">α(<i>G</i>) = ω(<span class="ovl"><i>G</i></span>)</span>.</p>
+            <p><b>Conferência.</b> Na Figura 1, <span class="m">ω(<i>G</i>) = 3</span> (o triângulo <span class="m">{1,2,5}</span>) e, no complemento, esses mesmos três vértices perdem todas as arestas entre si — e nenhum conjunto de 4 vértices de <span class="m"><span class="ovl"><i>G</i></span></span> é independente, porque seria um 4-clique em <span class="m"><i>G</i></span>. Logo <span class="m">α(<span class="ovl"><i>G</i></span>) = 3</span> ✔</p>
+          </div>
+        </article>
+
+        <!-- Ex 22 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 22</span><div class="stmt">
+            <p>Redefina, para todo grafo <span class="m"><i>G</i></span>, o parâmetro <span class="m">χ(<i>G</i>)</span> dado no exercício 7 do capítulo 1 em função dos conjuntos independentes de <span class="m"><i>G</i></span>. Esse parâmetro é conhecido na literatura como <b>número cromático</b> do grafo.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a22" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a22"><div class="plab">Resolução</div>
+            <p><b>A definição pedida.</b></p>
+            <div class="eq"><div class="body">
+              χ(<i>G</i>) = min { <i>k</i> ∈ ℕ : existem <i>V</i><sub>1</sub>, …, <i>V</i><sub><i>k</i></sub> independentes, disjuntos, com <i>V</i><sub>1</sub> ∪ ⋅⋅⋅ ∪ <i>V</i><sub><i>k</i></sub> = <i>V</i>(<i>G</i>) }
+            </div></div>
+            <p>Equivalentemente: <span class="m">χ(<i>G</i>)</span> é o menor <span class="m"><i>k</i></span> tal que <span class="m"><i>G</i></span> é <span class="m"><i>k</i></span>-partido.</p>
+            <p><b>Por que é a mesma coisa que no exercício 7.</b> Lá <span class="m">χ(<i>G</i>)</span> era o menor número de “caixas” (cores) numa distribuição em que dois vértices adjacentes nunca compartilham caixa. A tradução é uma bijeção entre os dois objetos:</p>
+            <div class="scroll">
+            <table class="tbl livre">
+              <thead><tr><th>Coloração com <span class="m"><i>k</i></span> cores</th><th>Partição em <span class="m"><i>k</i></span> conjuntos</th></tr></thead>
+              <tbody>
+                <tr><td>função <span class="m"><i>c</i> : <i>V</i>(<i>G</i>) → {1,…,<i>k</i>}</span></td><td>classes <span class="m"><i>V</i><sub><i>i</i></sub> = { <i>v</i> : <i>c</i>(<i>v</i>) = <i>i</i> }</span></td></tr>
+                <tr><td>cada vértice recebe exatamente uma cor</td><td>as classes são disjuntas e cobrem <span class="m"><i>V</i>(<i>G</i>)</span></td></tr>
+                <tr><td><span class="m"><i>c</i></span> é própria: <span class="m">{<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) ⟹ <i>c</i>(<i>u</i>) ≠ <i>c</i>(<i>v</i>)</span></td><td>nenhuma classe contém os dois extremos de uma aresta, isto é, <b>cada <span class="m"><i>V</i><sub><i>i</i></sub></span> é independente</b></td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>A terceira linha é o ponto: “nenhuma aresta dentro de <span class="m"><i>V</i><sub><i>i</i></sub></span>” é exatamente <span class="m"><i>G</i>[<i>V</i><sub><i>i</i></sub>] = (<i>V</i><sub><i>i</i></sub>, ∅)</span>, a definição de conjunto independente. Como a correspondência preserva o número <span class="m"><i>k</i></span>, os dois mínimos coincidem.</p>
+            <p><b>Testes.</b></p>
+            <ul>
+              <li><span class="m">χ(<i>K</i><sup><i>n</i></sup>) = <i>n</i></span>: todo conjunto independente de <span class="m"><i>K</i><sup><i>n</i></sup></span> tem no máximo 1 vértice, então são necessárias <span class="m"><i>n</i></span> classes.</li>
+              <li><span class="m">χ(<i>G</i>) = 1</span> ⟺ <span class="m"><i>V</i>(<i>G</i>) ≠ ∅</span> e <span class="m"><i>E</i>(<i>G</i>) = ∅</span>, pois a única classe teria de ser <span class="m"><i>V</i>(<i>G</i>)</span> independente.</li>
+              <li><span class="m">χ(<i>G</i>) = 0</span> só para <span class="m"><i>G</i> = (∅,∅)</span> (a união vazia de classes é <span class="m">∅</span>).</li>
+              <li>Na Figura 1: <span class="m">{1,3,6,8} ∪ {2,4,7} ∪ {5}</span> são três classes independentes, e o triângulo impede duas; logo <span class="m">χ = 3</span>.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Ex 23 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 23</span><div class="stmt">
+            <p>Prove que as duas desigualdades a seguir valem para todo grafo <span class="m"><i>G</i></span> com pelo menos um vértice:</p>
+            <div class="eq"><div class="body">
+              ω(<i>G</i>) ≤ χ(<i>G</i>) &nbsp;&nbsp;&nbsp;e&nbsp;&nbsp;&nbsp; χ(<i>G</i>) ≥ <span class="frac"><span>|<i>V</i>(<i>G</i>)|</span><span>α(<i>G</i>)</span></span>
+            </div><div class="tag">(13)</div></div>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h23" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a23" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h23"><div class="plab">Dica</div>
+            <p>Use a definição do exercício 22: uma coloração ótima é uma partição de <span class="m"><i>V</i>(<i>G</i>)</span> em <span class="m">χ(<i>G</i>)</span> conjuntos independentes. Para a primeira desigualdade, pergunte quantos vértices de um clique podem cair na mesma classe. Para a segunda, some os tamanhos das classes.</p>
+          </div>
+          <div class="panel answer" id="a23"><div class="plab">Resolução</div>
+            <p>Escreva <span class="m"><i>n</i> = |<i>V</i>(<i>G</i>)| ≥ 1</span>, <span class="m"><i>k</i> = χ(<i>G</i>)</span> e fixe uma partição ótima</p>
+            <div class="eq"><div class="body"><i>V</i>(<i>G</i>) = <i>V</i><sub>1</sub> ∪ <i>V</i><sub>2</sub> ∪ ⋅⋅⋅ ∪ <i>V</i><sub><i>k</i></sub>,&nbsp;&nbsp;com os <i>V</i><sub><i>i</i></sub> disjuntos e independentes.</div></div>
+            <p>Note que <span class="m"><i>n</i> ≥ 1</span> garante <span class="m">α(<i>G</i>) ≥ 1</span> (um único vértice já é independente) e <span class="m"><i>k</i> ≥ 1</span>, então as duas expressões fazem sentido.</p>
+            <p class="kicker">Primeira desigualdade: <span class="m">ω(<i>G</i>) ≤ χ(<i>G</i>)</span></p>
+            <p>Seja <span class="m"><i>A</i></span> um clique com <span class="m">|<i>A</i>| = ω(<i>G</i>)</span>. Para cada <span class="m"><i>i</i></span>, o conjunto <span class="m"><i>A</i> ∩ <i>V</i><sub><i>i</i></sub></span> tem <b>no máximo um</b> vértice: se tivesse dois vértices distintos <span class="m"><i>u</i>, <i>v</i></span>, eles seriam adjacentes (por estarem no clique <span class="m"><i>A</i></span>) e não adjacentes (por estarem no independente <span class="m"><i>V</i><sub><i>i</i></sub></span>) — absurdo. Como os <span class="m"><i>V</i><sub><i>i</i></sub></span> cobrem <span class="m"><i>V</i>(<i>G</i>)</span>,</p>
+            <div class="eq"><div class="body">
+              ω(<i>G</i>) = |<i>A</i>| = <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=1..<i>k</i></span></span> |<i>A</i> ∩ <i>V</i><sub><i>i</i></sub>| ≤ <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=1..<i>k</i></span></span> 1 = <i>k</i> = χ(<i>G</i>).
+            </div></div>
+            <p class="kicker">Segunda desigualdade: <span class="m">χ(<i>G</i>) ≥ <i>n</i> ∕ α(<i>G</i>)</span></p>
+            <p>Cada <span class="m"><i>V</i><sub><i>i</i></sub></span> é independente, logo <span class="m">|<i>V</i><sub><i>i</i></sub>| ≤ α(<i>G</i>)</span> pela definição de <span class="m">α</span> como máximo. Somando as <span class="m"><i>k</i></span> desigualdades e usando que a partição cobre todos os vértices exatamente uma vez:</p>
+            <div class="eq"><div class="body">
+              <i>n</i> = <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=1..<i>k</i></span></span> |<i>V</i><sub><i>i</i></sub>| ≤ <i>k</i> · α(<i>G</i>)
+              &nbsp;&nbsp;⟹&nbsp;&nbsp; χ(<i>G</i>) = <i>k</i> ≥ <span class="frac"><span><i>n</i></span><span>α(<i>G</i>)</span></span>
+            </div><div class="tag">□</div></div>
+            <p class="kicker">As duas cotas se completam</p>
+            <p>Nenhuma das duas domina a outra, então na prática usamos <span class="m">χ(<i>G</i>) ≥ max{ ω(<i>G</i>), <i>n</i>∕α(<i>G</i>) }</span>:</p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th>Grafo</th><th><i>n</i></th><th>ω</th><th>α</th><th><i>n</i>∕α</th><th>χ</th><th>melhor cota</th></tr></thead>
+              <tbody>
+                <tr><td>Figura 1</td><td>8</td><td>3</td><td>4</td><td>2</td><td>3</td><td>ω</td></tr>
+                <tr><td><span class="m"><i>C</i><sub>5</sub></span></td><td>5</td><td>2</td><td>2</td><td>2,5</td><td>3</td><td><i>n</i>∕α</td></tr>
+                <tr><td><span class="m"><i>K</i><sub>3,4</sub></span></td><td>7</td><td>2</td><td>4</td><td>1,75</td><td>2</td><td>ω</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>No caso do <span class="m"><i>C</i><sub>5</sub></span> a segunda cota dá <span class="m">χ ≥ 2,5</span> e, como <span class="m">χ</span> é inteiro, <span class="m">χ ≥ 3</span> — informação que a cota pelo clique não dava. Combinada com a coloração explícita <span class="m">{1,3} ∪ {2,4} ∪ {5}</span>, ela determina <span class="m">χ(<i>C</i><sub>5</sub>) = 3</span>.</p>
+          </div>
+        </article>
+
+        <!-- Ex 24 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 24</span><div class="stmt">
+            <p>Prove que <span class="m"><i>E</i>(<i>A</i>, <i>B</i>) = <i>E</i>(<i>B</i>, <i>A</i>)</span>, segundo a definição dada em (11).</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a24" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a24"><div class="plab">Resolução</div>
+            <p>Por (11), com <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span> disjuntos,</p>
+            <div class="eq"><div class="body">
+              <i>E</i>(<i>A</i>,<i>B</i>) = { {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) : <i>u</i> ∈ <i>A</i> e <i>v</i> ∈ <i>B</i> },&nbsp;&nbsp;&nbsp;
+              <i>E</i>(<i>B</i>,<i>A</i>) = { {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) : <i>u</i> ∈ <i>B</i> e <i>v</i> ∈ <i>A</i> }.
+            </div></div>
+            <p>Provamos as duas inclusões. O único fato usado é que <b>aresta é conjunto</b>, e conjunto não tem ordem: <span class="m">{<i>u</i>,<i>v</i>} = {<i>v</i>,<i>u</i>}</span>.</p>
+            <p><b>(⊆)</b> Seja <span class="m"><i>e</i> ∈ <i>E</i>(<i>A</i>,<i>B</i>)</span>. Então <span class="m"><i>e</i> ∈ <i>E</i>(<i>G</i>)</span> e podemos escrever <span class="m"><i>e</i> = {<i>u</i>,<i>v</i>}</span> com <span class="m"><i>u</i> ∈ <i>A</i></span> e <span class="m"><i>v</i> ∈ <i>B</i></span>. Escreva agora a mesma aresta como <span class="m"><i>e</i> = {<i>v</i>,<i>u</i>} = {<i>u</i>′,<i>v</i>′}</span> com <span class="m"><i>u</i>′ = <i>v</i> ∈ <i>B</i></span> e <span class="m"><i>v</i>′ = <i>u</i> ∈ <i>A</i></span>. Isso é precisamente a condição de pertencer a <span class="m"><i>E</i>(<i>B</i>,<i>A</i>)</span>. Logo <span class="m"><i>e</i> ∈ <i>E</i>(<i>B</i>,<i>A</i>)</span>.</p>
+            <p><b>(⊇)</b> Idêntico, trocando os papéis de <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span>.</p>
+            <p>Das duas inclusões, <span class="m"><i>E</i>(<i>A</i>,<i>B</i>) = <i>E</i>(<i>B</i>,<i>A</i>)</span>. <span style="font-weight:700">□</span></p>
+            <div class="box warn">
+              <div class="h">Por que isso não é uma bobagem</div>
+              <p>
+                A definição (11) <i>parece</i> assimétrica, porque nomeia um extremo de “<span class="m"><i>u</i></span>” e o outro de
+                “<span class="m"><i>v</i></span>”. A demonstração mostra que a assimetria é só da escrita. Se as arestas fossem
+                <b>pares ordenados</b> — como num grafo dirigido — a igualdade seria <b>falsa</b>, e aí
+                <span class="m"><i>E</i>(<i>A</i>,<i>B</i>)</span> e <span class="m"><i>E</i>(<i>B</i>,<i>A</i>)</span> contariam arcos
+                em sentidos opostos. É por isso que a hipótese “grafo simples não dirigido” aparece no argumento.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Ex 25 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 25</span><div class="stmt">
+            <p>Seja <span class="m"><i>G</i> = (<i>A</i> ∪ <i>B</i>, <i>E</i>)</span> um grafo bipartido qualquer e suponha que <span class="m">|<i>A</i>| < |<i>B</i>|</span>. É verdade que <span class="m">α(<i>G</i>) = |<i>B</i>|</span>? Determine <span class="m">ω(<i>G</i>)</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a25" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a25"><div class="plab">Resolução</div>
+            <p class="kicker">Parte 1 · <span class="m">α(<i>G</i>) = |<i>B</i>|</span>? Não necessariamente</p>
+            <p><b>O que sempre vale.</b> A parte <span class="m"><i>B</i></span> é, por definição de grafo bipartido, um conjunto independente. Logo</p>
+            <div class="eq"><div class="body">α(<i>G</i>) ≥ |<i>B</i>| &nbsp;&nbsp;(e também α(<i>G</i>) ≥ |<i>A</i>|, mas |<i>B</i>| é a melhor das duas).</div></div>
+            <p><b>Contraexemplo para a igualdade.</b> Tome <span class="m"><i>A</i> = {<i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>}</span>, <span class="m"><i>B</i> = {<i>b</i><sub>1</sub>, <i>b</i><sub>2</sub>, <i>b</i><sub>3</sub>}</span> e <span class="m"><i>E</i> = { {<i>a</i><sub>1</sub>, <i>b</i><sub>1</sub>} }</span>. Então <span class="m">|<i>A</i>| = 2 < 3 = |<i>B</i>|</span>, mas</p>
+            <div class="eq"><div class="body"><i>S</i> = {<i>a</i><sub>2</sub>, <i>b</i><sub>1</sub>, <i>b</i><sub>2</sub>, <i>b</i><sub>3</sub>}</div></div>
+            <p>é independente: os <span class="m"><i>b</i><sub><i>i</i></sub></span> não se ligam entre si (estão na mesma parte) e <span class="m"><i>a</i><sub>2</sub></span> não tem vizinho algum. Assim <span class="m">α(<i>G</i>) ≥ 4 > 3 = |<i>B</i>|</span>. A resposta é, portanto, <b>não</b>.</p>
+            <figure>
+              <svg class="dg" viewBox="0 0 380 250" role="img" aria-label="Grafo bipartido com duas e três partes e uma única aresta; quatro vértices formam um conjunto independente">
+                <g>
+                  <line class="e" x1="85" y1="85" x2="300" y2="55"/>
+                </g>
+                <g class="v open"><circle cx="85" cy="85" r="17"/><text x="85" y="85">a₁</text></g>
+                <g class="v hl2"><circle cx="85" cy="175" r="17"/><text x="85" y="175">a₂</text></g>
+                <g class="v hl2"><circle cx="300" cy="55" r="17"/><text x="300" y="55">b₁</text></g>
+                <g class="v hl2"><circle cx="300" cy="125" r="17"/><text x="300" y="125">b₂</text></g>
+                <g class="v hl2"><circle cx="300" cy="195" r="17"/><text x="300" y="195">b₃</text></g>
+              </svg>
+              <div class="legend">
+                <span><i style="background:var(--c3)"></i>conjunto independente de tamanho 4</span>
+              </div>
+              <figcaption><b>Figura 13.</b> Aqui <span class="m">|<i>B</i>| = 3</span> mas <span class="m">α(<i>G</i>) = 4</span>: basta trocar <span class="m"><i>a</i><sub>1</sub></span> por <span class="m"><i>a</i><sub>2</sub></span> e juntar tudo o que não é vizinho.</figcaption>
+            </figure>
+            <p><b>Quando a igualdade vale.</b> Se <span class="m"><i>G</i> = <i>K</i><sub>|<i>A</i>|,|<i>B</i>|</sub></span> é bipartido <b>completo</b>, então nenhum conjunto independente contém vértices das duas partes (todo par cruzado é aresta); logo todo independente está inteiro em <span class="m"><i>A</i></span> ou inteiro em <span class="m"><i>B</i></span>, e</p>
+            <div class="eq"><div class="body">α(<i>K</i><sub>|<i>A</i>|,|<i>B</i>|</sub>) = max{ |<i>A</i>|, |<i>B</i>| } = |<i>B</i>|.</div></div>
+            <p>De modo geral, quanto menos arestas o grafo tem, mais <span class="m">α(<i>G</i>)</span> sobe acima de <span class="m">|<i>B</i>|</span>. No extremo <span class="m"><i>E</i> = ∅</span> temos <span class="m">α(<i>G</i>) = |<i>A</i>| + |<i>B</i>|</span>.</p>
+            <p class="kicker">Parte 2 · o valor de <span class="m">ω(<i>G</i>)</span></p>
+            <p><b>Passo 1 — nenhum clique tem 3 vértices.</b> Seja <span class="m"><i>U</i></span> um clique com <span class="m">|<i>U</i>| ≥ 3</span>. Como <span class="m"><i>U</i> ⊆ <i>A</i> ∪ <i>B</i></span>, a casa dos pombos garante dois vértices distintos de <span class="m"><i>U</i></span> na mesma parte. Mas partes são independentes, então esses dois não são adjacentes — contradizendo <span class="m"><i>U</i></span> ser clique. Logo <span class="m">ω(<i>G</i>) ≤ 2</span>.</p>
+            <p><b>Passo 2 — o valor exato.</b> A hipótese <span class="m">|<i>A</i>| < |<i>B</i>|</span> garante <span class="m">|<i>B</i>| ≥ 1</span>, portanto <span class="m"><i>V</i>(<i>G</i>) ≠ ∅</span> e qualquer vértice isolado já é um 1-clique. Assim</p>
+            <div class="eq"><div class="body">
+              ω(<i>G</i>) = 2, se <i>E</i> ≠ ∅;&nbsp;&nbsp;&nbsp;&nbsp; ω(<i>G</i>) = 1, se <i>E</i> = ∅.
+            </div></div>
+            <p>De fato, se existe uma aresta <span class="m">{<i>a</i>,<i>b</i>}</span>, o conjunto <span class="m">{<i>a</i>,<i>b</i>}</span> é um 2-clique. Resumindo: em grafo bipartido, o maior clique é uma aresta — e é esse o motivo pelo qual grafos bipartidos são “fáceis” para muitos problemas em que cliques atrapalham.</p>
+            <p><i>(Nota sobre o enunciado: ele não diz se <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span> são uma bipartição fixada ou apenas alguma; adotamos a leitura natural de que <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span> são as partes dadas. As respostas não mudam com a outra leitura, pois <span class="m">ω</span> não depende da bipartição escolhida.)</i></p>
+          </div>
+        </article>
+
+        <!-- Ex 26 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 26</span><div class="stmt">
+            <p>Prove que <span class="m"><i>G</i></span> é bipartido se e somente se <span class="m">χ(<i>G</i>) < 3</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h26" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a26" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h26"><div class="plab">Dica</div>
+            <p><span class="m">χ(<i>G</i>)</span> é inteiro, então <span class="m">χ(<i>G</i>) < 3</span> quer dizer <span class="m">χ(<i>G</i>) ∈ {0, 1, 2}</span>. Use a definição do exercício 22 e não esqueça de tratar os casos <span class="m">χ = 0</span> e <span class="m">χ = 1</span> — é aí que entra a Observação 3.</p>
+          </div>
+          <div class="panel answer" id="a26"><div class="plab">Resolução</div>
+            <p>Como <span class="m">χ(<i>G</i>) ∈ ℕ</span>, a condição <span class="m">χ(<i>G</i>) < 3</span> é o mesmo que <span class="m">χ(<i>G</i>) ≤ 2</span>. Usamos a caracterização do exercício 22: <span class="m">χ(<i>G</i>)</span> é o menor número de conjuntos independentes, disjuntos, cuja união é <span class="m"><i>V</i>(<i>G</i>)</span>.</p>
+            <p class="kicker">(⟹) Bipartido implica <span class="m">χ(<i>G</i>) ≤ 2</span></p>
+            <p>Se <span class="m"><i>G</i></span> é bipartido, existem <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span> independentes com <span class="m"><i>A</i> ∩ <i>B</i> = ∅</span> e <span class="m"><i>A</i> ∪ <i>B</i> = <i>V</i>(<i>G</i>)</span>. Essa é, literalmente, uma partição de <span class="m"><i>V</i>(<i>G</i>)</span> em 2 conjuntos independentes. Como <span class="m">χ(<i>G</i>)</span> é o <i>mínimo</i> sobre tais partições e exibimos uma com 2 classes, <span class="m">χ(<i>G</i>) ≤ 2</span>.</p>
+            <p class="kicker">(⟸) <span class="m">χ(<i>G</i>) ≤ 2</span> implica bipartido</p>
+            <p>Seja <span class="m"><i>k</i> = χ(<i>G</i>) ≤ 2</span> e tome uma partição ótima em <span class="m"><i>k</i></span> conjuntos independentes. Três casos:</p>
+            <ul>
+              <li><span class="m"><i>k</i> = 2</span>: a partição é <span class="m"><i>V</i>(<i>G</i>) = <i>V</i><sub>1</sub> ∪ <i>V</i><sub>2</sub></span> com <span class="m"><i>V</i><sub>1</sub>, <i>V</i><sub>2</sub></span> independentes e disjuntos. Tomando <span class="m"><i>A</i> = <i>V</i><sub>1</sub></span> e <span class="m"><i>B</i> = <i>V</i><sub>2</sub></span>, a definição de bipartido está satisfeita.</li>
+              <li><span class="m"><i>k</i> = 1</span>: <span class="m"><i>V</i>(<i>G</i>)</span> é ele mesmo independente, isto é, <span class="m"><i>E</i>(<i>G</i>) = ∅</span>. Tome <span class="m"><i>A</i> = <i>V</i>(<i>G</i>)</span> e <span class="m"><i>B</i> = ∅</span>: são independentes (o vazio é independente), disjuntos e a união é <span class="m"><i>V</i>(<i>G</i>)</span>. Logo <span class="m"><i>G</i></span> é bipartido — em particular, todo grafo trivial é bipartido, conforme a Observação 3.</li>
+              <li><span class="m"><i>k</i> = 0</span>: a união de zero classes é <span class="m">∅</span>, então <span class="m"><i>V</i>(<i>G</i>) = ∅</span> e <span class="m"><i>G</i></span> é o grafo vazio, bipartido pela Observação 3 (tome <span class="m"><i>A</i> = <i>B</i> = ∅</span>).</li>
+            </ul>
+            <p>As duas implicações dão a equivalência. <span style="font-weight:700">□</span></p>
+            <div class="box warn">
+              <div class="h">Onde a convenção é indispensável</div>
+              <p>
+                Se exigíssemos partes <b>não vazias</b> na definição de bipartido, o grafo trivial e o vazio deixariam de ser
+                bipartidos e a implicação (⟸) falharia justamente nos casos <span class="m"><i>k</i> ≤ 1</span>. A Observação 3 existe
+                para fechar esse buraco.
+              </p>
+            </div>
+            <p><b>Uso prático.</b> A equivalência transforma “é bipartido?” numa pergunta sobre coloração com 2 cores. Em particular, exibir um triângulo prova que o grafo não é bipartido: pelo exercício 23, <span class="m">χ(<i>G</i>) ≥ ω(<i>G</i>) ≥ 3</span>.</p>
+          </div>
+        </article>
+
+        <!-- Ex 27 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 27</span><div class="stmt">
+            <p>Prove a afirmação da equação (12), isto é, que para todo <span class="m"><i>A</i> ⊆ <i>V</i>(<i>G</i>)</span></p>
+            <div class="eq"><div class="body">
+              <i>E</i>(<i>G</i>) = <i>E</i>(<i>G</i>[<i>A</i>]) ∪ <i>E</i>(<i>G</i>[<span class="ovl"><i>A</i></span>]) ∪ <i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>).
+            </div></div>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h27" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a27" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h27"><div class="plab">Dica</div>
+            <p>Igualdade de conjuntos, duas inclusões. Na inclusão difícil, tome <span class="m"><i>e</i> = {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>)</span> e observe que cada um dos dois extremos está em <span class="m"><i>A</i></span> ou em <span class="m"><span class="ovl"><i>A</i></span></span>, sem terceira opção. Quantos casos isso gera?</p>
+          </div>
+          <div class="panel answer" id="a27"><div class="plab">Resolução</div>
+            <p>Escreva <span class="m"><span class="ovl"><i>A</i></span> = <i>V</i>(<i>G</i>) \ <i>A</i></span>. Por definição de complemento de conjuntos, para todo <span class="m"><i>x</i> ∈ <i>V</i>(<i>G</i>)</span> vale <b>exatamente uma</b> das alternativas <span class="m"><i>x</i> ∈ <i>A</i></span> ou <span class="m"><i>x</i> ∈ <span class="ovl"><i>A</i></span></span>. É o único ingrediente da prova.</p>
+            <p class="kicker">Inclusão (⊇): os três conjuntos só contêm arestas de <span class="m"><i>G</i></span></p>
+            <ul>
+              <li><span class="m"><i>E</i>(<i>G</i>[<i>A</i>]) = { {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) : <i>u</i>, <i>v</i> ∈ <i>A</i> } ⊆ <i>E</i>(<i>G</i>)</span>, direto da definição de subgrafo induzido.</li>
+              <li>O mesmo para <span class="m"><i>E</i>(<i>G</i>[<span class="ovl"><i>A</i></span>])</span>.</li>
+              <li><span class="m"><i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>) ⊆ <i>E</i>(<i>G</i>)</span> porque (11) seleciona elementos de <span class="m"><i>E</i>(<i>G</i>)</span>. (A definição exige <span class="m"><i>A</i></span> e <span class="m"><span class="ovl"><i>A</i></span></span> disjuntos, o que é automático.)</li>
+            </ul>
+            <p>A união de três subconjuntos de <span class="m"><i>E</i>(<i>G</i>)</span> está contida em <span class="m"><i>E</i>(<i>G</i>)</span>.</p>
+            <p class="kicker">Inclusão (⊆): toda aresta cai em um dos três casos</p>
+            <p>Seja <span class="m"><i>e</i> = {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>)</span>. Cada extremo está em <span class="m"><i>A</i></span> ou em <span class="m"><span class="ovl"><i>A</i></span></span>, o que dá quatro combinações, duas delas equivalentes por <span class="m">{<i>u</i>,<i>v</i>} = {<i>v</i>,<i>u</i>}</span>:</p>
+            <div class="scroll">
+            <table class="tbl livre">
+              <thead><tr><th>Caso</th><th>Conclusão</th><th>Por quê</th></tr></thead>
+              <tbody>
+                <tr><td><span class="m"><i>u</i> ∈ <i>A</i></span> e <span class="m"><i>v</i> ∈ <i>A</i></span></td><td><span class="m"><i>e</i> ∈ <i>E</i>(<i>G</i>[<i>A</i>])</span></td><td>é aresta de <span class="m"><i>G</i></span> com os dois extremos em <span class="m"><i>A</i></span> — a definição de <span class="m"><i>G</i>[<i>A</i>]</span>.</td></tr>
+                <tr><td><span class="m"><i>u</i> ∈ <span class="ovl"><i>A</i></span></span> e <span class="m"><i>v</i> ∈ <span class="ovl"><i>A</i></span></span></td><td><span class="m"><i>e</i> ∈ <i>E</i>(<i>G</i>[<span class="ovl"><i>A</i></span>])</span></td><td>idem, do outro lado.</td></tr>
+                <tr><td>um extremo em <span class="m"><i>A</i></span>, o outro em <span class="m"><span class="ovl"><i>A</i></span></span></td><td><span class="m"><i>e</i> ∈ <i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)</span></td><td>se <span class="m"><i>u</i> ∈ <i>A</i>, <i>v</i> ∈ <span class="ovl"><i>A</i></span></span>, é (11) direto; se <span class="m"><i>u</i> ∈ <span class="ovl"><i>A</i></span>, <i>v</i> ∈ <i>A</i></span>, usamos <span class="m"><i>E</i>(<span class="ovl"><i>A</i></span>, <i>A</i>) = <i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)</span>, que é o exercício 24.</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>Em todos os casos <span class="m"><i>e</i></span> pertence a um dos três conjuntos, logo à união deles. Das duas inclusões segue (12). <span style="font-weight:700">□</span></p>
+            <p class="kicker">A união é disjunta — e isso é o que se usa na prática</p>
+            <p>Os três casos da tabela são mutuamente exclusivos (dependem de quantos extremos estão em <span class="m"><i>A</i></span>: dois, zero ou um), então nenhuma aresta aparece em dois dos conjuntos. Portanto vale também</p>
+            <div class="eq"><div class="body">
+              |<i>E</i>(<i>G</i>)| = |<i>E</i>(<i>G</i>[<i>A</i>])| + |<i>E</i>(<i>G</i>[<span class="ovl"><i>A</i></span>])| + |<i>E</i>(<i>A</i>, <span class="ovl"><i>A</i></span>)|.
+            </div></div>
+            <p><b>Conferência na Figura 7</b>, com <span class="m"><i>A</i> = {1,2,3}</span>: <span class="m"><i>E</i>(<i>G</i>[<i>A</i>]) = { {1,2},{2,3} }</span> (2 arestas), <span class="m"><i>E</i>(<i>G</i>[<span class="ovl"><i>A</i></span>]) = { {4,5},{5,6},{4,7},{6,7} }</span> (4 arestas) e o corte <span class="m"><i>E</i>(<i>A</i>,<span class="ovl"><i>A</i></span>) = { {1,4},{2,4},{2,5},{3,6} }</span> (4 arestas). Total <span class="m">2 + 4 + 4 = 10 = |<i>E</i>(<i>G</i>)|</span> ✔</p>
+            <div class="box tip">
+              <div class="h">Para que serve (12)</div>
+              <p>
+                É a forma canônica de fazer indução ou “dividir para conquistar” sobre grafos: escolha
+                <span class="m"><i>A</i></span>, resolva o problema dentro de <span class="m"><i>A</i></span>, dentro de
+                <span class="m"><span class="ovl"><i>A</i></span></span>, e trate separadamente as arestas do corte. Em problemas
+                de fluxo e de conectividade, é exatamente o corte que carrega a informação relevante.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Ex 28 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 28</span><div class="stmt">
+            <p>Dado um grafo <span class="m"><i>G</i></span>, defina para todo <span class="m"><i>U</i> ⊆ <i>V</i>(<i>G</i>)</span> a vizinhança de <span class="m"><i>U</i></span>, denotada <span class="m"><i>N</i><sub><i>G</i></sub>(<i>U</i>)</span>, por</p>
+            <div class="eq"><div class="body">
+              <i>N</i><sub><i>G</i></sub>(<i>U</i>) = <span class="sum"><span class="o">⋃</span><span class="l"><i>u</i>∈<i>U</i></span></span> <i>N</i><sub><i>G</i></sub>(<i>u</i>).
+            </div></div>
+            <p>É verdade que <span class="m">|<i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)| = |<i>N</i><sub><i>G</i></sub>(<i>U</i>)|</span>? Justifique.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h28" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a28" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h28"><div class="plab">Dica</div>
+            <p>Duas coisas dão errado, e vale a pena procurar as duas. Primeiro: <span class="m"><i>N</i><sub><i>G</i></sub>(<i>U</i>)</span> pode conter vértices <b>de dentro</b> de <span class="m"><i>U</i></span>. Segundo: um vértice fora de <span class="m"><i>U</i></span> pode ser vizinho de <b>vários</b> vértices de <span class="m"><i>U</i></span>. Teste com uma estrela.</p>
+          </div>
+          <div class="panel answer" id="a28"><div class="plab">Resolução</div>
+            <p><b>Resposta: não</b>, a igualdade é falsa em geral — e falha nos dois sentidos.</p>
+            <p class="kicker">Contraexemplo 1 · o corte é maior</p>
+            <p>Seja <span class="m"><i>G</i> = <i>K</i><sub>1,3</sub></span>, a estrela com centro <span class="m"><i>c</i></span> e folhas <span class="m"><i>x</i>, <i>y</i>, <i>z</i></span>, e tome <span class="m"><i>U</i> = {<i>x</i>, <i>y</i>, <i>z</i>}</span>. Então <span class="m"><span class="ovl"><i>U</i></span> = {<i>c</i>}</span> e</p>
+            <div class="eq"><div class="body">
+              <i>N</i><sub><i>G</i></sub>(<i>U</i>) = <i>N</i>(<i>x</i>) ∪ <i>N</i>(<i>y</i>) ∪ <i>N</i>(<i>z</i>) = {<i>c</i>} ∪ {<i>c</i>} ∪ {<i>c</i>} = {<i>c</i>},&nbsp;&nbsp;
+              <i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>) = { {<i>x</i>,<i>c</i>}, {<i>y</i>,<i>c</i>}, {<i>z</i>,<i>c</i>} }.
+            </div></div>
+            <p>Logo <span class="m">|<i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)| = 3 ≠ 1 = |<i>N</i><sub><i>G</i></sub>(<i>U</i>)|</span>. A causa: a união de conjuntos <b>não repete</b> o centro, mas o corte tem uma aresta para cada vizinho em <span class="m"><i>U</i></span>.</p>
+            <figure>
+              <svg class="dg" viewBox="0 0 340 230" role="img" aria-label="Estrela com centro c e três folhas x, y, z; as três arestas do corte são tracejadas">
+                <g>
+                  <line class="e cut" x1="80" y1="40" x2="250" y2="115"/>
+                  <line class="e cut" x1="80" y1="115" x2="250" y2="115"/>
+                  <line class="e cut" x1="80" y1="190" x2="250" y2="115"/>
+                </g>
+                <g class="v c1"><circle cx="80" cy="40" r="17"/><text x="80" y="40">x</text></g>
+                <g class="v c1"><circle cx="80" cy="115" r="17"/><text x="80" y="115">y</text></g>
+                <g class="v c1"><circle cx="80" cy="190" r="17"/><text x="80" y="190">z</text></g>
+                <g class="v open"><circle cx="250" cy="115" r="17"/><text x="250" y="115">c</text></g>
+              </svg>
+              <div class="legend">
+                <span><i style="background:var(--c1)"></i><span class="m"><i>U</i> = {<i>x</i>,<i>y</i>,<i>z</i>}</span></span>
+                <span><i class="ln" style="background:var(--c2)"></i>corte: 3 arestas</span>
+              </div>
+              <figcaption><b>Figura 14.</b> Três arestas no corte, um único vértice na vizinhança: <span class="m">3 ≠ 1</span>.</figcaption>
+            </figure>
+            <p class="kicker">Contraexemplo 2 · a vizinhança é maior</p>
+            <p>Seja <span class="m"><i>G</i></span> a única aresta <span class="m">{<i>u</i>,<i>v</i>}</span> (mais nada) e <span class="m"><i>U</i> = {<i>u</i>, <i>v</i>}</span>. Então <span class="m"><span class="ovl"><i>U</i></span> = ∅</span> e <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>) = ∅</span>, mas</p>
+            <div class="eq"><div class="body"><i>N</i><sub><i>G</i></sub>(<i>U</i>) = <i>N</i>(<i>u</i>) ∪ <i>N</i>(<i>v</i>) = {<i>v</i>} ∪ {<i>u</i>} = {<i>u</i>,<i>v</i>},</div></div>
+            <p>ou seja <span class="m">0 ≠ 2</span>. A causa: <span class="m"><i>N</i><sub><i>G</i></sub>(<i>U</i>)</span> pode conter vértices de <span class="m"><i>U</i></span> — a definição não os exclui.</p>
+            <p class="kicker">O que é verdade</p>
+            <p>Contando o corte aresta por aresta a partir do lado de fora, cada <span class="m"><i>w</i> ∈ <span class="ovl"><i>U</i></span></span> contribui com <span class="m">|<i>N</i>(<i>w</i>) ∩ <i>U</i>|</span> arestas, e só contribui se tiver algum vizinho em <span class="m"><i>U</i></span>, isto é, se <span class="m"><i>w</i> ∈ <i>N</i><sub><i>G</i></sub>(<i>U</i>) \ <i>U</i></span>. Logo</p>
+            <div class="eq"><div class="body">
+              |<i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)| =
+              <span class="sum"><span class="o">∑</span><span class="l"><i>w</i>∈<span class="ovl"><i>U</i></span></span></span>
+              |<i>N</i>(<i>w</i>) ∩ <i>U</i>| &nbsp;≥&nbsp; | <i>N</i><sub><i>G</i></sub>(<i>U</i>) \ <i>U</i> |,
+            </div></div>
+            <p>com <b>igualdade se e somente se</b> todo vértice fora de <span class="m"><i>U</i></span> tem no máximo um vizinho em <span class="m"><i>U</i></span> (cada parcela não nula vale 1). Na estrela do contraexemplo 1 a parcela do centro vale 3, e é por isso que a igualdade falha.</p>
+            <div class="box rec">
+              <div class="h">Quando a igualdade do enunciado vale</div>
+              <ol>
+                <li><span class="m"><i>U</i></span> é conjunto independente (garante <span class="m"><i>N</i><sub><i>G</i></sub>(<i>U</i>) ∩ <i>U</i> = ∅</span>, logo <span class="m"><i>N</i><sub><i>G</i></sub>(<i>U</i>) \ <i>U</i> = <i>N</i><sub><i>G</i></sub>(<i>U</i>)</span>); <b>e</b></li>
+                <li>cada vértice de <span class="m"><span class="ovl"><i>U</i></span></span> tem no máximo um vizinho em <span class="m"><i>U</i></span>.</li>
+              </ol>
+              <p>
+                O caso mais simples em que as duas condições valem é <span class="m"><i>U</i> = {<i>v</i>}</span> com um único
+                vértice: aí <span class="m">|<i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)| = <i>d</i>(<i>v</i>) = |<i>N</i>(<i>v</i>)|</span>,
+                porque cada vizinho de <span class="m"><i>v</i></span> recebe exatamente uma aresta do corte. Um exemplo com
+                <span class="m">|<i>U</i>| > 1</span>: no grafo bipartido da Figura 5, tome <span class="m"><i>U</i> = {1,3}</span>.
+                Ele é independente, cada vértice de fora tem no máximo um vizinho em <span class="m"><i>U</i></span>, e de fato
+                <span class="m"><i>N</i>(<i>U</i>) = {6,7,8}</span> e o corte é
+                <span class="m">{ {1,6}, {3,7}, {3,8} }</span> — três e três ✔
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Ex 29 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 29</span><div class="stmt">
+            <p>Um grafo <span class="m"><i>G</i></span> é dito <b><span class="m"><i>k</i></span>-partido</b>, para <span class="m"><i>k</i> ∈ ℕ</span>, se existem <span class="m"><i>k</i></span> conjuntos independentes <span class="m"><i>A</i><sub>1</sub>, <i>A</i><sub>2</sub>, …, <i>A</i><sub><i>k</i></sub></span> que particionam <span class="m"><i>V</i>(<i>G</i>)</span>, ou seja, <span class="m"><i>V</i>(<i>G</i>) = <i>A</i><sub>1</sub> ∪ <i>A</i><sub>2</sub> ∪ ⋅⋅⋅ ∪ <i>A</i><sub><i>k</i></sub></span>, cada <span class="m"><i>A</i><sub><i>i</i></sub></span> é independente em <span class="m"><i>G</i></span> e <span class="m"><i>A</i><sub><i>i</i></sub> ∩ <i>A</i><sub><i>j</i></sub> = ∅</span> para <span class="m"><i>i</i> ≠ <i>j</i></span>. Prove que, dentre os grafos <span class="m"><i>k</i></span>-partidos completos (<span class="m"><i>k</i> ≥ 3</span>) com <span class="m"><i>n</i></span> vértices, o número máximo de arestas é atingido quando <span class="m">| |<i>A</i><sub><i>i</i></sub>| − |<i>A</i><sub><i>j</i></sub>| | ≤ 1</span> para todos <span class="m"><i>i</i>, <i>j</i> ∈ {1, 2, …, <i>k</i>}</span> distintos.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h29" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a29" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h29"><div class="plab">Dica</div>
+            <p>Escreva o número de arestas em função só dos tamanhos <span class="m"><i>a</i><sub><i>i</i></sub> = |<i>A</i><sub><i>i</i></sub>|</span> — é a fórmula (★) da seção 3.6. Depois suponha que alguma parte tenha pelo menos 2 vértices a mais que outra e mova <b>um</b> vértice da maior para a menor. O que acontece com <span class="m">∑<i>a</i><sub><i>i</i></sub><sup>2</sup></span>?</p>
+          </div>
+          <div class="panel answer" id="a29"><div class="plab">Resolução</div>
+            <p><i>(O original escreve “<span class="m"><i>i</i>, <i>j</i> ∈ {1,2,…,<i>n</i>}</span>”, claramente um lapso: os índices das partes vão de 1 a <span class="m"><i>k</i></span>. Corrigimos no enunciado acima.)</i></p>
+            <p><b>Passo 1 — reduzir a um problema numérico.</b> Um grafo <span class="m"><i>k</i></span>-partido completo com <span class="m"><i>n</i></span> vértices fica inteiramente determinado (a menos de renomear vértices) pelos tamanhos das partes</p>
+            <div class="eq"><div class="body">
+              <i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>, …, <i>a</i><sub><i>k</i></sub> ≥ 0,&nbsp;&nbsp;
+              <i>a</i><sub>1</sub> + <i>a</i><sub>2</sub> + ⋅⋅⋅ + <i>a</i><sub><i>k</i></sub> = <i>n</i>.
+            </div></div>
+            <p>Suas arestas são todos os pares de vértices <b>exceto</b> os que ficam dentro de uma mesma parte (esses são proibidos, pois cada parte é independente; e todos os outros estão presentes, pois o grafo é completo). Assim</p>
+            <div class="eq"><div class="body">
+              |<i>E</i>| = <span class="binom"><span class="p">(</span><span class="s"><span><i>n</i></span><span>2</span></span><span class="p">)</span></span> −
+              <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=1..<i>k</i></span></span>
+              <span class="binom"><span class="p">(</span><span class="s"><span><i>a</i><sub><i>i</i></sub></span><span>2</span></span><span class="p">)</span></span>
+              &nbsp;=&nbsp; <span class="frac"><span>1</span><span>2</span></span>
+              <span>(</span> <i>n</i><sup>2</sup> − <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=1..<i>k</i></span></span> <i>a</i><sub><i>i</i></sub><sup>2</sup> <span>)</span>
+            </div><div class="tag">(★)</div></div>
+            <p>(A segunda igualdade usa <span class="m"><span class="binom"><span class="p">(</span><span class="s"><span><i>a</i></span><span>2</span></span><span class="p">)</span></span> = (<i>a</i><sup>2</sup> − <i>a</i>)∕2</span> e <span class="m">∑<i>a</i><sub><i>i</i></sub> = <i>n</i></span>, que cancela os termos lineares.) Como <span class="m"><i>n</i></span> está fixo, <b>maximizar <span class="m">|<i>E</i>|</span> é minimizar <span class="m"><i>Q</i> = ∑<i>a</i><sub><i>i</i></sub><sup>2</sup></span></b>.</p>
+            <p><b>Passo 2 — o máximo existe.</b> Há um número finito de vetores <span class="m">(<i>a</i><sub>1</sub>,…,<i>a</i><sub><i>k</i></sub>)</span> de inteiros não negativos somando <span class="m"><i>n</i></span>, e a família é não vazia. Então <span class="m">|<i>E</i>|</span> atinge um máximo.</p>
+            <p><b>Passo 3 — o argumento de troca.</b> Suponha que em uma configuração ótima existam índices <span class="m"><i>i</i>, <i>j</i></span> com</p>
+            <div class="eq"><div class="body"><i>a</i><sub><i>i</i></sub> ≥ <i>a</i><sub><i>j</i></sub> + 2.</div></div>
+            <p>Mova <b>um</b> vértice de <span class="m"><i>A</i><sub><i>i</i></sub></span> para <span class="m"><i>A</i><sub><i>j</i></sub></span>: os novos tamanhos são <span class="m"><i>a</i><sub><i>i</i></sub> − 1</span> e <span class="m"><i>a</i><sub><i>j</i></sub> + 1</span>, e os demais não mudam (a soma continua <span class="m"><i>n</i></span>, e ainda temos <span class="m"><i>k</i></span> partes). A variação de <span class="m"><i>Q</i></span> é</p>
+            <div class="eq"><div class="body">
+              Δ<i>Q</i> = (<i>a</i><sub><i>i</i></sub> − 1)<sup>2</sup> + (<i>a</i><sub><i>j</i></sub> + 1)<sup>2</sup> − <i>a</i><sub><i>i</i></sub><sup>2</sup> − <i>a</i><sub><i>j</i></sub><sup>2</sup>
+              = 2(<i>a</i><sub><i>j</i></sub> − <i>a</i><sub><i>i</i></sub>) + 2 ≤ 2(−2) + 2 = −2 < 0.
+            </div></div>
+            <p>Por (★), o número de arestas <b>aumentou</b>:</p>
+            <div class="eq"><div class="body">
+              Δ|<i>E</i>| = − <span class="frac"><span>Δ<i>Q</i></span><span>2</span></span> = <i>a</i><sub><i>i</i></sub> − <i>a</i><sub><i>j</i></sub> − 1 ≥ 1.
+            </div></div>
+            <p>Isso contradiz a otimalidade. Logo, em qualquer configuração ótima, <span class="m"><i>a</i><sub><i>i</i></sub> ≤ <i>a</i><sub><i>j</i></sub> + 1</span> para todos <span class="m"><i>i</i>, <i>j</i></span>, ou seja</p>
+            <div class="eq"><div class="body">| |<i>A</i><sub><i>i</i></sub>| − |<i>A</i><sub><i>j</i></sub>| | ≤ 1&nbsp;&nbsp;para todos <i>i</i> ≠ <i>j</i>.</div><div class="tag">□</div></div>
+            <p><b>Passo 4 — e tal configuração existe (e é única).</b> Escreva <span class="m"><i>n</i> = <i>kq</i> + <i>r</i></span> com <span class="m">0 ≤ <i>r</i> < <i>k</i></span>. O vetor com <span class="m"><i>r</i></span> partes de tamanho <span class="m"><i>q</i> + 1</span> e <span class="m"><i>k</i> − <i>r</i></span> partes de tamanho <span class="m"><i>q</i></span> soma <span class="m"><i>n</i></span> e satisfaz a condição. Reciprocamente, se todos os tamanhos diferem por no máximo 1, eles assumem no máximo dois valores consecutivos <span class="m"><i>q</i></span> e <span class="m"><i>q</i>+1</span>, e a soma <span class="m"><i>n</i></span> determina quantas partes têm cada valor: exatamente <span class="m"><i>r</i></span> com <span class="m"><i>q</i>+1</span>. Portanto o ótimo é único a menos da ordem das partes — é o grafo do exercício 30.</p>
+            <p class="kicker">Conferência numérica (<span class="m"><i>n</i> = 6</span>, <span class="m"><i>k</i> = 3</span>)</p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th>Tamanhos</th><th><i>Q</i> = ∑<i>a</i><sub><i>i</i></sub><sup>2</sup></th><th>|<i>E</i>| = (36 − <i>Q</i>)∕2</th></tr></thead>
+              <tbody>
+                <tr><td>2, 2, 2</td><td>12</td><td><b>12</b> ← máximo (Figura 8a)</td></tr>
+                <tr><td>3, 2, 1</td><td>14</td><td>11</td></tr>
+                <tr><td>3, 3, 0</td><td>18</td><td>9</td></tr>
+                <tr><td>4, 1, 1</td><td>18</td><td>9 (Figura 8b)</td></tr>
+                <tr><td>4, 2, 0</td><td>20</td><td>8</td></tr>
+                <tr><td>6, 0, 0</td><td>36</td><td>0</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>Só a linha equilibrada <span class="m">(2,2,2)</span> satisfaz a condição do enunciado, e é exatamente a de maior <span class="m">|<i>E</i>|</span> ✔ Observe ainda o mecanismo da troca em ação: de <span class="m">(4,1,1)</span> para <span class="m">(3,2,1)</span> movemos um vértice e ganhamos <span class="m"><i>a</i><sub><i>i</i></sub> − <i>a</i><sub><i>j</i></sub> − 1 = 4 − 1 − 1 = 2</span> arestas (de 9 para 11) ✔</p>
+          </div>
+        </article>
+
+        <!-- Ex 30 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 30</span><div class="stmt">
+            <p>Mostre que, se <span class="m"><i>n</i> = <i>kq</i> + <i>r</i></span> com <span class="m">0 ≤ <i>r</i> < <i>k</i></span>, então o número de arestas do grafo do exercício anterior é</p>
+            <div class="eq"><div class="body">
+              <span class="frac"><span>1</span><span>2</span></span>
+              <span class="frac"><span>(<i>k</i> − 1)</span><span><i>k</i></span></span>
+              (<i>n</i><sup>2</sup> − <i>r</i><sup>2</sup>) +
+              <span class="binom"><span class="p">(</span><span class="s"><span><i>r</i></span><span>2</span></span><span class="p">)</span></span>
+            </div></div>
+            <p>e que esse número é limitado por</p>
+            <div class="eq"><div class="body">
+              ≤ <span class="frac"><span><i>k</i> − 1</span><span><i>k</i></span></span> ·
+              <span class="frac"><span><i>n</i><sup>2</sup></span><span>2</span></span> .
+            </div></div>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h30" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a30" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h30"><div class="plab">Dica</div>
+            <p>O grafo ótimo tem <span class="m"><i>r</i></span> partes de tamanho <span class="m"><i>q</i>+1</span> e <span class="m"><i>k</i> − <i>r</i></span> de tamanho <span class="m"><i>q</i></span>. Calcule <span class="m"><i>Q</i> = ∑<i>a</i><sub><i>i</i></sub><sup>2</sup></span>, simplifique e depois <b>elimine <span class="m"><i>q</i></span></b> usando <span class="m"><i>kq</i> = <i>n</i> − <i>r</i></span>. Para a cota, compare o resultado com <span class="m">(1 − 1∕<i>k</i>) <i>n</i><sup>2</sup>∕2</span> e veja o que sobra.</p>
+          </div>
+          <div class="panel answer" id="a30"><div class="plab">Resolução</div>
+            <p><b>Passo 1 — os tamanhos.</b> Pelo exercício 29, o grafo com o máximo de arestas tem partes equilibradas: com <span class="m"><i>n</i> = <i>kq</i> + <i>r</i></span> e <span class="m">0 ≤ <i>r</i> < <i>k</i></span>, são <span class="m"><i>r</i></span> partes de tamanho <span class="m"><i>q</i> + 1</span> e <span class="m"><i>k</i> − <i>r</i></span> partes de tamanho <span class="m"><i>q</i></span>. Conferência da soma: <span class="m"><i>r</i>(<i>q</i>+1) + (<i>k</i>−<i>r</i>)<i>q</i> = <i>kq</i> + <i>r</i> = <i>n</i></span> ✔</p>
+            <p><b>Passo 2 — calcular <span class="m"><i>Q</i> = ∑<i>a</i><sub><i>i</i></sub><sup>2</sup></span>.</b></p>
+            <div class="eq"><div class="body">
+              <i>Q</i> = <i>r</i>(<i>q</i>+1)<sup>2</sup> + (<i>k</i>−<i>r</i>)<i>q</i><sup>2</sup>
+              = <i>r</i>(<i>q</i><sup>2</sup> + 2<i>q</i> + 1) + <i>kq</i><sup>2</sup> − <i>rq</i><sup>2</sup>
+              = <i>kq</i><sup>2</sup> + 2<i>rq</i> + <i>r</i>.
+            </div></div>
+            <p><b>Passo 3 — eliminar <span class="m"><i>q</i></span>.</b> De <span class="m"><i>n</i> = <i>kq</i> + <i>r</i></span> vem <span class="m"><i>n</i><sup>2</sup> = <i>k</i><sup>2</sup><i>q</i><sup>2</sup> + 2<i>kqr</i> + <i>r</i><sup>2</sup></span>, ou seja</p>
+            <div class="eq"><div class="body">
+              <i>kq</i><sup>2</sup> = <span class="frac"><span><i>n</i><sup>2</sup> − 2<i>kqr</i> − <i>r</i><sup>2</sup></span><span><i>k</i></span></span>
+              = <span class="frac"><span><i>n</i><sup>2</sup> − <i>r</i><sup>2</sup></span><span><i>k</i></span></span> − 2<i>qr</i>.
+            </div></div>
+            <p>Substituindo no Passo 2, os termos <span class="m">2<i>rq</i></span> se cancelam:</p>
+            <div class="eq"><div class="body">
+              <i>Q</i> = <span class="frac"><span><i>n</i><sup>2</sup> − <i>r</i><sup>2</sup></span><span><i>k</i></span></span> − 2<i>qr</i> + 2<i>rq</i> + <i>r</i>
+              = <span class="frac"><span><i>n</i><sup>2</sup> − <i>r</i><sup>2</sup></span><span><i>k</i></span></span> + <i>r</i>.
+            </div></div>
+            <p><b>Passo 4 — substituir em (★).</b> Com <span class="m">|<i>E</i>| = (<i>n</i><sup>2</sup> − <i>Q</i>)∕2</span>:</p>
+            <div class="eq"><div class="body">
+              |<i>E</i>| = <span class="frac"><span>1</span><span>2</span></span>
+              <span>(</span> <i>n</i><sup>2</sup> − <span class="frac"><span><i>n</i><sup>2</sup> − <i>r</i><sup>2</sup></span><span><i>k</i></span></span> − <i>r</i> <span>)</span>
+              = <span class="frac"><span>1</span><span>2</span></span>
+              <span>(</span> (<i>n</i><sup>2</sup> − <i>r</i><sup>2</sup>) <span>(</span>1 − <span class="frac"><span>1</span><span><i>k</i></span></span><span>)</span> + <i>r</i><sup>2</sup> − <i>r</i> <span>)</span>
+            </div></div>
+            <p>onde na segunda igualdade escrevemos <span class="m"><i>n</i><sup>2</sup> = (<i>n</i><sup>2</sup> − <i>r</i><sup>2</sup>) + <i>r</i><sup>2</sup></span>. Como <span class="m">1 − 1∕<i>k</i> = (<i>k</i>−1)∕<i>k</i></span> e <span class="m">(<i>r</i><sup>2</sup> − <i>r</i>)∕2 = <span class="binom"><span class="p">(</span><span class="s"><span><i>r</i></span><span>2</span></span><span class="p">)</span></span></span>, chegamos à fórmula pedida:</p>
+            <div class="eq"><div class="body">
+              |<i>E</i>| = <span class="frac"><span>1</span><span>2</span></span>
+              <span class="frac"><span>(<i>k</i> − 1)</span><span><i>k</i></span></span>
+              (<i>n</i><sup>2</sup> − <i>r</i><sup>2</sup>) +
+              <span class="binom"><span class="p">(</span><span class="s"><span><i>r</i></span><span>2</span></span><span class="p">)</span></span>
+            </div><div class="tag">(30.1)</div></div>
+            <p><b>Passo 5 — a cota superior.</b> Compare (30.1) com <span class="m">((<i>k</i>−1)∕<i>k</i>) · <i>n</i><sup>2</sup>∕2</span>:</p>
+            <div class="eq"><div class="body">
+              <span class="frac"><span><i>k</i>−1</span><span><i>k</i></span></span> <span class="frac"><span><i>n</i><sup>2</sup></span><span>2</span></span> − |<i>E</i>|
+              = <span class="frac"><span><i>k</i>−1</span><span>2<i>k</i></span></span> <i>r</i><sup>2</sup> − <span class="frac"><span><i>r</i><sup>2</sup> − <i>r</i></span><span>2</span></span>
+              = <span class="frac"><span><i>r</i></span><span>2</span></span> <span>(</span> <i>r</i> − <span class="frac"><span><i>r</i></span><span><i>k</i></span></span> − <i>r</i> + 1 <span>)</span>
+              = <span class="frac"><span><i>r</i>(<i>k</i> − <i>r</i>)</span><span>2<i>k</i></span></span> ≥ 0,
+            </div></div>
+            <p>pois <span class="m">0 ≤ <i>r</i> < <i>k</i></span>. Portanto</p>
+            <div class="eq"><div class="body">
+              |<i>E</i>| = <span class="frac"><span><i>k</i>−1</span><span><i>k</i></span></span> <span class="frac"><span><i>n</i><sup>2</sup></span><span>2</span></span> − <span class="frac"><span><i>r</i>(<i>k</i>−<i>r</i>)</span><span>2<i>k</i></span></span>
+              &nbsp;≤&nbsp; <span class="frac"><span><i>k</i>−1</span><span><i>k</i></span></span> <span class="frac"><span><i>n</i><sup>2</sup></span><span>2</span></span>,
+            </div><div class="tag">□</div></div>
+            <p>com igualdade exatamente quando <span class="m"><i>r</i> = 0</span>, isto é, quando <span class="m"><i>k</i></span> divide <span class="m"><i>n</i></span> e todas as partes têm o mesmo tamanho <span class="m"><i>n</i>∕<i>k</i></span>.</p>
+            <p class="kicker">Conferência numérica (<span class="m"><i>k</i> = 3</span>)</p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th><i>n</i></th><th><i>q</i>, <i>r</i></th><th>tamanhos</th><th>|<i>E</i>| na mão</th><th>por (30.1)</th><th>cota <span class="m">(2∕3)<i>n</i><sup>2</sup>∕2</span></th></tr></thead>
+              <tbody>
+                <tr><td>6</td><td>2, 0</td><td>2,2,2</td><td>2·2+2·2+2·2 = 12</td><td>(1∕3)(36−0) + 0 = 12 ✔</td><td>12 (igualdade)</td></tr>
+                <tr><td>7</td><td>2, 1</td><td>3,2,2</td><td>3·2+3·2+2·2 = 16</td><td>(1∕3)(49−1) + 0 = 16 ✔</td><td>≈ 16,33</td></tr>
+                <tr><td>8</td><td>2, 2</td><td>3,3,2</td><td>3·3+3·2+3·2 = 21</td><td>(1∕3)(64−4) + 1 = 21 ✔</td><td>≈ 21,33</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>Os “defeitos” <span class="m"><i>r</i>(<i>k</i>−<i>r</i>)∕(2<i>k</i>)</span> confirmam a fórmula: <span class="m">0</span> para <span class="m"><i>r</i>=0</span>, <span class="m">2∕6 = 1∕3</span> para <span class="m"><i>r</i>=1</span> e <span class="m">2∕6 = 1∕3</span> para <span class="m"><i>r</i>=2</span> ✔</p>
+            <div class="box warn">
+              <div class="h">Sobre a leitura do enunciado original</div>
+              <p>
+                A extração do original deixou o lado direito da cota ambíguo entre
+                <span class="m">((<i>k</i>−1)∕<i>k</i>) · <span class="binom"><span class="p">(</span><span class="s"><span><i>n</i></span><span>2</span></span><span class="p">)</span></span></span>
+                e <span class="m">((<i>k</i>−1)∕<i>k</i>) · <i>n</i><sup>2</sup>∕2</span>. A primeira leitura é <b>falsa</b>: com
+                <span class="m"><i>k</i> = <i>n</i> = 3</span> o grafo ótimo é <span class="m"><i>K</i><sup>3</sup></span>, com 3
+                arestas, enquanto
+                <span class="m">(2∕3) · <span class="binom"><span class="p">(</span><span class="s"><span>3</span><span>2</span></span><span class="p">)</span></span> = 2 < 3</span>.
+                Já a segunda dá <span class="m">(2∕3)(9∕2) = 3</span>, com igualdade — é a cota clássica de Turán, e é ela que
+                provamos acima.
+              </p>
+            </div>
+            <div class="box tip">
+              <div class="h">Por que essa cota é famosa</div>
+              <p>
+                O grafo <span class="m"><i>k</i></span>-partido completo equilibrado não tem nenhum
+                <span class="m"><i>K</i><sup><i>k</i>+1</sup></span> (qualquer <span class="m"><i>k</i>+1</span> vértices têm dois na
+                mesma parte, logo não adjacentes). O <b>teorema de Turán</b> diz que ele é o grafo com <b>mais arestas</b> entre todos
+                os grafos de <span class="m"><i>n</i></span> vértices sem <span class="m"><i>K</i><sup><i>k</i>+1</sup></span> — e a
+                cota <span class="m">(1 − 1∕<i>k</i>) <i>n</i><sup>2</sup>∕2</span> é, portanto, o número máximo de arestas que se
+                pode ter proibindo um clique de tamanho <span class="m"><i>k</i>+1</span>. O caso <span class="m"><i>k</i> = 2</span>
+                é o teorema de Mantel: um grafo sem triângulo tem no máximo <span class="m"><i>n</i><sup>2</sup>∕4</span> arestas.
+              </p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="01-definicoes-e-grau.html"><span class="dir">Capítulo anterior</span><span class="ttl">1. Grafos: definições iniciais e grau</span></a>
+        <a class="next" href="03-isomorfismo-e-outras-nocoes.html"><span class="dir">Próximo capítulo</span><span class="ttl">3. Isomorfismo e outras noções de grafos</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática das seções “Subgrafos” e “Clique, conjunto independente, grafo bipartido
+          e corte” das notas de Teoria dos Grafos (CI065 / BC1429) do Prof. Jair Donadelli. Enunciados dos 14 exercícios
+          preservados; explicações, diagramas e resoluções foram escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>

@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teoria dos Grafos — Definições iniciais e Grau | Notas com exercícios resolvidos</title>
+<meta name="description" content="Material didático de Teoria dos Grafos: definições iniciais, diagramas, ordem, tamanho, complemento, grafos completos e grau, com 16 exercícios e respostas que podem ser exibidas ou ocultadas.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo 1 · Fundamentos</span>
+    <h1>Grafos: definições iniciais e grau</h1>
+    <p class="lead">
+      Uma versão reorganizada das notas de <b>Teoria dos Grafos</b> (CI065 / BC1429). Cada bloco de exercícios vem
+      precedido da teoria necessária, escrita de forma direta, com exemplos resolvidos, diagramas e receitas de
+      resolução. Todos os 16 exercícios têm resposta completa, que você exibe apenas quando quiser.
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> definição de grafo · diagramas · ordem e tamanho · complemento · grafos completos · grau · teorema do aperto de mão</span>
+      <span><b>Exercícios:</b> 16 com resolução</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/#x1-50001" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#como-usar">Como usar</a>
+        <a href="#notacao">Notação e símbolos</a>
+        <a href="#s1">1. Definições iniciais</a>
+        <a class="sub" href="#s1-ideia">A ideia central</a>
+        <a class="sub" href="#s1-def">Definição formal</a>
+        <a class="sub" href="#s1-diagrama">Diagramas</a>
+        <a class="sub" href="#s1-vocab">Vocabulário</a>
+        <a class="sub" href="#s1-ordem">Ordem e tamanho</a>
+        <a class="sub" href="#s1-familias">Completo, complemento, união</a>
+        <a class="sub" href="#s1-cores">Modelar com cores</a>
+        <a href="#ex1">Exercícios 1 a 7</a>
+        <a href="#s2">2. Grau de um vértice</a>
+        <a class="sub" href="#s2-def">Vizinhança e grau</a>
+        <a class="sub" href="#s2-params">δ, Δ e grau médio</a>
+        <a class="sub" href="#s2-teorema">Teorema do aperto de mão</a>
+        <a class="sub" href="#s2-regular">Grafos regulares</a>
+        <a class="sub" href="#s2-receita">Receita: a sequência existe?</a>
+        <a href="#ex2">Exercícios 8 a 16</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <!-- ============================ COMO USAR ============================ -->
+      <section class="chapter" id="como-usar">
+        <div class="box tip">
+          <div class="h">Como aproveitar este material</div>
+          <ol>
+            <li><b>Leia a teoria do bloco</b> — ela foi escrita contendo exatamente o que os exercícios seguintes exigem, nada além.</li>
+            <li><b>Tente o exercício sem abrir nada.</b> Se travar, use o botão <i>Dica</i> (quando existir) antes da resposta.</li>
+            <li><b>Só então abra <i>Mostrar resposta</i></b> e compare o seu raciocínio com o argumento apresentado — em matemática discreta, o caminho vale mais que o resultado.</li>
+          </ol>
+          <p>As respostas ficam ocultas por padrão. O botão no topo da página abre ou fecha todas de uma vez, e a impressão da página já sai com tudo aberto.</p>
+        </div>
+      </section>
+
+      <!-- ============================ NOTAÇÃO ============================ -->
+      <section class="chapter" id="notacao">
+        <h2><span class="num">§0</span> Notação e símbolos</h2>
+        <p class="sub-lead">Referência rápida. Volte aqui sempre que um símbolo parecer estranho.</p>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Símbolo</th><th>Significado</th></tr></thead>
+          <tbody>
+            <tr><td>ℕ, ℤ, ℚ, ℝ</td><td>Conjuntos dos naturais, inteiros, racionais e reais. <span class="m">ℝ<sub>+</sub></span> são os reais positivos.</td></tr>
+            <tr><td>|<i>X</i>|</td><td>Cardinalidade (número de elementos) do conjunto <span class="m"><i>X</i></span>.</td></tr>
+            <tr><td><span style="text-decoration:overline"><i>X</i></span></td><td>Complemento de <span class="m"><i>X</i></span> em <span class="m"><i>V</i></span>, isto é, <span class="m"><i>V</i> \ <i>X</i></span>.</td></tr>
+            <tr><td><span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></td><td>Conjunto de <b>todos</b> os subconjuntos de <span class="m"><i>V</i></span> com exatamente 2 elementos. É o “universo” de arestas possíveis.</td></tr>
+            <tr><td>⌊<i>x</i>⌋</td><td>Piso: o maior inteiro <span class="m"><i>n</i></span> com <span class="m"><i>n</i> ≤ <i>x</i></span>.</td></tr>
+            <tr><td><i>A</i> ⊕ <i>B</i></td><td>Diferença simétrica: <span class="m">(<i>A</i> ∪ <i>B</i>) \ (<i>A</i> ∩ <i>B</i>)</span>.</td></tr>
+            <tr><td>∈, ⊆, ⊂, ∅</td><td>Pertence, está contido, está contido propriamente, conjunto vazio.</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="box warn">
+          <div class="h">O símbolo mais importante do capítulo</div>
+          <p>
+            Grave <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span>:
+            é a lista de todos os pares não ordenados de vértices distintos. Se <span class="m">|<i>V</i>| = <i>n</i></span>, então
+            <span class="m">|<span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span>| = <span class="frac"><span><i>n</i>(<i>n</i>−1)</span><span>2</span></span></span>.
+            Quase toda contagem deste capítulo é uma comparação entre o que o grafo tem e o que ele <i>poderia</i> ter.
+          </p>
+        </div>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 1 ============================ -->
+      <section class="chapter" id="s1">
+        <h2><span class="num">§1</span> Grafos — definições iniciais</h2>
+        <p class="sub-lead">Objetivo do bloco: saber escrever um grafo formalmente, desenhá-lo, falar dele com o vocabulário correto e usá-lo para modelar problemas do mundo real.</p>
+
+        <h3 id="s1-ideia">1.1 A ideia central</h3>
+        <p>
+          Um grafo é a ferramenta matemática para tratar de <b>uma relação simétrica entre pares de objetos</b> — e só isso.
+          Você joga fora tudo o que o problema tem de concreto e guarda duas informações: <i>quais são os objetos</i> e
+          <i>quais pares estão relacionados</i>.
+        </p>
+        <div class="box rec">
+          <div class="h">Receita de modelagem (usada nos exercícios 1, 2 e 7)</div>
+          <ol>
+            <li><b>Objetos → vértices.</b> Produtos químicos, pessoas, cidades, tarefas, lanches.</li>
+            <li><b>Relação simétrica entre dois objetos → arestas.</b> “reagem entre si”, “se cumprimentaram”, “gosta de”, “tem estrada entre”.</li>
+            <li><b>Traduza a pergunta para uma propriedade do grafo.</b> “menor número de caixas” vira coloração; “cada amiga com o lanche que gosta” vira emparelhamento; “é possível percorrer tudo” vira caminho.</li>
+          </ol>
+          <p>Se a relação <b>não</b> for simétrica (“<span class="m"><i>a</i></span> é pré-requisito de <span class="m"><i>b</i></span>”), o modelo correto é um grafo dirigido — assunto de outro capítulo.</p>
+        </div>
+
+        <h3 id="s1-def">1.2 Definição formal</h3>
+        <div class="box def">
+          <div class="h">Definição · grafo</div>
+          <p>
+            Um <b>grafo</b> é um par ordenado de conjuntos finitos <span class="m">(<i>V</i>, <i>E</i>)</span> tal que
+            <span class="m"><i>E</i> ⊆ <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span>.
+            Cada elemento de <span class="m"><i>V</i></span> é um <b>vértice</b>; cada elemento de <span class="m"><i>E</i></span> é uma <b>aresta</b>.
+          </p>
+          <p>
+            Ou seja, toda aresta <span class="m"><i>e</i> ∈ <i>E</i></span> é um subconjunto de <span class="m"><i>V</i></span> com exatamente dois vértices:
+            <span class="m"><i>e</i> ⊆ <i>V</i></span> e <span class="m">|<i>e</i>| = 2</span>. Se <span class="m"><i>G</i></span> é o grafo definido por
+            <span class="m">(<i>V</i>, <i>E</i>)</span>, escrevemos <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span>.
+          </p>
+        </div>
+        <p>
+          Essa definição é curta, mas carrega três decisões silenciosas. Entendê-las evita a maior parte dos erros do capítulo,
+          porque <b>“aresta é um conjunto de dois elementos”</b> já proíbe coisas:
+        </p>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Consequência</th><th>Por quê</th></tr></thead>
+          <tbody>
+            <tr><td>Não existe laço</td><td>Um laço em <span class="m"><i>v</i></span> seria <span class="m">{<i>v</i>, <i>v</i>} = {<i>v</i>}</span>, que tem 1 elemento, não 2.</td></tr>
+            <tr><td>Não existe aresta múltipla</td><td><span class="m"><i>E</i></span> é um <i>conjunto</i>: o par <span class="m">{<i>u</i>, <i>v</i>}</span> está lá uma vez ou nenhuma.</td></tr>
+            <tr><td>Não há direção</td><td><span class="m">{<i>u</i>, <i>v</i>} = {<i>v</i>, <i>u</i>}</span>: conjunto não tem ordem.</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Quando um problema precisa de laços ou de arestas repetidas, falamos de <b>multigrafo</b>; quando precisa de direção,
+          de <b>grafo dirigido</b>. Neste capítulo, “grafo” é sempre o objeto simples definido acima.
+        </p>
+
+        <h3 id="s1-diagrama">1.3 Diagramas: o desenho não é o grafo</h3>
+        <p>
+          Todo grafo pode ser representado por um <b>diagrama</b>: um ponto por vértice e uma curva ligando cada par de vértices
+          que forma aresta. O diagrama é só uma fotografia conveniente — <b>o mesmo grafo admite infinitos desenhos diferentes</b>,
+          e cruzamentos de curvas não significam nada (não são vértices).
+        </p>
+        <div class="box def">
+          <div class="h">Exemplo 1 · o grafo que usaremos como referência</div>
+          <div class="eq"><div class="body">
+            <i>V</i> = {1, 2, 3, 4, 5, 6, 7, 8}<br>
+            <i>E</i> = { {1,2}, {1,5}, {2,5}, {3,4}, {6,7} }
+          </div></div>
+          <figure>
+            <svg class="dg" viewBox="0 0 560 200" role="img" aria-label="Diagrama do grafo do Exemplo 1: triângulo 1-2-5, aresta 3-4, aresta 6-7 e vértice isolado 8">
+              <g>
+                <line class="e" x1="70" y1="55" x2="165" y2="55"/>
+                <line class="e" x1="70" y1="55" x2="117" y2="140"/>
+                <line class="e" x1="165" y1="55" x2="117" y2="140"/>
+                <line class="e" x1="265" y1="55" x2="265" y2="145"/>
+                <line class="e" x1="365" y1="55" x2="460" y2="55"/>
+              </g>
+              <g class="v"><circle cx="70" cy="55" r="17"/><text x="70" y="55">1</text></g>
+              <g class="v"><circle cx="165" cy="55" r="17"/><text x="165" y="55">2</text></g>
+              <g class="v"><circle cx="117" cy="140" r="17"/><text x="117" y="140">5</text></g>
+              <g class="v"><circle cx="265" cy="55" r="17"/><text x="265" y="55">3</text></g>
+              <g class="v"><circle cx="265" cy="145" r="17"/><text x="265" y="145">4</text></g>
+              <g class="v"><circle cx="365" cy="55" r="17"/><text x="365" y="55">6</text></g>
+              <g class="v"><circle cx="460" cy="55" r="17"/><text x="460" y="55">7</text></g>
+              <g class="v"><circle cx="510" cy="145" r="17"/><text x="510" y="145">8</text></g>
+            </svg>
+            <figcaption><b>Figura 1.</b> Um diagrama do grafo do Exemplo 1. O vértice 8 não pertence a nenhuma aresta — isso é perfeitamente legal.</figcaption>
+          </figure>
+          <p>
+            Note que o conjunto <span class="m"><i>E</i></span> já diz tudo: há um triângulo sobre <span class="m">{1,2,5}</span>,
+            uma aresta isolada entre 3 e 4, outra entre 6 e 7, e o vértice 8 sozinho.
+          </p>
+        </div>
+
+        <h3 id="s1-vocab">1.4 Vocabulário essencial</h3>
+        <p>No que segue, <span class="m"><i>u</i></span> e <span class="m"><i>v</i></span> denotam vértices e <span class="m"><i>e</i></span>, <span class="m"><i>f</i></span> denotam arestas de um grafo.</p>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Se…</th><th>então dizemos…</th><th>na Figura 1</th></tr></thead>
+          <tbody>
+            <tr><td><i>v</i> ∈ <i>e</i></td><td>a aresta <span class="m"><i>e</i></span> <b>incide</b> em <span class="m"><i>v</i></span></td><td>{1,5} incide em 1 e em 5</td></tr>
+            <tr><td>{<i>u</i>, <i>v</i>} ∈ <i>E</i></td><td><span class="m"><i>u</i></span> e <span class="m"><i>v</i></span> são <b>adjacentes</b> (ou vizinhos)</td><td>2 e 5 são adjacentes; 1 e 4 não</td></tr>
+            <tr><td>|<i>e</i> ∩ <i>f</i>| = 1</td><td>as arestas <span class="m"><i>e</i></span> e <span class="m"><i>f</i></span> são <b>adjacentes</b></td><td>{1,2} e {2,5} são adjacentes (compartilham o 2)</td></tr>
+            <tr><td><i>e</i> = {<i>u</i>, <i>v</i>}</td><td><span class="m"><i>u</i></span> e <span class="m"><i>v</i></span> são os <b>extremos</b> de <span class="m"><i>e</i></span></td><td>3 e 4 são os extremos de {3,4}</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção</div>
+          <p>“Adjacente” é usado para <b>dois vértices</b> (quando formam aresta) e para <b>duas arestas</b> (quando têm exatamente um extremo em comum). Quem relaciona vértice com aresta é o verbo <b>incidir</b>.</p>
+        </div>
+
+        <h3 id="s1-ordem">1.5 Ordem, tamanho e notações de apoio</h3>
+        <p>
+          Quando o grafo <span class="m"><i>G</i></span> já é conhecido e não queremos repetir os conjuntos, escrevemos
+          <span class="m"><i>V</i>(<i>G</i>)</span> e <span class="m"><i>E</i>(<i>G</i>)</span>. Assim, se
+          <span class="m"><i>G</i> = (<i>X</i>, <i>Y</i>)</span> então <span class="m"><i>V</i>(<i>G</i>) = <i>X</i></span> e
+          <span class="m"><i>E</i>(<i>G</i>) = <i>Y</i></span>.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · ordem e tamanho</div>
+          <ul>
+            <li><b>Ordem</b> de <span class="m"><i>G</i></span>: <span class="m">|<i>V</i>(<i>G</i>)|</span>, o número de vértices.</li>
+            <li><b>Tamanho</b> de <span class="m"><i>G</i></span>: <span class="m">|<i>V</i>(<i>G</i>)| + |<i>E</i>(<i>G</i>)|</span>.</li>
+            <li>Um expoente indica a ordem: <span class="m"><i>G</i><sup><i>n</i></sup></span> é um grafo de ordem <span class="m"><i>n</i></span>.</li>
+            <li><span class="m"><i>G</i><sup>0</sup> = (∅, ∅)</span> é o <b>grafo vazio</b>; todo grafo de ordem 1 é <b>trivial</b>.</li>
+          </ul>
+        </div>
+        <div class="box warn">
+          <div class="h">Convenção que muda de livro para livro</div>
+          <p>
+            Aqui <b>tamanho</b> é <span class="m">|<i>V</i>| + |<i>E</i>|</span> (a medida natural do “espaço que o grafo ocupa” na memória do computador, o que importa ao analisar a complexidade de algoritmos).
+            Boa parte da literatura chama <span class="m">|<i>E</i>|</span> de tamanho. Use a convenção destas notas nas provas desta disciplina.
+          </p>
+          <p>Na Figura 1: ordem 8, <span class="m">|<i>E</i>| = 5</span> e tamanho <span class="m">8 + 5 = 13</span>.</p>
+        </div>
+
+        <h3 id="s1-familias">1.6 Três construções que os exercícios cobram</h3>
+        <p>Estas definições aparecem nos exercícios 4, 5 e 6. Todas seguem o mesmo padrão: “mesmo tipo de objeto, mexendo no conjunto de arestas”.</p>
+
+        <h4>Grafo completo <span class="m"><i>K</i><sup><i>n</i></sup></span></h4>
+        <p>
+          Um grafo é <b>completo</b> sobre <span class="m"><i>V</i></span> quando <i>todo</i> par de vértices é aresta, ou seja
+          <span class="m"><i>E</i> = <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span>.
+          O completo com <span class="m"><i>n</i></span> vértices é denotado <span class="m"><i>K</i><sup><i>n</i></sup></span> e tem
+          <span class="m"><span class="frac"><span><i>n</i>(<i>n</i>−1)</span><span>2</span></span></span> arestas.
+        </p>
+
+        <h4>Complemento <span class="m"><span style="text-decoration:overline"><i>G</i></span></span></h4>
+        <p>O complemento troca presença por ausência de arestas, mantendo os mesmos vértices:</p>
+        <div class="eq"><div class="body">
+          <i>V</i>(<span style="text-decoration:overline"><i>G</i></span>) = <i>V</i>(<i>G</i>),&nbsp;&nbsp;&nbsp;
+          <i>E</i>(<span style="text-decoration:overline"><i>G</i></span>) = { {<i>u</i>,<i>v</i>} ⊆ <i>V</i>(<i>G</i>) : {<i>u</i>,<i>v</i>} ∉ <i>E</i>(<i>G</i>) }.
+        </div></div>
+        <div class="figrow">
+          <figure>
+            <svg class="dg" viewBox="0 0 270 235" role="img" aria-label="Grafo completo K5">
+              <g>
+                <line class="e" x1="130" y1="40" x2="206" y2="95"/><line class="e" x1="130" y1="40" x2="177" y2="185"/>
+                <line class="e" x1="130" y1="40" x2="83" y2="185"/><line class="e" x1="130" y1="40" x2="54" y2="95"/>
+                <line class="e" x1="206" y1="95" x2="177" y2="185"/><line class="e" x1="206" y1="95" x2="83" y2="185"/>
+                <line class="e" x1="206" y1="95" x2="54" y2="95"/><line class="e" x1="177" y1="185" x2="83" y2="185"/>
+                <line class="e" x1="177" y1="185" x2="54" y2="95"/><line class="e" x1="83" y1="185" x2="54" y2="95"/>
+              </g>
+              <g class="v"><circle cx="130" cy="40" r="16"/><text x="130" y="40">1</text></g>
+              <g class="v"><circle cx="206" cy="95" r="16"/><text x="206" y="95">2</text></g>
+              <g class="v"><circle cx="177" cy="185" r="16"/><text x="177" y="185">3</text></g>
+              <g class="v"><circle cx="83" cy="185" r="16"/><text x="83" y="185">4</text></g>
+              <g class="v"><circle cx="54" cy="95" r="16"/><text x="54" y="95">5</text></g>
+            </svg>
+            <figcaption><b>Figura 2a.</b> <span class="m"><i>K</i><sup>5</sup></span>: 10 arestas, o máximo possível com 5 vértices.</figcaption>
+          </figure>
+          <figure>
+            <svg class="dg" viewBox="0 0 270 235" role="img" aria-label="Complemento de K5: cinco vértices sem arestas">
+              <g class="v open"><circle cx="130" cy="40" r="16"/><text x="130" y="40">1</text></g>
+              <g class="v open"><circle cx="206" cy="95" r="16"/><text x="206" y="95">2</text></g>
+              <g class="v open"><circle cx="177" cy="185" r="16"/><text x="177" y="185">3</text></g>
+              <g class="v open"><circle cx="83" cy="185" r="16"/><text x="83" y="185">4</text></g>
+              <g class="v open"><circle cx="54" cy="95" r="16"/><text x="54" y="95">5</text></g>
+            </svg>
+            <figcaption><b>Figura 2b.</b> <span class="m"><span style="text-decoration:overline"><i>K</i><sup>5</sup></span></span>: nenhuma aresta sobra.</figcaption>
+          </figure>
+        </div>
+
+        <h4>União de grafos</h4>
+        <p>A união junta vértices com vértices e arestas com arestas:</p>
+        <div class="eq"><div class="body">
+          <i>G</i> ∪ <i>H</i> = ( <i>V</i>(<i>G</i>) ∪ <i>V</i>(<i>H</i>), &nbsp;<i>E</i>(<i>G</i>) ∪ <i>E</i>(<i>H</i>) ).
+        </div></div>
+
+        <h3 id="s1-cores">1.7 Modelar com cores: o parâmetro <span class="m">χ(<i>G</i>)</span></h3>
+        <p>
+          Os exercícios 1 e 7 pedem “o menor número de caixas”. Traduzindo: queremos separar os vértices em grupos de modo que
+          <b>vértices adjacentes nunca caiam no mesmo grupo</b>. Pense em pintar cada vértice com uma cor, onde cada cor é uma caixa.
+          O menor número de cores que serve é o <b>número cromático</b> <span class="m">χ(<i>G</i>)</span>.
+        </p>
+        <div class="box rec">
+          <div class="h">Como estimar χ na prática</div>
+          <ul>
+            <li><b>Limite inferior:</b> se existem <span class="m"><i>k</i></span> vértices <b>todos adjacentes entre si</b> (um <span class="m"><i>K</i><sup><i>k</i></sup></span> dentro do grafo), então <span class="m">χ(<i>G</i>) ≥ <i>k</i></span> — cada um deles exige uma cor própria.</li>
+            <li><b>Limite superior:</b> exiba uma pintura concreta com <span class="m"><i>k</i></span> cores. Se o limite inferior e a pintura coincidem, você provou o valor exato.</li>
+            <li>Vértices <b>não</b> adjacentes podem (e devem, para economizar) compartilhar cor, mesmo que estejam distantes no desenho.</li>
+          </ul>
+        </div>
+
+        <div class="box def">
+          <div class="h">Resumo do bloco em cinco linhas</div>
+          <ul>
+            <li><span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span> com <span class="m"><i>E</i> ⊆ <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span>: sem laços, sem arestas repetidas, sem direção.</li>
+            <li>Diagrama é representação, não definição; um grafo tem muitos diagramas.</li>
+            <li>Incidir: vértice–aresta. Adjacente: vértice–vértice ou aresta–aresta.</li>
+            <li>Ordem <span class="m">= |<i>V</i>|</span>; tamanho <span class="m">= |<i>V</i>| + |<i>E</i>|</span>; máximo de arestas <span class="m">= <span class="frac"><span><i>n</i>(<i>n</i>−1)</span><span>2</span></span></span>.</li>
+            <li>“Agrupar sem conflito” = colorir; o mínimo de grupos é <span class="m">χ(<i>G</i>)</span>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================ EXERCÍCIOS 1–7 ============================ -->
+      <section class="chapter" id="ex1">
+        <div class="ex-head">
+          <h3>Exercícios 1 a 7</h3>
+          <button class="toggle" type="button" data-scope="#ex1" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: modelagem, diagramas, contagem máxima de arestas, complemento, união e coloração.</p>
+        </div>
+
+        <!-- Ex 1 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 1</span><div class="stmt">
+            <p>Um químico deseja embarcar os produtos <span class="m"><i>A</i>, <i>B</i>, <i>C</i>, <i>D</i>, <i>E</i>, <i>F</i>, <i>X</i></span> usando o menor número de caixas. Alguns produtos não podem ser colocados numa mesma caixa porque reagem. Os produtos <span class="m"><i>A</i>, <i>B</i>, <i>C</i>, <i>X</i></span> reagem dois-a-dois; <span class="m"><i>A</i></span> reage com <span class="m"><i>F</i></span> e com <span class="m"><i>D</i></span> e vice-versa; <span class="m"><i>E</i></span> também reage com <span class="m"><i>F</i></span> e com <span class="m"><i>D</i></span> e vice-versa. Descreva o grafo que modela essa situação, mostre um diagrama e use-o para descobrir o menor número de caixas necessárias.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h1" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a1" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h1"><div class="plab">Dica</div>
+            <p>Vértices = produtos, arestas = pares que reagem. “Menor número de caixas” = <span class="m">χ(<i>G</i>)</span>. Ache primeiro um limite inferior olhando o maior conjunto de produtos que reagem todos entre si.</p>
+          </div>
+          <div class="panel answer" id="a1"><div class="plab">Resolução</div>
+            <p><b>Modelo.</b> <span class="m"><i>V</i>(<i>G</i>) = {<i>A</i>,<i>B</i>,<i>C</i>,<i>D</i>,<i>E</i>,<i>F</i>,<i>X</i>}</span> e</p>
+            <div class="eq"><div class="body"><i>E</i>(<i>G</i>) = { {<i>A</i>,<i>B</i>}, {<i>A</i>,<i>C</i>}, {<i>A</i>,<i>X</i>}, {<i>B</i>,<i>C</i>}, {<i>B</i>,<i>X</i>}, {<i>C</i>,<i>X</i>}, {<i>A</i>,<i>D</i>}, {<i>A</i>,<i>F</i>}, {<i>E</i>,<i>D</i>}, {<i>E</i>,<i>F</i>} }</div></div>
+            <p>São 10 arestas: as 6 do <span class="m"><i>K</i><sup>4</sup></span> sobre <span class="m">{<i>A</i>,<i>B</i>,<i>C</i>,<i>X</i>}</span> mais o ciclo <span class="m"><i>A</i>–<i>D</i>–<i>E</i>–<i>F</i>–<i>A</i></span>.</p>
+            <figure>
+              <svg class="dg" viewBox="0 0 400 220" role="img" aria-label="Diagrama do grafo do exercício 1">
+                <g>
+                  <line class="e" x1="190" y1="110" x2="270" y2="45"/><line class="e" x1="190" y1="110" x2="350" y2="110"/>
+                  <line class="e" x1="190" y1="110" x2="270" y2="175"/><line class="e" x1="270" y1="45" x2="350" y2="110"/>
+                  <line class="e" x1="270" y1="45" x2="270" y2="175"/><line class="e" x1="350" y1="110" x2="270" y2="175"/>
+                  <line class="e" x1="190" y1="110" x2="110" y2="55"/><line class="e" x1="190" y1="110" x2="110" y2="165"/>
+                  <line class="e" x1="35" y1="110" x2="110" y2="55"/><line class="e" x1="35" y1="110" x2="110" y2="165"/>
+                </g>
+                <g class="v"><circle cx="190" cy="110" r="17"/><text x="190" y="110">A</text></g>
+                <g class="v"><circle cx="270" cy="45" r="17"/><text x="270" y="45">B</text></g>
+                <g class="v"><circle cx="350" cy="110" r="17"/><text x="350" y="110">C</text></g>
+                <g class="v"><circle cx="270" cy="175" r="17"/><text x="270" y="175">X</text></g>
+                <g class="v"><circle cx="110" cy="55" r="17"/><text x="110" y="55">D</text></g>
+                <g class="v"><circle cx="110" cy="165" r="17"/><text x="110" y="165">F</text></g>
+                <g class="v"><circle cx="35" cy="110" r="17"/><text x="35" y="110">E</text></g>
+              </svg>
+              <figcaption>Grafo das reações. O cruzamento no centro é só do desenho, não é vértice.</figcaption>
+            </figure>
+            <p><b>Limite inferior.</b> <span class="m">{<i>A</i>,<i>B</i>,<i>C</i>,<i>X</i>}</span> induz um <span class="m"><i>K</i><sup>4</sup></span>: esses quatro produtos reagem dois-a-dois, logo precisam de 4 caixas distintas entre si. Portanto <span class="m">χ(<i>G</i>) ≥ 4</span>.</p>
+            <p><b>Limite superior.</b> A distribuição abaixo usa 4 caixas e nenhuma contém um par que reage:</p>
+            <div class="eq"><div class="body">
+              caixa 1 = {<i>A</i>, <i>E</i>} &nbsp;·&nbsp; caixa 2 = {<i>B</i>, <i>D</i>, <i>F</i>} &nbsp;·&nbsp; caixa 3 = {<i>C</i>} &nbsp;·&nbsp; caixa 4 = {<i>X</i>}
+            </div></div>
+            <figure>
+              <svg class="dg" viewBox="0 0 400 220" role="img" aria-label="Coloração do grafo do exercício 1 com quatro cores">
+                <g>
+                  <line class="e" x1="190" y1="110" x2="270" y2="45"/><line class="e" x1="190" y1="110" x2="350" y2="110"/>
+                  <line class="e" x1="190" y1="110" x2="270" y2="175"/><line class="e" x1="270" y1="45" x2="350" y2="110"/>
+                  <line class="e" x1="270" y1="45" x2="270" y2="175"/><line class="e" x1="350" y1="110" x2="270" y2="175"/>
+                  <line class="e" x1="190" y1="110" x2="110" y2="55"/><line class="e" x1="190" y1="110" x2="110" y2="165"/>
+                  <line class="e" x1="35" y1="110" x2="110" y2="55"/><line class="e" x1="35" y1="110" x2="110" y2="165"/>
+                </g>
+                <g class="v c1"><circle cx="190" cy="110" r="17"/><text x="190" y="110">A</text></g>
+                <g class="v c2"><circle cx="270" cy="45" r="17"/><text x="270" y="45">B</text></g>
+                <g class="v c3"><circle cx="350" cy="110" r="17"/><text x="350" y="110">C</text></g>
+                <g class="v c4"><circle cx="270" cy="175" r="17"/><text x="270" y="175">X</text></g>
+                <g class="v c2"><circle cx="110" cy="55" r="17"/><text x="110" y="55">D</text></g>
+                <g class="v c2"><circle cx="110" cy="165" r="17"/><text x="110" y="165">F</text></g>
+                <g class="v c1"><circle cx="35" cy="110" r="17"/><text x="35" y="110">E</text></g>
+              </svg>
+              <div class="legend">
+                <span><i style="background:var(--c1)"></i>caixa 1: A, E</span>
+                <span><i style="background:var(--c2)"></i>caixa 2: B, D, F</span>
+                <span><i style="background:var(--c3)"></i>caixa 3: C</span>
+                <span><i style="background:var(--c4)"></i>caixa 4: X</span>
+              </div>
+              <figcaption>Verificação: nenhuma aresta tem as duas pontas da mesma cor.</figcaption>
+            </figure>
+            <p>Como <span class="m">4 ≤ χ(<i>G</i>) ≤ 4</span>, o número mínimo de caixas é <b>4</b>.</p>
+          </div>
+        </article>
+
+        <!-- Ex 2 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 2</span><div class="stmt">
+            <p>Adaltina esperava 4 amigas — Brandelina, Clodina, Dejaina e Edina — para um lanche e preparou: Bauru, Misto quente, Misto frio e X‑salada. Brandelina gosta de Misto frio e X‑salada; Clodina de Bauru e X‑salada; Dejaina de Misto quente e Misto frio; Edina de Bauru e Misto quente. Descreva o grafo que modela a situação, mostre um diagrama e decida se é possível que cada amiga receba um lanche de que gosta.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a2" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a2"><div class="plab">Resolução</div>
+            <p><b>Modelo.</b> Os vértices são as 4 amigas e os 4 lanches; há aresta entre uma amiga e um lanche quando ela gosta dele. Nenhuma aresta liga amiga com amiga ou lanche com lanche — o grafo é <b>bipartido</b> com partes <span class="m"><i>A</i> = {Bra, Clo, Dej, Edi}</span> e <span class="m"><i>L</i> = {Bau, MQ, MF, XS}</span>:</p>
+            <div class="eq"><div class="body"><i>E</i> = { {Bra,MF}, {Bra,XS}, {Clo,Bau}, {Clo,XS}, {Dej,MQ}, {Dej,MF}, {Edi,Bau}, {Edi,MQ} }</div></div>
+            <p>Cada vértice tem grau 2 e as 8 arestas formam um único ciclo de comprimento 8: Bra–XS–Clo–Bau–Edi–MQ–Dej–MF–Bra.</p>
+            <p><b>Resposta.</b> Sim, é possível. Precisamos escolher arestas que não compartilhem vértices (um <b>emparelhamento</b>) cobrindo as 4 amigas — em destaque abaixo:</p>
+            <figure>
+              <svg class="dg wide" viewBox="0 0 520 250" role="img" aria-label="Grafo bipartido de amigas e lanches com um emparelhamento perfeito destacado">
+                <g>
+                  <line class="e" x1="165" y1="37" x2="355" y2="157"/>
+                  <line class="e" x1="165" y1="97" x2="355" y2="37"/>
+                  <line class="e" x1="165" y1="157" x2="355" y2="157"/>
+                  <line class="e" x1="165" y1="217" x2="355" y2="37"/>
+                  <line class="e match" x1="165" y1="37" x2="355" y2="217"/>
+                  <line class="e match" x1="165" y1="97" x2="355" y2="217"/>
+                  <line class="e match" x1="165" y1="157" x2="355" y2="97"/>
+                  <line class="e match" x1="165" y1="217" x2="355" y2="97"/>
+                </g>
+                <g class="v"><rect x="10" y="20" width="155" height="34" rx="10"/><text x="87" y="37">Brandelina</text></g>
+                <g class="v"><rect x="10" y="80" width="155" height="34" rx="10"/><text x="87" y="97">Clodina</text></g>
+                <g class="v"><rect x="10" y="140" width="155" height="34" rx="10"/><text x="87" y="157">Dejaina</text></g>
+                <g class="v"><rect x="10" y="200" width="155" height="34" rx="10"/><text x="87" y="217">Edina</text></g>
+                <g class="v"><rect x="355" y="20" width="155" height="34" rx="10"/><text x="432" y="37">Bauru</text></g>
+                <g class="v"><rect x="355" y="80" width="155" height="34" rx="10"/><text x="432" y="97">Misto quente</text></g>
+                <g class="v"><rect x="355" y="140" width="155" height="34" rx="10"/><text x="432" y="157">Misto frio</text></g>
+                <g class="v"><rect x="355" y="200" width="155" height="34" rx="10"/><text x="432" y="217">X-salada</text></g>
+              </svg>
+              <figcaption>Em verde, um emparelhamento perfeito. Como o grafo é um ciclo par, há exatamente duas soluções — a destacada e a complementar.</figcaption>
+            </figure>
+            <p>Uma solução explícita: <b>Brandelina → X‑salada</b>, <b>Clodina → Bauru</b>, <b>Dejaina → Misto frio</b>, <b>Edina → Misto quente</b>. A outra: Brandelina → Misto frio, Dejaina → Misto quente, Edina → Bauru, Clodina → X‑salada.</p>
+          </div>
+        </article>
+
+        <!-- Ex 3 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 3</span><div class="stmt">
+            <p>Para todo <span class="m"><i>n</i> ∈ ℕ</span>, qual é o número máximo de arestas que pode ter um grafo com <span class="m"><i>n</i></span> vértices?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a3" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a3"><div class="plab">Resolução</div>
+            <p>Por definição <span class="m"><i>E</i> ⊆ <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span>, logo o máximo de arestas é a quantidade de subconjuntos de 2 elementos de um conjunto de <span class="m"><i>n</i></span> elementos:</p>
+            <div class="eq"><div class="body">|<i>E</i>| ≤ <span class="binom"><span class="p">(</span><span class="s"><span><i>n</i></span><span>2</span></span><span class="p">)</span></span> = <span class="frac"><span><i>n</i>(<i>n</i>−1)</span><span>2</span></span></div><div class="tag">(máx.)</div></div>
+            <p><b>Por que essa contagem.</b> Para escolher um par, há <span class="m"><i>n</i></span> opções para o primeiro vértice e <span class="m"><i>n</i>−1</span> para o segundo, mas <span class="m">{<i>u</i>,<i>v</i>}</span> e <span class="m">{<i>v</i>,<i>u</i>}</span> são a <i>mesma</i> aresta; daí dividir por 2.</p>
+            <p>O valor é <b>atingido</b> exatamente pelo grafo completo <span class="m"><i>K</i><sup><i>n</i></sup></span>. Casos pequenos: <span class="m"><i>n</i> = 0</span> ou 1 dão 0 arestas; <span class="m"><i>n</i> = 2</span> dá 1; <span class="m"><i>n</i> = 5</span> dá 10 (Figura 2a).</p>
+          </div>
+        </article>
+
+        <!-- Ex 4 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 4</span><div class="stmt">
+            <p>O <b>complemento</b> de um grafo <span class="m"><i>G</i></span>, denotado <span class="m"><span style="text-decoration:overline"><i>G</i></span></span>, tem o mesmo conjunto de vértices de <span class="m"><i>G</i></span> e dois vértices formam aresta em <span class="m"><span style="text-decoration:overline"><i>G</i></span></span> se e somente se <b>não</b> formam aresta em <span class="m"><i>G</i></span>. Dê o complemento dos grafos:</p>
+            <ol>
+              <li><span class="m"><i>V</i>(<i>G</i>) = {1,2,3,4,5}</span>, <span class="m"><i>E</i>(<i>G</i>)</span> = todos os 10 pares (isto é, <span class="m"><i>G</i> = <i>K</i><sup>5</sup></span>);</li>
+              <li><span class="m"><i>V</i>(<i>H</i>) = {1,…,7}</span>, <span class="m"><i>E</i>(<i>H</i>) = { {1,2},{1,3},{2,4},{2,5},{3,6},{3,7} }</span>;</li>
+              <li><span class="m"><i>V</i>(<i>B</i>) = {<i>a</i>,<i>b</i>,<i>c</i>,1,2,3}</span>, <span class="m"><i>E</i>(<i>B</i>) = { {<i>a</i>,1},{<i>a</i>,2},{<i>a</i>,3},{<i>b</i>,1},{<i>b</i>,2},{<i>b</i>,3},{<i>c</i>,1},{<i>c</i>,2},{<i>c</i>,3} }</span>.</li>
+            </ol>
+            <div class="figrow">
+              <figure>
+                <svg class="dg" viewBox="0 0 340 210" role="img" aria-label="Grafo H, uma árvore binária com sete vértices">
+                  <g>
+                    <line class="e" x1="170" y1="35" x2="90" y2="105"/><line class="e" x1="170" y1="35" x2="250" y2="105"/>
+                    <line class="e" x1="90" y1="105" x2="45" y2="175"/><line class="e" x1="90" y1="105" x2="135" y2="175"/>
+                    <line class="e" x1="250" y1="105" x2="205" y2="175"/><line class="e" x1="250" y1="105" x2="295" y2="175"/>
+                  </g>
+                  <g class="v"><circle cx="170" cy="35" r="17"/><text x="170" y="35">1</text></g>
+                  <g class="v"><circle cx="90" cy="105" r="17"/><text x="90" y="105">2</text></g>
+                  <g class="v"><circle cx="250" cy="105" r="17"/><text x="250" y="105">3</text></g>
+                  <g class="v"><circle cx="45" cy="175" r="17"/><text x="45" y="175">4</text></g>
+                  <g class="v"><circle cx="135" cy="175" r="17"/><text x="135" y="175">5</text></g>
+                  <g class="v"><circle cx="205" cy="175" r="17"/><text x="205" y="175">6</text></g>
+                  <g class="v"><circle cx="295" cy="175" r="17"/><text x="295" y="175">7</text></g>
+                </svg>
+                <figcaption>Grafo <span class="m"><i>H</i></span> (6 arestas).</figcaption>
+              </figure>
+              <figure>
+                <svg class="dg" viewBox="0 0 340 210" role="img" aria-label="Grafo B, bipartido completo K3,3">
+                  <g>
+                    <line class="e" x1="60" y1="45" x2="60" y2="165"/><line class="e" x1="60" y1="45" x2="170" y2="165"/><line class="e" x1="60" y1="45" x2="280" y2="165"/>
+                    <line class="e" x1="170" y1="45" x2="60" y2="165"/><line class="e" x1="170" y1="45" x2="170" y2="165"/><line class="e" x1="170" y1="45" x2="280" y2="165"/>
+                    <line class="e" x1="280" y1="45" x2="60" y2="165"/><line class="e" x1="280" y1="45" x2="170" y2="165"/><line class="e" x1="280" y1="45" x2="280" y2="165"/>
+                  </g>
+                  <g class="v"><circle cx="60" cy="45" r="17"/><text x="60" y="45">a</text></g>
+                  <g class="v"><circle cx="170" cy="45" r="17"/><text x="170" y="45">b</text></g>
+                  <g class="v"><circle cx="280" cy="45" r="17"/><text x="280" y="45">c</text></g>
+                  <g class="v"><circle cx="60" cy="165" r="17"/><text x="60" y="165">1</text></g>
+                  <g class="v"><circle cx="170" cy="165" r="17"/><text x="170" y="165">2</text></g>
+                  <g class="v"><circle cx="280" cy="165" r="17"/><text x="280" y="165">3</text></g>
+                </svg>
+                <figcaption>Grafo <span class="m"><i>B</i></span> (9 arestas), o bipartido completo <span class="m"><i>K</i><sub>3,3</sub></span>.</figcaption>
+              </figure>
+            </div>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h4" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a4" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h4"><div class="plab">Dica</div>
+            <p>Conte antes de desenhar: <span class="m">|<i>E</i>(<span style="text-decoration:overline"><i>G</i></span>)| = <span class="frac"><span><i>n</i>(<i>n</i>−1)</span><span>2</span></span> − |<i>E</i>(<i>G</i>)|</span>. Assim você sabe quantas arestas deve obter e confere o resultado.</p>
+          </div>
+          <div class="panel answer" id="a4"><div class="plab">Resolução</div>
+            <p class="kicker">1) Complemento de <span class="m"><i>G</i> = <i>K</i><sup>5</sup></span></p>
+            <p><span class="m"><i>G</i></span> já tem todas as <span class="m">10</span> arestas possíveis, então não sobra nenhuma: <span class="m"><span style="text-decoration:overline"><i>G</i></span> = ({1,2,3,4,5}, ∅)</span> — cinco vértices isolados (Figura 2b). Em geral, <span class="m"><span style="text-decoration:overline"><i>K</i><sup><i>n</i></sup></span></span> é o grafo sem arestas.</p>
+
+            <p class="kicker">2) Complemento de <span class="m"><i>H</i></span></p>
+            <p>Total possível: <span class="m"><span class="binom"><span class="p">(</span><span class="s"><span>7</span><span>2</span></span><span class="p">)</span></span> = 21</span>; <span class="m"><i>H</i></span> tem 6, logo <span class="m"><span style="text-decoration:overline"><i>H</i></span></span> tem <span class="m">21 − 6 = 15</span> arestas:</p>
+            <div class="eq"><div class="body">
+              <i>E</i>(<span style="text-decoration:overline"><i>H</i></span>) = { {1,4},{1,5},{1,6},{1,7},{2,3},{2,6},{2,7},{3,4},{3,5},{4,5},{4,6},{4,7},{5,6},{5,7},{6,7} }
+            </div></div>
+            <figure>
+              <svg class="dg" viewBox="0 0 240 240" role="img" aria-label="Complemento do grafo H com quinze arestas">
+                <g>
+                  <line class="e faint" x1="120" y1="25" x2="161" y2="206"/><line class="e faint" x1="120" y1="25" x2="79" y2="206"/>
+                  <line class="e faint" x1="120" y1="25" x2="27" y2="141"/><line class="e faint" x1="120" y1="25" x2="46" y2="61"/>
+                  <line class="e faint" x1="194" y1="61" x2="213" y2="141"/><line class="e faint" x1="194" y1="61" x2="27" y2="141"/>
+                  <line class="e faint" x1="194" y1="61" x2="46" y2="61"/><line class="e faint" x1="213" y1="141" x2="161" y2="206"/>
+                  <line class="e faint" x1="213" y1="141" x2="79" y2="206"/><line class="e faint" x1="161" y1="206" x2="79" y2="206"/>
+                  <line class="e faint" x1="161" y1="206" x2="27" y2="141"/><line class="e faint" x1="161" y1="206" x2="46" y2="61"/>
+                  <line class="e faint" x1="79" y1="206" x2="27" y2="141"/><line class="e faint" x1="79" y1="206" x2="46" y2="61"/>
+                  <line class="e faint" x1="27" y1="141" x2="46" y2="61"/>
+                </g>
+                <g class="v"><circle cx="120" cy="25" r="16"/><text x="120" y="25">1</text></g>
+                <g class="v"><circle cx="194" cy="61" r="16"/><text x="194" y="61">2</text></g>
+                <g class="v"><circle cx="213" cy="141" r="16"/><text x="213" y="141">3</text></g>
+                <g class="v"><circle cx="161" cy="206" r="16"/><text x="161" y="206">4</text></g>
+                <g class="v"><circle cx="79" cy="206" r="16"/><text x="79" y="206">5</text></g>
+                <g class="v"><circle cx="27" cy="141" r="16"/><text x="27" y="141">6</text></g>
+                <g class="v"><circle cx="46" cy="61" r="16"/><text x="46" y="61">7</text></g>
+              </svg>
+              <figcaption><span class="m"><span style="text-decoration:overline"><i>H</i></span></span> com os vértices em círculo, para ficar legível. Observe que <span class="m">{4,5,6,7}</span> virou um <span class="m"><i>K</i><sup>4</sup></span>.</figcaption>
+            </figure>
+            <p>Leitura útil: as folhas <span class="m">4,5,6,7</span>, que eram duas a duas não adjacentes em <span class="m"><i>H</i></span>, tornam-se mutuamente adjacentes no complemento.</p>
+
+            <p class="kicker">3) Complemento de <span class="m"><i>B</i> = <i>K</i><sub>3,3</sub></span></p>
+            <p>Total possível: <span class="m"><span class="binom"><span class="p">(</span><span class="s"><span>6</span><span>2</span></span><span class="p">)</span></span> = 15</span>; <span class="m"><i>B</i></span> tem 9, então sobram 6 arestas — exatamente os pares <i>dentro</i> de cada parte:</p>
+            <div class="eq"><div class="body">
+              <i>E</i>(<span style="text-decoration:overline"><i>B</i></span>) = { {<i>a</i>,<i>b</i>}, {<i>a</i>,<i>c</i>}, {<i>b</i>,<i>c</i>}, {1,2}, {1,3}, {2,3} }
+            </div></div>
+            <figure>
+              <svg class="dg" viewBox="0 0 340 200" role="img" aria-label="Complemento de B: dois triângulos disjuntos">
+                <g>
+                  <line class="e" x1="80" y1="40" x2="30" y2="150"/><line class="e" x1="80" y1="40" x2="130" y2="150"/><line class="e" x1="30" y1="150" x2="130" y2="150"/>
+                  <line class="e" x1="250" y1="40" x2="200" y2="150"/><line class="e" x1="250" y1="40" x2="300" y2="150"/><line class="e" x1="200" y1="150" x2="300" y2="150"/>
+                </g>
+                <g class="v"><circle cx="80" cy="40" r="17"/><text x="80" y="40">a</text></g>
+                <g class="v"><circle cx="30" cy="150" r="17"/><text x="30" y="150">b</text></g>
+                <g class="v"><circle cx="130" cy="150" r="17"/><text x="130" y="150">c</text></g>
+                <g class="v"><circle cx="250" cy="40" r="17"/><text x="250" y="40">1</text></g>
+                <g class="v"><circle cx="200" cy="150" r="17"/><text x="200" y="150">2</text></g>
+                <g class="v"><circle cx="300" cy="150" r="17"/><text x="300" y="150">3</text></g>
+              </svg>
+              <figcaption><span class="m"><span style="text-decoration:overline"><i>B</i></span></span> são dois triângulos disjuntos: <span class="m"><i>K</i><sup>3</sup></span> sobre <span class="m">{<i>a</i>,<i>b</i>,<i>c</i>}</span> e <span class="m"><i>K</i><sup>3</sup></span> sobre <span class="m">{1,2,3}</span>.</figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <!-- Ex 5 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 5</span><div class="stmt">
+            <p>Defina a união dos grafos <span class="m"><i>G</i></span> e <span class="m"><i>H</i></span> por <span class="m"><i>G</i> ∪ <i>H</i> = ( <i>V</i>(<i>G</i>) ∪ <i>V</i>(<i>H</i>), <i>E</i>(<i>G</i>) ∪ <i>E</i>(<i>H</i>) )</span>. A união <span class="m"><i>G</i> ∪ <i>H</i></span> é um grafo?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a5" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a5"><div class="plab">Resolução</div>
+            <p><b>Sim, sempre.</b> Para verificar, basta conferir a definição: precisamos que <span class="m"><i>E</i>(<i>G</i>) ∪ <i>E</i>(<i>H</i>)</span> seja um conjunto de subconjuntos de dois elementos de <span class="m"><i>V</i>(<i>G</i>) ∪ <i>V</i>(<i>H</i>)</span>.</p>
+            <p>Tome <span class="m"><i>e</i> ∈ <i>E</i>(<i>G</i>) ∪ <i>E</i>(<i>H</i>)</span>. Então <span class="m"><i>e</i> ∈ <i>E</i>(<i>G</i>)</span> ou <span class="m"><i>e</i> ∈ <i>E</i>(<i>H</i>)</span>.</p>
+            <ul>
+              <li>Se <span class="m"><i>e</i> ∈ <i>E</i>(<i>G</i>)</span>, então <span class="m">|<i>e</i>| = 2</span> e <span class="m"><i>e</i> ⊆ <i>V</i>(<i>G</i>) ⊆ <i>V</i>(<i>G</i>) ∪ <i>V</i>(<i>H</i>)</span>.</li>
+              <li>Se <span class="m"><i>e</i> ∈ <i>E</i>(<i>H</i>)</span>, o mesmo argumento com <span class="m"><i>H</i></span>.</li>
+            </ul>
+            <p>Em qualquer caso <span class="m"><i>e</i></span> é um par de vértices da união, isto é,</p>
+            <div class="eq"><div class="body"><i>E</i>(<i>G</i>) ∪ <i>E</i>(<i>H</i>) ⊆ <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i>(<i>G</i>) ∪ <i>V</i>(<i>H</i>)</span><span>2</span></span><span class="p">)</span></span></div></div>
+            <p>e ambos os conjuntos são finitos. Logo o par ordenado é um grafo. Note que não é preciso supor <span class="m"><i>V</i>(<i>G</i>) ∩ <i>V</i>(<i>H</i>) = ∅</span>: se os grafos compartilham vértices, as arestas comuns simplesmente não são duplicadas, porque união de conjuntos elimina repetições.</p>
+          </div>
+        </article>
+
+        <!-- Ex 6 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 6</span><div class="stmt">
+            <p>Um grafo é <b>completo</b> sobre <span class="m"><i>V</i></span> se todo par de vértices de <span class="m"><i>V</i></span> é aresta, ou seja <span class="m"><i>E</i> = <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span>; o completo com <span class="m"><i>n</i></span> vértices é <span class="m"><i>K</i><sup><i>n</i></sup></span>. Prove que <span class="m"><i>G</i> ∪ <span style="text-decoration:overline"><i>G</i></span> = <i>K</i><sup><i>n</i></sup></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a6" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a6"><div class="plab">Resolução</div>
+            <p>Seja <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span> com <span class="m">|<i>V</i>| = <i>n</i></span>. Provar a igualdade de dois grafos é provar duas igualdades de conjuntos.</p>
+            <p><b>Vértices.</b> Por definição de complemento, <span class="m"><i>V</i>(<span style="text-decoration:overline"><i>G</i></span>) = <i>V</i></span>, logo</p>
+            <div class="eq"><div class="body"><i>V</i>(<i>G</i> ∪ <span style="text-decoration:overline"><i>G</i></span>) = <i>V</i> ∪ <i>V</i> = <i>V</i>,</div></div>
+            <p>que tem <span class="m"><i>n</i></span> elementos — o conjunto de vértices certo.</p>
+            <p><b>Arestas.</b> Escreva <span class="m">𝒫 = <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span> para o conjunto de todos os pares. Por definição, <span class="m"><i>E</i>(<span style="text-decoration:overline"><i>G</i></span>) = 𝒫 \ <i>E</i></span>. Então</p>
+            <div class="eq"><div class="body"><i>E</i>(<i>G</i> ∪ <span style="text-decoration:overline"><i>G</i></span>) = <i>E</i> ∪ (𝒫 \ <i>E</i>) = 𝒫,</div></div>
+            <p>pois <span class="m"><i>E</i> ⊆ 𝒫</span>. De fato: “⊆” é claro porque <span class="m"><i>E</i> ⊆ 𝒫</span> e <span class="m">𝒫 \ <i>E</i> ⊆ 𝒫</span>; e “⊇” vale porque qualquer <span class="m"><i>p</i> ∈ 𝒫</span> está em <span class="m"><i>E</i></span> ou não está, e nesse segundo caso está em <span class="m">𝒫 \ <i>E</i></span>.</p>
+            <p>Portanto <span class="m"><i>G</i> ∪ <span style="text-decoration:overline"><i>G</i></span> = (<i>V</i>, 𝒫)</span> é completo sobre <span class="m"><i>V</i></span> com <span class="m"><i>n</i></span> vértices, isto é, <span class="m"><i>G</i> ∪ <span style="text-decoration:overline"><i>G</i></span> = <i>K</i><sup><i>n</i></sup></span>. <span style="font-weight:700">□</span></p>
+            <p><b>Corolário de contagem</b> (muito usado): <span class="m">|<i>E</i>(<i>G</i>)| + |<i>E</i>(<span style="text-decoration:overline"><i>G</i></span>)| = <span class="frac"><span><i>n</i>(<i>n</i>−1)</span><span>2</span></span></span>, porque <span class="m"><i>E</i></span> e <span class="m">𝒫 \ <i>E</i></span> são disjuntos.</p>
+          </div>
+        </article>
+
+        <!-- Ex 7 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 7</span><div class="stmt">
+            <p>Considere o caso geral do exercício 1: um químico deseja embarcar <span class="m"><i>p</i><sub>1</sub>, <i>p</i><sub>2</sub>, …, <i>p</i><sub><i>n</i></sub></span> no menor número de caixas, sendo que alguns pares reagem. Seja <span class="m"><i>G</i></span> o grafo em que vértices são produtos e arestas são os pares que reagem, e <span class="m">χ(<i>G</i>)</span> o número mínimo de caixas. Prove que</p>
+            <div class="eq"><div class="body">χ(<i>G</i>) ≤ <span class="frac"><span>1</span><span>2</span></span> + √<span class="rad">2<i>m</i> + <span class="frac"><span>1</span><span>4</span></span></span></div></div>
+            <p>onde <span class="m"><i>m</i></span> é o número de pares de produtos que reagem.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h7" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a7" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h7"><div class="plab">Dica</div>
+            <p>Numa distribuição <b>ótima</b> em <span class="m"><i>k</i></span> caixas, o que aconteceria se duas caixas não tivessem nenhum par reagente entre elas? Conclua que cada par de caixas “consome” pelo menos uma aresta e conte.</p>
+          </div>
+          <div class="panel answer" id="a7"><div class="plab">Resolução</div>
+            <p>Escreva <span class="m"><i>k</i> = χ(<i>G</i>)</span> e fixe uma distribuição ótima dos produtos em caixas <span class="m"><i>C</i><sub>1</sub>, …, <i>C</i><sub><i>k</i></sub></span> (nenhuma caixa contém dois produtos que reagem).</p>
+            <p><b>Passo 1 — entre duas caixas quaisquer existe pelo menos uma aresta.</b> Suponha, por absurdo, que para algum par <span class="m"><i>i</i> ≠ <i>j</i></span> não haja nenhuma aresta com um extremo em <span class="m"><i>C</i><sub><i>i</i></sub></span> e outro em <span class="m"><i>C</i><sub><i>j</i></sub></span>. Então <span class="m"><i>C</i><sub><i>i</i></sub> ∪ <i>C</i><sub><i>j</i></sub></span> continua sem pares reagentes e podemos juntar essas duas caixas numa só, obtendo uma distribuição válida com <span class="m"><i>k</i> − 1</span> caixas — contradizendo a minimalidade de <span class="m"><i>k</i></span>.</p>
+            <p><b>Passo 2 — contagem.</b> Cada par de caixas exige, então, ao menos uma aresta, e arestas distintas para pares de caixas distintos (uma aresta liga exatamente duas caixas). Logo</p>
+            <div class="eq"><div class="body"><i>m</i> ≥ <span class="binom"><span class="p">(</span><span class="s"><span><i>k</i></span><span>2</span></span><span class="p">)</span></span> = <span class="frac"><span><i>k</i>(<i>k</i>−1)</span><span>2</span></span></div></div>
+            <p><b>Passo 3 — resolver a desigualdade em <span class="m"><i>k</i></span>.</b> De <span class="m"><i>k</i><sup>2</sup> − <i>k</i> − 2<i>m</i> ≤ 0</span>, completando o quadrado:</p>
+            <div class="eq"><div class="body">
+              (<i>k</i> − <span class="frac"><span>1</span><span>2</span></span>)<sup>2</sup> ≤ 2<i>m</i> + <span class="frac"><span>1</span><span>4</span></span>
+              &nbsp;&nbsp;⟹&nbsp;&nbsp; <i>k</i> − <span class="frac"><span>1</span><span>2</span></span> ≤ √<span class="rad">2<i>m</i> + <span class="frac"><span>1</span><span>4</span></span></span>
+              &nbsp;&nbsp;⟹&nbsp;&nbsp; χ(<i>G</i>) = <i>k</i> ≤ <span class="frac"><span>1</span><span>2</span></span> + √<span class="rad">2<i>m</i> + <span class="frac"><span>1</span><span>4</span></span></span>
+            </div><div class="tag">□</div></div>
+            <p><b>Teste no exercício 1:</b> lá <span class="m"><i>m</i> = 10</span>, e a cota dá <span class="m">0,5 + √<span class="rad">20,25</span> ≈ 5,0</span>. Como <span class="m">χ</span> é inteiro, <span class="m">χ ≤ 5</span> — verdadeiro, já que encontramos <span class="m">χ = 4</span>. A cota é útil quando não queremos (ou não podemos) calcular <span class="m">χ</span> exatamente: com poucas reações, poucas caixas bastam.</p>
+          </div>
+        </article>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 2 ============================ -->
+      <section class="chapter" id="s2">
+        <h2><span class="num">§2</span> Grau de um vértice</h2>
+        <p class="sub-lead">Objetivo do bloco: medir “quanta conexão” cada vértice tem e usar essa medida para decidir, por contagem, o que pode ou não existir.</p>
+
+        <h3 id="s2-def">2.1 Arestas incidentes, vizinhança e grau</h3>
+        <p>Para um vértice <span class="m"><i>v</i></span> qualquer num grafo <span class="m"><i>G</i></span>, definimos dois conjuntos:</p>
+        <div class="eq"><div class="body"><i>E</i><sub><i>G</i></sub>(<i>v</i>) = { <i>e</i> ∈ <i>E</i>(<i>G</i>) : <i>v</i> ∈ <i>e</i> }</div><div class="tag">(1)</div></div>
+        <div class="eq"><div class="body"><i>N</i><sub><i>G</i></sub>(<i>v</i>) = { <i>w</i> ∈ <i>V</i>(<i>G</i>) : {<i>v</i>,<i>w</i>} ∈ <i>E</i>(<i>G</i>) }</div><div class="tag">(2)</div></div>
+        <p>
+          O primeiro é o conjunto das arestas que <b>incidem</b> em <span class="m"><i>v</i></span>; o segundo é a <b>vizinhança</b> de
+          <span class="m"><i>v</i></span>, e seus elementos são os <b>vizinhos</b> de <span class="m"><i>v</i></span>. Um é um conjunto de arestas, o outro de vértices —
+          confundi-los é o erro mais comum aqui.
+        </p>
+        <div class="box def">
+          <div class="h">Definições · grau e parâmetros de grau</div>
+          <div class="eq" style="margin-top:6px"><div class="body">grau de <i>u</i> em <i>G</i>: &nbsp; <i>d</i><sub><i>G</i></sub>(<i>u</i>) = |<i>N</i><sub><i>G</i></sub>(<i>u</i>)|</div><div class="tag">(3)</div></div>
+          <div class="eq"><div class="body">grau mínimo: &nbsp; δ(<i>G</i>) = min{ <i>d</i><sub><i>G</i></sub>(<i>u</i>) : <i>u</i> ∈ <i>V</i> }</div><div class="tag">(4)</div></div>
+          <div class="eq"><div class="body">grau máximo: &nbsp; Δ(<i>G</i>) = max{ <i>d</i><sub><i>G</i></sub>(<i>u</i>) : <i>u</i> ∈ <i>V</i> }</div><div class="tag">(5)</div></div>
+          <div class="eq"><div class="body">grau médio (<i>G</i> não-vazio): &nbsp; <span style="text-decoration:overline"><i>d</i></span>(<i>G</i>) = <span class="frac"><span>1</span><span>|<i>V</i>|</span></span> <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> <i>d</i><sub><i>G</i></sub>(<i>u</i>)</div><div class="tag">(6)</div></div>
+        </div>
+        <div class="box tip">
+          <div class="h">Por que <span class="m"><i>d</i>(<i>v</i>) = |<i>E</i>(<i>v</i>)| = |<i>N</i>(<i>v</i>)|</span></div>
+          <p>
+            Num grafo simples, cada aresta incidente em <span class="m"><i>v</i></span> leva a exatamente um vizinho distinto, e vizinhos distintos vêm de arestas distintas.
+            Logo contar arestas incidentes ou contar vizinhos dá o mesmo número. (Em multigrafos com laços isso <b>deixa</b> de valer — mais um motivo para a definição restritiva do §1.)
+          </p>
+        </div>
+        <p>
+          <b>Observação.</b> Às vezes suprimimos o índice <span class="m"><i>G</i></span> ou o argumento <span class="m">(<i>G</i>)</span> para simplificar:
+          escrevemos <span class="m"><i>E</i>(<i>v</i>)</span>, <span class="m"><i>N</i>(<i>v</i>)</span>, <span class="m"><i>d</i>(<i>v</i>)</span> e <span class="m">Δ</span>
+          quando está claro de que grafo se fala.
+        </p>
+
+        <h3 id="s2-params">2.2 Exemplo completo (Figura 1)</h3>
+        <figure>
+          <svg class="dg" viewBox="0 0 560 200" role="img" aria-label="Grafo do Exemplo 1 com o vértice 5 e seus vizinhos destacados">
+            <g>
+              <line class="e" x1="70" y1="55" x2="165" y2="55"/>
+              <line class="e match" x1="70" y1="55" x2="117" y2="140"/>
+              <line class="e match" x1="165" y1="55" x2="117" y2="140"/>
+              <line class="e" x1="265" y1="55" x2="265" y2="145"/>
+              <line class="e" x1="365" y1="55" x2="460" y2="55"/>
+            </g>
+            <g class="v hl2"><circle cx="70" cy="55" r="17"/><text x="70" y="55">1</text></g>
+            <g class="v hl2"><circle cx="165" cy="55" r="17"/><text x="165" y="55">2</text></g>
+            <g class="v hl"><circle cx="117" cy="140" r="17"/><text x="117" y="140">5</text></g>
+            <g class="v"><circle cx="265" cy="55" r="17"/><text x="265" y="55">3</text></g>
+            <g class="v"><circle cx="265" cy="145" r="17"/><text x="265" y="145">4</text></g>
+            <g class="v"><circle cx="365" cy="55" r="17"/><text x="365" y="55">6</text></g>
+            <g class="v"><circle cx="460" cy="55" r="17"/><text x="460" y="55">7</text></g>
+            <g class="v"><circle cx="510" cy="145" r="17"/><text x="510" y="145">8</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c2)"></i>vértice <span class="m"><i>v</i></span> = 5</span>
+            <span><i style="background:var(--c3)"></i><span class="m"><i>N</i>(5) = {1, 2}</span></span>
+            <span><i style="background:var(--ok);border-radius:2px;height:5px;width:16px"></i><span class="m"><i>E</i>(5) = { {1,5}, {2,5} }</span></span>
+          </div>
+          <figcaption><b>Figura 3.</b> Vizinhança e arestas incidentes de um vértice. Como <span class="m">|<i>N</i>(5)| = 2</span>, temos <span class="m"><i>d</i>(5) = 2</span>.</figcaption>
+        </figure>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Vértice <i>v</i></th><th><i>E</i>(<i>v</i>)</th><th><i>N</i>(<i>v</i>)</th><th><i>d</i>(<i>v</i>)</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>{1,2}, {1,5}</td><td>{2, 5}</td><td>2</td></tr>
+            <tr><td>2</td><td>{1,2}, {2,5}</td><td>{1, 5}</td><td>2</td></tr>
+            <tr><td>3</td><td>{3,4}</td><td>{4}</td><td>1</td></tr>
+            <tr><td>4</td><td>{3,4}</td><td>{3}</td><td>1</td></tr>
+            <tr><td>5</td><td>{1,5}, {2,5}</td><td>{1, 2}</td><td>2</td></tr>
+            <tr><td>6</td><td>{6,7}</td><td>{7}</td><td>1</td></tr>
+            <tr><td>7</td><td>{6,7}</td><td>{6}</td><td>1</td></tr>
+            <tr><td>8</td><td>∅</td><td>∅</td><td>0</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Daí: <span class="m">Δ(<i>G</i>) = 2</span>, <span class="m">δ(<i>G</i>) = 0</span> (por causa do vértice isolado 8) e
+          <span class="m"><span style="text-decoration:overline"><i>d</i></span>(<i>G</i>) = <span class="frac"><span>10</span><span>8</span></span> = <span class="frac"><span>5</span><span>4</span></span></span>.
+          Note que a soma dos graus, 10, é o dobro do número de arestas, 5. Isso não é coincidência.
+        </p>
+
+        <h3 id="s2-teorema">2.3 Teorema do aperto de mão</h3>
+        <div class="box thm">
+          <div class="h">Teorema 1</div>
+          <p>Para todo grafo <span class="m"><i>G</i></span> vale que</p>
+          <div class="eq"><div class="body"><span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i>(<i>G</i>)</span></span> <i>d</i><sub><i>G</i></sub>(<i>u</i>) = 2 |<i>E</i>(<i>G</i>)|</div><div class="tag">(7)</div></div>
+          <div class="proof">
+            <p><b>Demonstração (contagem dupla).</b> Seja <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span> e defina o conjunto de pares “vértice–aresta que o contém”:</p>
+            <div class="eq"><div class="body"><i>X</i> = { (<i>u</i>, <i>e</i>) ∈ <i>V</i> × <i>E</i> : <i>u</i> ∈ <i>e</i> }</div></div>
+            <p>Vamos contar <span class="m">|<i>X</i>|</span> de duas maneiras.</p>
+            <p>Primeiro, agrupando por vértice: cada <span class="m"><i>u</i></span> participa de <span class="m"><i>d</i>(<i>u</i>)</span> pares, pois há <span class="m">|<i>E</i>(<i>u</i>)| = <i>d</i>(<i>u</i>)</span> arestas que o contêm. Logo</p>
+            <div class="eq"><div class="body">|<i>X</i>| = <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> <i>d</i>(<i>u</i>)</div><div class="tag">(8)</div></div>
+            <p>Depois, agrupando por aresta: cada <span class="m"><i>e</i> ∈ <i>E</i></span> tem exatamente dois extremos, então aparece em exatamente 2 pares. Logo</p>
+            <div class="eq"><div class="body">|<i>X</i>| = 2 |<i>E</i>|</div><div class="tag">(9)</div></div>
+            <p>De (8) e (9) segue (7). <span class="qed">□</span></p>
+          </div>
+        </div>
+        <div class="box rec">
+          <div class="h">As três fórmulas que você vai usar sem parar</div>
+          <ul>
+            <li><b>Número de arestas pelos graus:</b> <span class="m">|<i>E</i>| = <span class="frac"><span>1</span><span>2</span></span> <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> <i>d</i>(<i>u</i>)</span>.</li>
+            <li><b>Grau médio:</b> <span class="m"><span style="text-decoration:overline"><i>d</i></span>(<i>G</i>) = <span class="frac"><span>2|<i>E</i>|</span><span>|<i>V</i>|</span></span></span> — consequência direta de (6) e (7).</li>
+            <li><b>Teste de paridade:</b> a soma dos graus é sempre <b>par</b>. Se uma lista de graus soma ímpar, nenhum grafo a realiza.</li>
+          </ul>
+        </div>
+        <div class="box thm">
+          <div class="h">Corolário 2</div>
+          <p>Em todo grafo, o número de vértices com grau ímpar é par.</p>
+          <div class="proof">
+            <p>Seja <span class="m"><i>G</i></span> um grafo, <span class="m"><i>I</i></span> o conjunto dos vértices de grau ímpar e <span class="m"><i>P</i></span> o dos de grau par. Como <span class="m"><i>I</i> ∩ <i>P</i> = ∅</span> e <span class="m"><i>I</i> ∪ <i>P</i> = <i>V</i>(<i>G</i>)</span>, o Teorema 1 dá</p>
+            <div class="eq"><div class="body"><span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>I</i></span></span> <i>d</i>(<i>u</i>) &nbsp;=&nbsp; 2|<i>E</i>(<i>G</i>)| − <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>P</i></span></span> <i>d</i>(<i>u</i>)</div><div class="tag">(10)</div></div>
+            <p>O lado direito é par (diferença de pares, já que cada <span class="m"><i>d</i>(<i>u</i>)</span> com <span class="m"><i>u</i> ∈ <i>P</i></span> é par). Então a soma de <span class="m">|<i>I</i>|</span> números ímpares é par, o que só é possível se <span class="m">|<i>I</i>|</span> for par. <span class="qed">□</span></p>
+          </div>
+        </div>
+        <div class="box tip">
+          <div class="h">Leitura intuitiva do nome</div>
+          <p>Se cada vértice é uma pessoa e cada aresta um aperto de mão, a soma de “quantas mãos cada um apertou” conta cada aperto duas vezes — uma por participante. Daí o teorema, e daí também o corolário: não é possível que um número ímpar de pessoas tenha apertado um número ímpar de mãos.</p>
+        </div>
+
+        <h3 id="s2-regular">2.4 Grafos regulares</h3>
+        <p>
+          Para <span class="m"><i>r</i> ∈ ℕ</span>, um grafo é <b><span class="m"><i>r</i></span>-regular</b> quando <i>todos</i> os vértices têm grau <span class="m"><i>r</i></span>
+          (equivalentemente, <span class="m">δ(<i>G</i>) = Δ(<i>G</i>) = <i>r</i></span>). Aplicando o Teorema 1 a um grafo <span class="m"><i>r</i></span>-regular com
+          <span class="m"><i>n</i></span> vértices e <span class="m"><i>m</i></span> arestas: <span class="m"><i>nr</i> = 2<i>m</i></span>, ou seja
+          <span class="m"><i>m</i> = <span class="frac"><span><i>nr</i></span><span>2</span></span></span>.
+        </p>
+        <p>
+          Exemplos: <span class="m"><i>K</i><sup><i>n</i></sup></span> é <span class="m">(<i>n</i>−1)</span>-regular; um ciclo é 2-regular;
+          <span class="m"><i>K</i><sub>3,3</sub></span> e o cubo abaixo são 3-regulares sem serem completos.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 260 240" role="img" aria-label="Grafo do cubo, 3-regular com oito vértices">
+            <g>
+              <line class="e" x1="40" y1="40" x2="200" y2="40"/><line class="e" x1="200" y1="40" x2="200" y2="200"/>
+              <line class="e" x1="200" y1="200" x2="40" y2="200"/><line class="e" x1="40" y1="200" x2="40" y2="40"/>
+              <line class="e" x1="85" y1="85" x2="155" y2="85"/><line class="e" x1="155" y1="85" x2="155" y2="155"/>
+              <line class="e" x1="155" y1="155" x2="85" y2="155"/><line class="e" x1="85" y1="155" x2="85" y2="85"/>
+              <line class="e" x1="40" y1="40" x2="85" y2="85"/><line class="e" x1="200" y1="40" x2="155" y2="85"/>
+              <line class="e" x1="200" y1="200" x2="155" y2="155"/><line class="e" x1="40" y1="200" x2="85" y2="155"/>
+            </g>
+            <g class="v"><circle cx="40" cy="40" r="13"/></g><g class="v"><circle cx="200" cy="40" r="13"/></g>
+            <g class="v"><circle cx="200" cy="200" r="13"/></g><g class="v"><circle cx="40" cy="200" r="13"/></g>
+            <g class="v"><circle cx="85" cy="85" r="13"/></g><g class="v"><circle cx="155" cy="85" r="13"/></g>
+            <g class="v"><circle cx="155" cy="155" r="13"/></g><g class="v"><circle cx="85" cy="155" r="13"/></g>
+          </svg>
+          <figcaption><b>Figura 4.</b> O cubo <span class="m"><i>Q</i><sub>3</sub></span>: 3-regular, <span class="m"><i>n</i> = 8</span> e <span class="m"><i>m</i> = <span class="frac"><span>8·3</span><span>2</span></span> = 12</span>.</figcaption>
+        </figure>
+        <div class="box warn">
+          <div class="h">Consequência de paridade</div>
+          <p>Como <span class="m"><i>m</i> = <i>nr</i>/2</span> deve ser inteiro, <b>não existe grafo <span class="m"><i>r</i></span>-regular com <span class="m"><i>n</i></span> e <span class="m"><i>r</i></span> ambos ímpares</b>. Por exemplo, não há grafo 3-regular com 7 vértices.</p>
+        </div>
+
+        <h3 id="s2-receita">2.5 Receita: essa sequência de graus é possível?</h3>
+        <div class="box rec">
+          <div class="h">Três testes, na ordem, antes de tentar desenhar</div>
+          <ol>
+            <li><b>Paridade.</b> A soma dos graus é par? Se não, <b>não existe</b> tal grafo (Teorema 1).</li>
+            <li><b>Grau máximo.</b> Todo grau é <span class="m">≤ <i>n</i> − 1</span>? Um vértice não pode ter mais vizinhos do que os outros vértices disponíveis.</li>
+            <li><b>Repetição obrigatória.</b> Com <span class="m"><i>n</i> ≥ 2</span> vértices, é impossível que todos os graus sejam distintos (veja o exercício 12). Sequências “todas diferentes” são inviáveis.</li>
+          </ol>
+          <p>Passando os três testes, tente construir um exemplo: comece pelos vértices de grau maior, ligando-os aos de maior grau restante.</p>
+        </div>
+
+        <h4>Grafo linha (usado no exercício 16)</h4>
+        <p>
+          O <b>grafo linha</b> de <span class="m"><i>G</i></span>, denotado <span class="m"><i>L</i><sub><i>G</i></sub></span>, tem como vértices as <i>arestas</i> de
+          <span class="m"><i>G</i></span>, e dois deles são adjacentes exatamente quando as arestas correspondentes são adjacentes em <span class="m"><i>G</i></span>
+          (compartilham um extremo). É a mesma informação vista “do ponto de vista das arestas”.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 480 210" role="img" aria-label="Uma estrela com três arestas e seu grafo linha, um triângulo">
+            <g>
+              <line class="e" x1="80" y1="105" x2="165" y2="45"/><line class="e" x1="80" y1="105" x2="175" y2="115"/><line class="e" x1="80" y1="105" x2="125" y2="180"/>
+              <line class="e" x1="255" y1="20" x2="255" y2="190" stroke-dasharray="6 7" opacity=".4"/>
+              <line class="e" x1="380" y1="45" x2="440" y2="155"/><line class="e" x1="380" y1="45" x2="320" y2="155"/><line class="e" x1="320" y1="155" x2="440" y2="155"/>
+            </g>
+            <g class="v"><circle cx="80" cy="105" r="15"/><text x="80" y="105">v</text></g>
+            <g class="v open"><circle cx="165" cy="45" r="15"/><text x="165" y="45">a</text></g>
+            <g class="v open"><circle cx="175" cy="115" r="15"/><text x="175" y="115">b</text></g>
+            <g class="v open"><circle cx="125" cy="180" r="15"/><text x="125" y="180">c</text></g>
+            <g class="v"><circle cx="380" cy="45" r="17"/><text x="380" y="45">va</text></g>
+            <g class="v"><circle cx="440" cy="155" r="17"/><text x="440" y="155">vb</text></g>
+            <g class="v"><circle cx="320" cy="155" r="17"/><text x="320" y="155">vc</text></g>
+            <text class="lbl" x="120" y="24">G</text><text class="lbl" x="380" y="24">L(G)</text>
+          </svg>
+          <figcaption><b>Figura 5.</b> As três arestas de <span class="m"><i>G</i></span> compartilham o vértice <span class="m"><i>v</i></span>, logo são adjacentes duas a duas e viram um triângulo em <span class="m"><i>L</i><sub><i>G</i></sub></span>.</figcaption>
+        </figure>
+
+        <div class="box def">
+          <div class="h">Resumo do bloco em cinco linhas</div>
+          <ul>
+            <li><span class="m"><i>d</i>(<i>v</i>) = |<i>N</i>(<i>v</i>)| = |<i>E</i>(<i>v</i>)|</span>: vizinhos são vértices, <span class="m"><i>E</i>(<i>v</i>)</span> são arestas.</li>
+            <li><span class="m">δ ≤ <span style="text-decoration:overline"><i>d</i></span> ≤ Δ</span> sempre, e <span class="m"><span style="text-decoration:overline"><i>d</i></span> = 2<i>m</i>/<i>n</i></span>.</li>
+            <li><b>Teorema 1:</b> <span class="m">∑<i>d</i>(<i>u</i>) = 2<i>m</i></span> — sua ferramenta número um de contagem.</li>
+            <li><b>Corolário 2:</b> a quantidade de vértices de grau ímpar é par.</li>
+            <li><span class="m"><i>r</i></span>-regular: <span class="m"><i>m</i> = <i>nr</i>/2</span>, e <span class="m"><i>n</i></span>, <span class="m"><i>r</i></span> não podem ser ambos ímpares.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================ EXERCÍCIOS 8–16 ============================ -->
+      <section class="chapter" id="ex2">
+        <div class="ex-head">
+          <h3>Exercícios 8 a 16</h3>
+          <button class="toggle" type="button" data-scope="#ex2" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: contagem com o Teorema 1, paridade, grau médio, casa dos pombos, grafos regulares e grafo linha.</p>
+        </div>
+
+        <!-- Ex 8 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 8</span><div class="stmt">
+            <p>Chico e sua esposa foram a uma festa com três outros casais. Houve vários apertos de mão: ninguém apertou a própria mão ou a mão do(a) esposo(a), e ninguém apertou a mão da mesma pessoa mais de uma vez. Depois, Chico perguntou a todos — inclusive à esposa — quantas mãos cada um apertou, e recebeu de cada pessoa uma resposta <b>diferente</b>. (i) Quantas mãos Chico apertou? (ii) Quantas mãos a esposa de Chico apertou?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h8" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a8" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h8"><div class="plab">Dica</div>
+            <p>São 8 pessoas, e cada uma pode ter apertado de 0 a 6 mãos. Chico obteve 7 respostas distintas nesse intervalo de 7 valores — logo todos os valores 0,…,6 aparecem exatamente uma vez. Agora pense: quem apertou 6 mãos e quem apertou 0 precisam ser casados.</p>
+          </div>
+          <div class="panel answer" id="a8"><div class="plab">Resolução</div>
+            <p><b>Modelo.</b> Grafo com 8 vértices (as pessoas); aresta quando duas pessoas se cumprimentaram. Cada pessoa não aperta a própria mão nem a do cônjuge, então <span class="m"><i>d</i>(<i>v</i>) ≤ 6</span> para todo <span class="m"><i>v</i></span>.</p>
+            <p>As 7 pessoas consultadas deram respostas duas a duas distintas dentro de <span class="m">{0, 1, …, 6}</span>, que tem exatamente 7 valores. Portanto <b>cada valor de 0 a 6 aparece uma única vez</b>. Chame de <span class="m"><i>P</i><sub><i>k</i></sub></span> a pessoa que apertou <span class="m"><i>k</i></span> mãos.</p>
+            <p><b>Passo 1 — <span class="m"><i>P</i><sub>6</sub></span> e <span class="m"><i>P</i><sub>0</sub></span> são casados.</b> <span class="m"><i>P</i><sub>6</sub></span> cumprimentou todos menos o próprio cônjuge. Se <span class="m"><i>P</i><sub>0</sub></span> não fosse seu cônjuge, teria apertado ao menos a mão de <span class="m"><i>P</i><sub>6</sub></span>, contrariando <span class="m"><i>d</i> = 0</span>. Note também que nenhum dos dois é Chico (Chico não respondeu a si mesmo) nem é sua esposa — se a esposa fosse <span class="m"><i>P</i><sub>6</sub></span>, o cônjuge dela, <span class="m"><i>P</i><sub>0</sub></span>, seria Chico, cuja resposta não está na lista.</p>
+            <p><b>Passo 2 — removendo esse casal.</b> Todos os demais apertaram a mão de <span class="m"><i>P</i><sub>6</sub></span> e não a de <span class="m"><i>P</i><sub>0</sub></span>. Descartando esse casal, cada contagem restante cai exatamente 1, e recaímos no mesmo problema com 3 casais: os valores <span class="m">5,4,3,2,1</span> tornam-se <span class="m">4,3,2,1,0</span>. Repetindo o argumento, <span class="m">(<i>P</i><sub>5</sub>, <i>P</i><sub>1</sub>)</span> é casal e <span class="m">(<i>P</i><sub>4</sub>, <i>P</i><sub>2</sub>)</span> é casal.</p>
+            <p><b>Passo 3 — quem sobra.</b> Os 7 consultados são a esposa de Chico e os 6 convidados, que formam 3 casais: <span class="m">(<i>P</i><sub>6</sub>,<i>P</i><sub>0</sub>)</span>, <span class="m">(<i>P</i><sub>5</sub>,<i>P</i><sub>1</sub>)</span> e <span class="m">(<i>P</i><sub>4</sub>,<i>P</i><sub>2</sub>)</span>. O único valor não pareado é o <b>3</b>, que só pode ser da <b>esposa de Chico</b>.</p>
+            <p><b>Passo 4 — contando os apertos de Chico.</b> Pelo mesmo desmonte: <span class="m"><i>P</i><sub>6</sub></span> cumprimentou todos, exceto <span class="m"><i>P</i><sub>0</sub></span>; <span class="m"><i>P</i><sub>5</sub></span> cumprimentou todos, exceto <span class="m"><i>P</i><sub>1</sub></span> e <span class="m"><i>P</i><sub>0</sub></span>; <span class="m"><i>P</i><sub>4</sub></span>, todos exceto <span class="m"><i>P</i><sub>2</sub>, <i>P</i><sub>1</sub>, <i>P</i><sub>0</sub></span>. Logo Chico apertou a mão de <span class="m"><i>P</i><sub>6</sub>, <i>P</i><sub>5</sub></span> e <span class="m"><i>P</i><sub>4</sub></span>, e de mais ninguém (<span class="m"><i>P</i><sub>3</sub></span> é sua esposa; <span class="m"><i>P</i><sub>2</sub>, <i>P</i><sub>1</sub>, <i>P</i><sub>0</sub></span> já esgotaram suas contagens).</p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th>Pessoa</th><th>Quem ela cumprimentou</th><th>Grau</th></tr></thead>
+              <tbody>
+                <tr><td><i>P</i><sub>6</sub></td><td><i>P</i><sub>5</sub>, <i>P</i><sub>4</sub>, <i>P</i><sub>3</sub>, <i>P</i><sub>2</sub>, <i>P</i><sub>1</sub>, Chico</td><td>6</td></tr>
+                <tr><td><i>P</i><sub>5</sub></td><td><i>P</i><sub>6</sub>, <i>P</i><sub>4</sub>, <i>P</i><sub>3</sub>, <i>P</i><sub>2</sub>, Chico</td><td>5</td></tr>
+                <tr><td><i>P</i><sub>4</sub></td><td><i>P</i><sub>6</sub>, <i>P</i><sub>5</sub>, <i>P</i><sub>3</sub>, Chico</td><td>4</td></tr>
+                <tr><td><i>P</i><sub>3</sub> = esposa</td><td><i>P</i><sub>6</sub>, <i>P</i><sub>5</sub>, <i>P</i><sub>4</sub></td><td>3</td></tr>
+                <tr><td>Chico</td><td><i>P</i><sub>6</sub>, <i>P</i><sub>5</sub>, <i>P</i><sub>4</sub></td><td>3</td></tr>
+                <tr><td><i>P</i><sub>2</sub></td><td><i>P</i><sub>6</sub>, <i>P</i><sub>5</sub></td><td>2</td></tr>
+                <tr><td><i>P</i><sub>1</sub></td><td><i>P</i><sub>6</sub></td><td>1</td></tr>
+                <tr><td><i>P</i><sub>0</sub></td><td>ninguém</td><td>0</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p><b>Respostas.</b> (i) Chico apertou <b>3</b> mãos. (ii) A esposa de Chico também apertou <b>3</b> mãos. (Conferindo com o Teorema 1: a soma dos graus é <span class="m">6+5+4+3+3+2+1+0 = 24 = 2 · 12</span>, logo houve 12 apertos de mão.)</p>
+          </div>
+        </article>
+
+        <!-- Ex 9 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 9</span><div class="stmt">
+            <p>Prove que <span class="m">δ(<i>G</i>) ≤ <span style="text-decoration:overline"><i>d</i></span>(<i>G</i>) ≤ Δ(<i>G</i>)</span> para todo grafo <span class="m"><i>G</i></span> (não-vazio).</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a9" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a9"><div class="plab">Resolução</div>
+            <p>Seja <span class="m"><i>n</i> = |<i>V</i>| ≥ 1</span>. Por definição de mínimo e de máximo, para todo <span class="m"><i>u</i> ∈ <i>V</i></span> vale <span class="m">δ(<i>G</i>) ≤ <i>d</i>(<i>u</i>) ≤ Δ(<i>G</i>)</span>. Somando essas <span class="m"><i>n</i></span> desigualdades sobre todos os vértices:</p>
+            <div class="eq"><div class="body"><i>n</i> · δ(<i>G</i>) &nbsp;=&nbsp; <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> δ(<i>G</i>) &nbsp;≤&nbsp; <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> <i>d</i>(<i>u</i>) &nbsp;≤&nbsp; <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> Δ(<i>G</i>) &nbsp;=&nbsp; <i>n</i> · Δ(<i>G</i>)</div></div>
+            <p>Dividindo tudo por <span class="m"><i>n</i> > 0</span> (que preserva as desigualdades) e usando a definição (6) do grau médio:</p>
+            <div class="eq"><div class="body">δ(<i>G</i>) ≤ <span class="frac"><span>1</span><span><i>n</i></span></span> <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> <i>d</i>(<i>u</i>) = <span style="text-decoration:overline"><i>d</i></span>(<i>G</i>) ≤ Δ(<i>G</i>)</div><div class="tag">□</div></div>
+            <p>É o fato geral de que uma média fica entre o menor e o maior valor. <b>Igualdade</b> em ambos os lados ocorre exatamente quando todos os graus são iguais, isto é, quando <span class="m"><i>G</i></span> é regular.</p>
+          </div>
+        </article>
+
+        <!-- Ex 10 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 10</span><div class="stmt">
+            <p>Decida se pode existir um grafo <span class="m"><i>G</i></span> com vértices de graus <span class="m">2, 3, 3, 4, 4, 5</span>. E com graus <span class="m">2, 3, 4, 4, 5</span>?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a10" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a10"><div class="plab">Resolução</div>
+            <p class="kicker">Caso 1 · graus 2, 3, 3, 4, 4, 5</p>
+            <p>Teste de paridade: <span class="m">2 + 3 + 3 + 4 + 4 + 5 = 21</span>, que é <b>ímpar</b>. Pelo Teorema 1 a soma dos graus é <span class="m">2|<i>E</i>|</span>, necessariamente par. Logo <b>não existe</b> tal grafo. (Equivalente pelo Corolário 2: a lista tem três graus ímpares — 3, 3, 5 — e três é ímpar.)</p>
+            <p class="kicker">Caso 2 · graus 2, 3, 4, 4, 5</p>
+            <p>Aqui a soma é <span class="m">2 + 3 + 4 + 4 + 5 = 18</span>, par — o primeiro teste passa e daria <span class="m">|<i>E</i>| = 9</span>. Mas são <span class="m"><i>n</i> = 5</span> vértices, e num grafo simples cada vértice tem no máximo <span class="m"><i>n</i> − 1 = 4</span> vizinhos. O grau 5 é impossível. Logo <b>também não existe</b>.</p>
+            <div class="box tip" style="margin-bottom:0">
+              <div class="h">Lição</div>
+              <p>Paridade e <span class="m">Δ ≤ <i>n</i> − 1</span> são testes independentes: falhar em qualquer um já mata a sequência. O caso 2 mostra que passar na paridade não basta.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Ex 11 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 11</span><div class="stmt">
+            <p>Seja <span class="m"><i>G</i></span> um grafo com 14 vértices e 25 arestas. Se todo vértice de <span class="m"><i>G</i></span> tem grau 3 ou 5, quantos vértices de grau 3 o grafo <span class="m"><i>G</i></span> possui?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a11" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a11"><div class="plab">Resolução</div>
+            <p>Sejam <span class="m"><i>x</i></span> o número de vértices de grau 3 e <span class="m"><i>y</i></span> o de grau 5. Duas equações:</p>
+            <div class="eq"><div class="body">
+              <i>x</i> + <i>y</i> = 14 &nbsp;&nbsp;(todos os vértices)<br>
+              3<i>x</i> + 5<i>y</i> = 2 · 25 = 50 &nbsp;&nbsp;(Teorema 1)
+            </div></div>
+            <p>Substituindo <span class="m"><i>y</i> = 14 − <i>x</i></span> na segunda:</p>
+            <div class="eq"><div class="body">3<i>x</i> + 5(14 − <i>x</i>) = 50 &nbsp;⟹&nbsp; 70 − 2<i>x</i> = 50 &nbsp;⟹&nbsp; <i>x</i> = 10</div></div>
+            <p>Portanto <b>10 vértices de grau 3</b> (e 4 vértices de grau 5). Conferência: <span class="m">10 · 3 + 4 · 5 = 50 = 2 · 25</span>. ✔</p>
+          </div>
+        </article>
+
+        <!-- Ex 12 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 12</span><div class="stmt">
+            <p>Prove que em todo grafo de ordem pelo menos 2 existem pelo menos dois vértices com o mesmo grau.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h12" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a12" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h12"><div class="plab">Dica</div>
+            <p>Há <span class="m"><i>n</i></span> vértices e apenas <span class="m"><i>n</i></span> valores possíveis de grau: <span class="m">0, 1, …, <i>n</i>−1</span>. Se todos fossem distintos, <b>todos</b> esses valores apareceriam. Por que isso é absurdo?</p>
+          </div>
+          <div class="panel answer" id="a12"><div class="plab">Resolução</div>
+            <p>Seja <span class="m"><i>G</i></span> um grafo com <span class="m"><i>n</i> = |<i>V</i>(<i>G</i>)| ≥ 2</span>. Todo grau é um inteiro entre 0 e <span class="m"><i>n</i>−1</span>, isto é,</p>
+            <div class="eq"><div class="body"><i>d</i>(<i>v</i>) ∈ {0, 1, …, <i>n</i>−1} &nbsp;&nbsp;para todo <i>v</i> ∈ <i>V</i>(<i>G</i>)</div></div>
+            <p>Suponha, por absurdo, que os <span class="m"><i>n</i></span> graus sejam dois a dois distintos. Como há exatamente <span class="m"><i>n</i></span> valores disponíveis e <span class="m"><i>n</i></span> vértices, a função <span class="m"><i>v</i> ↦ <i>d</i>(<i>v</i>)</span> seria uma bijeção sobre <span class="m">{0, …, <i>n</i>−1}</span>. Em particular existiriam vértices <span class="m"><i>a</i></span> e <span class="m"><i>z</i></span> com</p>
+            <div class="eq"><div class="body"><i>d</i>(<i>a</i>) = <i>n</i> − 1 &nbsp;&nbsp;e&nbsp;&nbsp; <i>d</i>(<i>z</i>) = 0,</div></div>
+            <p>e <span class="m"><i>a</i> ≠ <i>z</i></span> porque <span class="m"><i>n</i> ≥ 2</span> garante <span class="m"><i>n</i> − 1 ≠ 0</span>. Mas <span class="m"><i>d</i>(<i>a</i>) = <i>n</i> − 1</span> significa que <span class="m"><i>a</i></span> é adjacente a <b>todos</b> os outros vértices, inclusive a <span class="m"><i>z</i></span>; então <span class="m">{<i>a</i>, <i>z</i>} ∈ <i>E</i>(<i>G</i>)</span> e <span class="m"><i>d</i>(<i>z</i>) ≥ 1</span> — contradição com <span class="m"><i>d</i>(<i>z</i>) = 0</span>.</p>
+            <p>Logo os graus não podem ser todos distintos: pelo princípio da casa dos pombos, dois vértices compartilham o mesmo grau. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <!-- Ex 13 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 13</span><div class="stmt">
+            <p>Para um número natural <span class="m"><i>r</i></span>, um grafo é <span class="m"><i>r</i></span>-<b>regular</b> se todos os vértices têm grau <span class="m"><i>r</i></span>. Para um grafo <span class="m"><i>r</i></span>-regular com <span class="m"><i>n</i></span> vértices e <span class="m"><i>m</i></span> arestas, expresse <span class="m"><i>m</i></span> em função de <span class="m"><i>n</i></span> e <span class="m"><i>r</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a13" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a13"><div class="plab">Resolução</div>
+            <p>Pelo Teorema 1, com todos os <span class="m"><i>n</i></span> graus iguais a <span class="m"><i>r</i></span>:</p>
+            <div class="eq"><div class="body">2<i>m</i> = <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> <i>d</i>(<i>u</i>) = <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i></span></span> <i>r</i> = <i>nr</i> &nbsp;&nbsp;⟹&nbsp;&nbsp; <i>m</i> = <span class="frac"><span><i>nr</i></span><span>2</span></span></div></div>
+            <p><b>Consequência importante:</b> como <span class="m"><i>m</i></span> é inteiro, <span class="m"><i>nr</i></span> tem de ser par. Então não existe grafo <span class="m"><i>r</i></span>-regular com <span class="m"><i>n</i></span> e <span class="m"><i>r</i></span> ambos ímpares (por exemplo, nenhum grafo 3-regular tem 7 vértices).</p>
+            <p>Exemplos de conferência: <span class="m"><i>K</i><sup>5</sup></span> é 4-regular e tem <span class="m">5 · 4 / 2 = 10</span> arestas; o cubo da Figura 4 é 3-regular com <span class="m">8 · 3 / 2 = 12</span> arestas.</p>
+          </div>
+        </article>
+
+        <!-- Ex 14 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 14</span><div class="stmt">
+            <p>Dê exemplo de um grafo 3-regular que não é completo.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a14" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a14"><div class="plab">Resolução</div>
+            <p>O único grafo completo que é 3-regular é <span class="m"><i>K</i><sup>4</sup></span> (nele cada vértice tem grau <span class="m"><i>n</i> − 1 = 3</span>). Então basta exibir um 3-regular com mais de 4 vértices; pelo exercício 13, <span class="m"><i>n</i></span> deve ser par, e o menor caso possível é <span class="m"><i>n</i> = 6</span>.</p>
+            <p><b>Exemplo 1 — o prisma triangular</b> (dois triângulos ligados por três arestas), com 6 vértices e <span class="m">6·3/2 = 9</span> arestas:</p>
+            <figure>
+              <svg class="dg" viewBox="0 0 330 210" role="img" aria-label="Prisma triangular: grafo 3-regular com seis vértices">
+                <g>
+                  <line class="e" x1="110" y1="35" x2="45" y2="150"/><line class="e" x1="110" y1="35" x2="175" y2="150"/><line class="e" x1="45" y1="150" x2="175" y2="150"/>
+                  <line class="e" x1="215" y1="65" x2="165" y2="120"/><line class="e" x1="215" y1="65" x2="285" y2="120"/><line class="e" x1="165" y1="120" x2="285" y2="120"/>
+                  <line class="e" x1="110" y1="35" x2="215" y2="65"/><line class="e" x1="45" y1="150" x2="165" y2="120" opacity=".95"/><line class="e" x1="175" y1="150" x2="285" y2="120"/>
+                </g>
+                <g class="v"><circle cx="110" cy="35" r="15"/><text x="110" y="35">1</text></g>
+                <g class="v"><circle cx="45" cy="150" r="15"/><text x="45" y="150">2</text></g>
+                <g class="v"><circle cx="175" cy="150" r="15"/><text x="175" y="150">3</text></g>
+                <g class="v"><circle cx="215" cy="65" r="15"/><text x="215" y="65">4</text></g>
+                <g class="v"><circle cx="165" cy="120" r="15"/><text x="165" y="120">5</text></g>
+                <g class="v"><circle cx="285" cy="120" r="15"/><text x="285" y="120">6</text></g>
+              </svg>
+              <figcaption>Prisma: triângulos <span class="m">{1,2,3}</span> e <span class="m">{4,5,6}</span> mais as arestas <span class="m">{1,4}, {2,5}, {3,6}</span>. Não é completo — por exemplo, 1 e 5 não são adjacentes.</figcaption>
+            </figure>
+            <p><b>Exemplo 2 —</b> o bipartido completo <span class="m"><i>K</i><sub>3,3</sub></span> (o grafo <span class="m"><i>B</i></span> do exercício 4): todo vértice tem exatamente 3 vizinhos do outro lado, e não é completo porque <span class="m"><i>a</i></span> e <span class="m"><i>b</i></span> não são adjacentes.</p>
+            <p><b>Exemplo 3 —</b> o cubo <span class="m"><i>Q</i><sub>3</sub></span> da Figura 4, com 8 vértices.</p>
+          </div>
+        </article>
+
+        <!-- Ex 15 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 15</span><div class="stmt">
+            <p>Prove que se <span class="m">|<i>V</i>(<i>G</i>)| ≥ 3</span> e <span class="m">δ(<i>G</i>) ≥ ⌊|<i>V</i>(<i>G</i>)| ∕ 2⌋</span> então existem vértices <span class="m"><i>u</i></span> e <span class="m"><i>v</i></span> em <span class="m"><i>G</i></span> distintos e tais que <span class="m"><i>N</i>(<i>u</i>) ∩ <i>N</i>(<i>v</i>) ≠ ∅</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h15" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a15" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h15"><div class="plab">Dica</div>
+            <p>Negue a conclusão: “nenhum par de vértices distintos tem vizinho comum”. O que isso obriga sobre o grau de cada vértice? Um vértice com dois vizinhos já seria um vizinho comum a esses dois.</p>
+          </div>
+          <div class="panel answer" id="a15"><div class="plab">Resolução</div>
+            <p>Escreva <span class="m"><i>n</i> = |<i>V</i>(<i>G</i>)| ≥ 3</span> e suponha, por absurdo, que</p>
+            <div class="eq"><div class="body"><i>N</i>(<i>u</i>) ∩ <i>N</i>(<i>v</i>) = ∅ &nbsp;&nbsp;para todos <i>u</i> ≠ <i>v</i> em <i>V</i>(<i>G</i>).</div></div>
+            <p><b>Passo 1 — isso força <span class="m">Δ(<i>G</i>) ≤ 1</span>.</b> Se algum vértice <span class="m"><i>w</i></span> tivesse dois vizinhos distintos <span class="m"><i>u</i></span> e <span class="m"><i>v</i></span>, então <span class="m"><i>w</i> ∈ <i>N</i>(<i>u</i>)</span> e <span class="m"><i>w</i> ∈ <i>N</i>(<i>v</i>)</span>, ou seja <span class="m"><i>w</i> ∈ <i>N</i>(<i>u</i>) ∩ <i>N</i>(<i>v</i>) ≠ ∅</span> — contradição. Logo todo vértice tem no máximo 1 vizinho.</p>
+            <p><b>Passo 2 — confronto com a hipótese.</b> Da hipótese e do passo 1:</p>
+            <div class="eq"><div class="body">⌊<i>n</i>∕2⌋ ≤ δ(<i>G</i>) ≤ Δ(<i>G</i>) ≤ 1</div></div>
+            <p>Como <span class="m"><i>n</i> ≥ 3</span>, temos <span class="m">⌊<i>n</i>∕2⌋ ≥ 1</span>, e para <span class="m"><i>n</i> ≥ 4</span> já teríamos <span class="m">⌊<i>n</i>∕2⌋ ≥ 2 > 1</span>: absurdo. Resta analisar <span class="m"><i>n</i> = 3</span>.</p>
+            <p><b>Passo 3 — o caso <span class="m"><i>n</i> = 3</span>.</b> Aí <span class="m">⌊3∕2⌋ = 1</span>, então <span class="m">δ(<i>G</i>) = Δ(<i>G</i>) = 1</span> e <span class="m"><i>G</i></span> seria 1-regular com 3 vértices. Pelo Teorema 1, <span class="m">2|<i>E</i>| = 3 · 1 = 3</span>, ímpar — impossível. (Equivalente: os três vértices teriam grau ímpar, contrariando o Corolário 2.)</p>
+            <p>Todos os casos levam a contradição, logo existem <span class="m"><i>u</i> ≠ <i>v</i></span> com <span class="m"><i>N</i>(<i>u</i>) ∩ <i>N</i>(<i>v</i>) ≠ ∅</span>. <span style="font-weight:700">□</span></p>
+            <div class="box tip" style="margin-bottom:0">
+              <div class="h">Interpretação</div>
+              <p>Grau mínimo alto obriga “triângulos de caminhos”: existem dois vértices a distância 2 um do outro passando pelo mesmo intermediário. É a versão mais simples de uma família de resultados que extraem estrutura a partir de densidade.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Ex 16 -->
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 16</span><div class="stmt">
+            <p>Dado <span class="m"><i>G</i></span>, o <b>grafo linha</b> de <span class="m"><i>G</i></span>, denotado <span class="m"><i>L</i><sub><i>G</i></sub></span>, é o grafo cujos vértices são as arestas de <span class="m"><i>G</i></span> e um par de vértices define uma aresta em <span class="m"><i>L</i><sub><i>G</i></sub></span> se, e somente se, esses vértices são arestas adjacentes em <span class="m"><i>G</i></span>. Dado <span class="m"><i>G</i></span>, determine <span class="m">|<i>V</i>(<i>L</i><sub><i>G</i></sub>)|</span> e <span class="m">|<i>E</i>(<i>L</i><sub><i>G</i></sub>)|</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h16" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a16" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h16"><div class="plab">Dica</div>
+            <p>Duas arestas são adjacentes quando compartilham exatamente um extremo. Então cada aresta de <span class="m"><i>L</i><sub><i>G</i></sub></span> “mora” num vértice de <span class="m"><i>G</i></span>: conte, para cada vértice, quantos pares de arestas incidentes nele existem.</p>
+          </div>
+          <div class="panel answer" id="a16"><div class="plab">Resolução</div>
+            <p class="kicker">Vértices</p>
+            <p>Por definição, <span class="m"><i>V</i>(<i>L</i><sub><i>G</i></sub>) = <i>E</i>(<i>G</i>)</span>, logo</p>
+            <div class="eq"><div class="body">|<i>V</i>(<i>L</i><sub><i>G</i></sub>)| = |<i>E</i>(<i>G</i>)| = <i>m</i></div></div>
+            <p class="kicker">Arestas</p>
+            <p>Uma aresta de <span class="m"><i>L</i><sub><i>G</i></sub></span> é um par de arestas de <span class="m"><i>G</i></span> com exatamente um extremo em comum. Como o grafo é simples, duas arestas distintas compartilham <b>no máximo um</b> vértice; então cada par adjacente é contado em exatamente um vértice de <span class="m"><i>G</i></span>, e os pares de arestas que se cruzam em <span class="m"><i>v</i></span> são os subconjuntos de 2 elementos de <span class="m"><i>E</i>(<i>v</i>)</span>, que tem <span class="m"><i>d</i>(<i>v</i>)</span> elementos. Somando sobre os vértices:</p>
+            <div class="eq"><div class="body">|<i>E</i>(<i>L</i><sub><i>G</i></sub>)| = <span class="sum"><span class="o">∑</span><span class="l"><i>v</i>∈<i>V</i>(<i>G</i>)</span></span> <span class="binom"><span class="p">(</span><span class="s"><span><i>d</i>(<i>v</i>)</span><span>2</span></span><span class="p">)</span></span> = <span class="frac"><span>1</span><span>2</span></span> <span class="sum"><span class="o">∑</span><span class="l"><i>v</i>∈<i>V</i>(<i>G</i>)</span></span> <i>d</i>(<i>v</i>)<sup>2</sup> − <i>m</i></div></div>
+            <p>A segunda forma sai expandindo <span class="m"><span class="binom"><span class="p">(</span><span class="s"><span><i>d</i></span><span>2</span></span><span class="p">)</span></span> = <span class="frac"><span><i>d</i><sup>2</sup> − <i>d</i></span><span>2</span></span></span> e aplicando o Teorema 1 na parcela <span class="m">∑<i>d</i>(<i>v</i>)</span>.</p>
+            <p class="kicker">Conferência</p>
+            <ul>
+              <li><b>Figura 1:</b> graus <span class="m">2,2,1,1,2,1,1,0</span> e <span class="m"><i>m</i> = 5</span>. Então <span class="m">|<i>V</i>(<i>L</i><sub><i>G</i></sub>)| = 5</span> e <span class="m">|<i>E</i>(<i>L</i><sub><i>G</i></sub>)| = 3 · <span class="binom"><span class="p">(</span><span class="s"><span>2</span><span>2</span></span><span class="p">)</span></span> = 3</span> — exatamente os três pares de arestas do triângulo.</li>
+              <li><b>Figura 5:</b> estrela com <span class="m"><i>d</i>(<i>v</i>) = 3</span> e três folhas de grau 1: <span class="m">|<i>V</i>(<i>L</i><sub><i>G</i></sub>)| = 3</span> e <span class="m">|<i>E</i>(<i>L</i><sub><i>G</i></sub>)| = <span class="binom"><span class="p">(</span><span class="s"><span>3</span><span>2</span></span><span class="p">)</span></span> = 3</span>, o triângulo desenhado.</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="index.html"><span class="dir">Índice</span><span class="ttl">Todos os capítulos</span></a>
+        <a class="next" href="02-subgrafos-cliques-bipartidos.html"><span class="dir">Próximo capítulo</span><span class="ttl">2. Subgrafos, cliques, conjuntos independentes e cortes</span></a>
+      </nav>
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática da seção “Grafos — definições iniciais” e da subseção “Grau” das notas de
+          Teoria dos Grafos (CI065 / BC1429) do Prof. Jair Donadelli. Enunciados dos 16 exercícios preservados;
+          as explicações, os diagramas e as resoluções foram escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/#x1-50001" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    <script src="assets/grafos.js"></script>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+
+</body>
+</html>

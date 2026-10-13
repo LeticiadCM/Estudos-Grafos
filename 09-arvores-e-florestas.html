@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9. Árvores e florestas — Teoria dos Grafos</title>
+<meta name="description" content="Árvores e florestas: as quatro equivalências do Teorema 15, folhas, a contagem n−1 arestas, árvores geradoras e a árvore da busca em profundidade, com os exercícios 98 a 103 resolvidos.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo 9 · Sem circuitos</span>
+    <h1>Árvores e florestas</h1>
+    <p class="lead">
+      Uma árvore é o grafo conexo mais econômico possível: <span class="m"><i>n</i></span> vértices,
+      <span class="m"><i>n</i>−1</span> arestas, e um único caminho entre cada par. Ao terminar, você
+      saberá reconhecer árvores pelas quatro equivalências do Teorema 15, contar arestas de uma floresta,
+      argumentar por indução removendo uma folha, e extrair uma árvore geradora de qualquer grafo conexo
+      — inclusive a que a busca em profundidade deixa no vetor <span class="m">pai[<i>v</i>]</span>.
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> floresta · árvore · Teorema 15 · folha · Lema 17 · Teorema 18 · árvore geradora · DFS</span>
+      <span><b>Exercícios:</b> 6 com resolução (98 a 103)</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#como-usar">Como usar</a>
+        <a href="#s13">13. Árvores e florestas</a>
+        <a class="sub" href="#s13-def">Floresta e árvore</a>
+        <a class="sub" href="#s13-thm15">Teorema 15</a>
+        <a class="sub" href="#s13-folha">Folhas</a>
+        <a class="sub" href="#s13-lema17">Lema 17: n−1 arestas</a>
+        <a class="sub" href="#s13-iso">Como distinguir árvores</a>
+        <a href="#s13-1">13.1 Árvores geradoras</a>
+        <a class="sub" href="#s13-existe">Todo conexo tem uma</a>
+        <a class="sub" href="#s13-thm18">Teorema 18</a>
+        <a class="sub" href="#s13-dfs">Árvore da DFS</a>
+        <a href="#ex1">Exercícios 98 a 103</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <section class="chapter" id="como-usar">
+        <div class="box tip">
+          <div class="h">Como aproveitar este material</div>
+          <ol>
+            <li><b>Leia a teoria do bloco</b> — ela contém exatamente o que os exercícios seguintes exigem, nada além.</li>
+            <li><b>Tente o exercício sem abrir nada.</b> Se travar, use o botão <i>Dica</i> (quando existir) antes da resposta.</li>
+            <li><b>Só então abra <i>Mostrar resposta</i></b> e compare o seu raciocínio com o argumento apresentado.</li>
+          </ol>
+          <p>As respostas ficam ocultas por padrão. O botão no topo da página abre ou fecha todas de uma vez, e a impressão da página já sai com tudo aberto.</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="s13">
+        <h2><span class="num">§13</span> Árvores e florestas</h2>
+        <p class="sub-lead">Objetivo do bloco: caracterizar grafos sem circuitos, contar as arestas de uma árvore e de uma floresta, e reconhecer as quatro faces da mesma definição.</p>
+
+        <h3 id="s13-def">13.1 Floresta e árvore</h3>
+        <p>
+          Um circuito é um desperdício estrutural: ele oferece <i>dois</i> jeitos de ir de um vértice a outro.
+          Se proibimos circuitos, sobra no máximo um caminho entre cada par. Esse é o objeto deste capítulo.
+        </p>
+
+        <div class="box def">
+          <div class="h">Definição · floresta e árvore</div>
+          <p>
+            Uma <b>floresta</b> é um grafo sem circuitos (um grafo <b>acíclico</b>).
+            Uma <b>árvore</b> é um grafo <b>conexo e sem circuitos</b>.
+          </p>
+          <p>
+            Equivalentemente: os componentes conexos de uma floresta são árvores.
+            Toda árvore é uma floresta; a recíproca vale só quando há um único componente.
+          </p>
+        </div>
+
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Símbolo / termo</th><th>Significado</th></tr></thead>
+          <tbody>
+            <tr><td>floresta</td><td>grafo acíclico (pode ser desconexo)</td></tr>
+            <tr><td>árvore</td><td>grafo conexo e acíclico</td></tr>
+            <tr><td>folha</td><td>vértice de grau 1 numa árvore</td></tr>
+            <tr><td><span class="m"><i>G</i> + <i>xy</i></span></td><td>o grafo <span class="m">(<i>V</i>(<i>G</i>), <i>E</i>(<i>G</i>) ∪ {{<i>x</i>,<i>y</i>}})</span>, com <span class="m"><i>x</i>,<i>y</i> ∈ <i>V</i>(<i>G</i>)</span> não adjacentes</td></tr>
+            <tr><td>árvore geradora</td><td>subgrafo gerador que é uma árvore</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <figure>
+          <svg class="dg" viewBox="0 0 520 190" role="img" aria-label="Floresta com três componentes: uma estrela de 4 vértices, um caminho de 3 vértices e um vértice isolado">
+            <line class="e" x1="90" y1="95" x2="90" y2="32"/>
+            <line class="e" x1="90" y1="95" x2="28" y2="150"/>
+            <line class="e" x1="90" y1="95" x2="152" y2="150"/>
+            <line class="e" x1="250" y1="95" x2="330" y2="95"/>
+            <line class="e" x1="330" y1="95" x2="410" y2="95"/>
+            <g class="v"><circle cx="90" cy="95" r="16"/><text x="90" y="95">1</text></g>
+            <g class="v"><circle cx="90" cy="32" r="16"/><text x="90" y="32">2</text></g>
+            <g class="v"><circle cx="28" cy="150" r="16"/><text x="28" y="150">3</text></g>
+            <g class="v"><circle cx="152" cy="150" r="16"/><text x="152" y="150">4</text></g>
+            <g class="v"><circle cx="250" cy="95" r="16"/><text x="250" y="95">5</text></g>
+            <g class="v"><circle cx="330" cy="95" r="16"/><text x="330" y="95">6</text></g>
+            <g class="v"><circle cx="410" cy="95" r="16"/><text x="410" y="95">7</text></g>
+            <g class="v"><circle cx="480" cy="95" r="16"/><text x="480" y="95">8</text></g>
+            <text class="lbl" x="90" y="182">T1</text>
+            <text class="lbl" x="330" y="182">T2</text>
+            <text class="lbl" x="480" y="182">T3</text>
+          </svg>
+          <figcaption><b>Figura 1.</b> Uma floresta com <span class="m"><i>n</i> = 8</span> vértices e <span class="m"><i>k</i> = 3</span> componentes — cada um é uma árvore. Há <span class="m">3 + 2 + 0 = 5</span> arestas, que é <span class="m"><i>n</i> − <i>k</i></span>. O vértice 8, sozinho, é a árvore trivial.</figcaption>
+        </figure>
+
+        <div class="box warn">
+          <div class="h">Árvore não é “floresta com arestas”</div>
+          <p>
+            A floresta da Figura 1 é acíclica, mas <b>não</b> é árvore: faltam caminhos entre componentes.
+            Ligar 4 a 5 produz uma árvore (continua acíclica e fica conexa). Ligar 2 a 3 cria um circuito
+            e destrói a floresta. A diferença entre os dois gestos é o assunto do Teorema 15.
+          </p>
+        </div>
+
+        <div class="box tip">
+          <div class="h">Por que a definição é essa</div>
+          <p>
+            Conexidade garante que dá para ir de qualquer vértice a qualquer outro.
+            Aciclicidade garante que esse caminho é único — não há “volta por outro lado”.
+            Juntas, as duas hipóteses descrevem a estrutura mínima que ainda conecta <span class="m"><i>n</i></span> pontos.
+          </p>
+        </div>
+
+        <h3 id="s13-thm15">13.2 Teorema 15: quatro jeitos de dizer “é árvore”</h3>
+        <p>
+          A definição (conexo + acíclico) é só uma das faces. As outras três são as que realmente
+          se usa em demonstração: caminho único, conexidade minimal, aciclicidade maximal.
+        </p>
+
+        <div class="box thm">
+          <div class="h">Teorema 15</div>
+          <p>Para todo grafo <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span>, as afirmações seguintes são equivalentes:</p>
+          <ol>
+            <li><span class="m"><i>G</i></span> é árvore;</li>
+            <li>para quaisquer <span class="m"><i>x</i>, <i>y</i> ∈ <i>V</i></span> existe um <b>único</b> caminho em <span class="m"><i>G</i></span> ligando <span class="m"><i>x</i></span> a <span class="m"><i>y</i></span>;</li>
+            <li><span class="m"><i>G</i></span> é <b>conexo minimal</b>: é conexo e <span class="m"><i>G</i> − <i>e</i></span> é desconexo, para qualquer <span class="m"><i>e</i> ∈ <i>E</i></span>;</li>
+            <li><span class="m"><i>G</i></span> é <b>acíclico maximal</b>: é acíclico e <span class="m"><i>G</i> + <i>xy</i></span> contém circuito, para quaisquer <span class="m"><i>x</i>, <i>y</i> ∈ <i>V</i></span> não adjacentes.</li>
+          </ol>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Se <span class="m"><i>G</i></span> é trivial (<span class="m"><i>K</i><sub>1</sub></span>), as quatro afirmações valem
+              por vacuidade. Se <span class="m">|<i>V</i>| = 2</span>, então <span class="m"><i>G</i> = <i>K</i><sub>2</sub></span> e a verificação é imediata.
+              Daqui para a frente, <span class="m"><i>G</i></span> tem pelo menos 3 vértices. Mostramos
+              <span class="m">(1) ⇒ (2) ⇒ (3) ⇒ (4) ⇒ (1)</span>.
+            </p>
+            <p>
+              Usaremos um fato que vem da Proposição 11 das notas (capítulo de caminhos):
+              <b>se <span class="m">δ(<i>G</i>) ≥ 2</span>, então <span class="m"><i>G</i></span> tem circuito</b>.
+              Consequência imediata: toda árvore com pelo menos três vértices tem
+              <span class="m">δ = 1</span> — senão teria circuito, e não seria árvore.
+            </p>
+            <p class="kicker">(1) ⇒ (2)</p>
+            <p>
+              Seja <span class="m"><i>G</i></span> uma árvore. A existência do caminho vem da conexidade.
+              Para a unicidade, suponha que existam dois caminhos distintos
+              <span class="m"><i>x</i> = <i>x</i><sub>1</sub>, <i>x</i><sub>2</sub>, …, <i>x</i><sub><i>n</i></sub> = <i>y</i></span>
+              e
+              <span class="m"><i>x</i> = <i>y</i><sub>1</sub>, <i>y</i><sub>2</sub>, …, <i>y</i><sub><i>m</i></sub> = <i>y</i></span>.
+              Defina
+            </p>
+            <div class="eq"><div class="body">
+              <i>p</i> = max{ <i>i</i> : <i>i</i> ≥ 1 e <i>x</i><sub><i>i</i></sub> = <i>y</i><sub><i>i</i></sub> }
+              &nbsp;&nbsp; e &nbsp;&nbsp;
+              <i>q</i> = min{ <i>j</i> : <i>j</i> &gt; <i>p</i> e <i>x</i><sub><i>j</i></sub> = <i>y</i><sub>ℓ</sub> para algum <i>ℓ</i> &gt; <i>p</i> }.
+            </div></div>
+            <p>
+              Os índices estão bem definidos: <span class="m"><i>x</i><sub>1</sub> = <i>y</i><sub>1</sub> = <i>x</i></span>,
+              então <span class="m"><i>p</i> ≥ 1</span>; os caminhos são distintos, então
+              <span class="m">1 ≤ <i>p</i> &lt; min{<i>m</i>, <i>n</i>}</span>; e eles se reencontram em
+              <span class="m"><i>y</i></span>, então <span class="m"><i>q</i></span> existe e
+              <span class="m"><i>p</i> &lt; <i>q</i> ≤ <i>n</i></span>.
+              O passeio
+              <span class="m"><i>x</i><sub><i>p</i></sub>, <i>x</i><sub><i>p</i>+1</sub>, …, <i>x</i><sub><i>q</i></sub>, <i>y</i><sub>ℓ−1</sub>, …, <i>y</i><sub><i>p</i></sub></span>
+              é um circuito: pela maximalidade de <span class="m"><i>p</i></span> e pela minimalidade de
+              <span class="m"><i>q</i></span>, os trechos interno de cada caminho não se cruzam.
+              Contradição com (1). Logo o caminho <span class="m"><i>x</i></span>–<span class="m"><i>y</i></span> é único.
+            </p>
+            <p class="kicker">(2) ⇒ (3)</p>
+            <p>
+              Por (2) o grafo é conexo. Seja <span class="m"><i>e</i> = <i>xy</i> ∈ <i>E</i></span>.
+              O passeio <span class="m"><i>x</i>, <i>y</i></span> é um caminho ligando os extremos de
+              <span class="m"><i>e</i></span> e, por (2), é o <i>único</i>. Portanto
+              <span class="m"><i>G</i> − <i>e</i></span> não tem caminho de <span class="m"><i>x</i></span> a
+              <span class="m"><i>y</i></span>: é desconexo.
+            </p>
+            <p class="kicker">(3) ⇒ (4)</p>
+            <p>
+              Seja <span class="m"><i>G</i></span> conexo minimal. Se <span class="m"><i>G</i></span> tivesse um circuito,
+              qualquer aresta <span class="m"><i>e</i></span> desse circuito poderia ser removida sem desconectar
+              o grafo (é o exercício 87 do capítulo de conexidade). Isso contradiz a minimalidade.
+              Logo <span class="m"><i>G</i></span> é acíclico.
+            </p>
+            <p>
+              Agora tome <span class="m"><i>x</i>, <i>y</i> ∈ <i>V</i></span> não adjacentes. Como
+              <span class="m"><i>G</i></span> é conexo, existe um caminho
+              <span class="m"><i>P</i> = <i>x</i>, <i>v</i><sub>1</sub>, …, <i>v</i><sub><i>k</i></sub>, <i>y</i></span>.
+              Em <span class="m"><i>G</i> + <i>xy</i></span> o passeio <span class="m"><i>P</i></span> fechado pela aresta nova
+              é um circuito.
+            </p>
+            <p class="kicker">(4) ⇒ (1)</p>
+            <p>
+              Seja <span class="m"><i>G</i></span> acíclico maximal. Já é acíclico; falta a conexidade.
+              Se existissem <span class="m"><i>x</i>, <i>y</i></span> sem caminho entre si, a aresta
+              <span class="m"><i>xy</i></span> não fecharia circuito algum, e
+              <span class="m"><i>G</i> + <i>xy</i></span> continuaria acíclico — contradizendo a maximalidade.
+              Logo <span class="m"><i>G</i></span> é conexo, portanto é árvore.
+            </p>
+            <p>As quatro afirmações são equivalentes. <span class="qed">□</span></p>
+          </div>
+        </div>
+
+        <figure>
+          <svg class="dg" viewBox="0 0 400 220" role="img" aria-label="Árvore com o único caminho entre os vértices 4 e 5 destacado">
+            <line class="e" x1="200" y1="100" x2="200" y2="32"/>
+            <line class="e tree" x1="100" y1="100" x2="200" y2="100"/>
+            <line class="e tree" x1="200" y1="100" x2="300" y2="100"/>
+            <line class="e tree" x1="300" y1="100" x2="370" y2="100"/>
+            <line class="e" x1="200" y1="100" x2="200" y2="178"/>
+            <g class="v"><circle cx="200" cy="100" r="16"/><text x="200" y="100">1</text></g>
+            <g class="v"><circle cx="200" cy="32" r="16"/><text x="200" y="32">2</text></g>
+            <g class="v"><circle cx="300" cy="100" r="16"/><text x="300" y="100">3</text></g>
+            <g class="v hl"><circle cx="100" cy="100" r="16"/><text x="100" y="100">4</text></g>
+            <g class="v hl"><circle cx="370" cy="100" r="16"/><text x="370" y="100">5</text></g>
+            <g class="v"><circle cx="200" cy="178" r="16"/><text x="200" y="178">6</text></g>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--brand)"></i>único caminho 4–5</span>
+          </div>
+          <figcaption><b>Figura 2.</b> Em uma árvore o caminho entre dois vértices é único. Aqui, de 4 a 5 só existe 4–1–3–5. Qualquer outra rota repetiria vértice ou usaria aresta que não está no grafo.</figcaption>
+        </figure>
+
+        <div class="box rec">
+          <div class="h">Receita: qual face do Teorema 15 usar</div>
+          <ol>
+            <li><b>Quer provar que é árvore.</b> Mostre conexidade e aciclicidade; ou conexidade e <span class="m"><i>n</i>−1</span> arestas (Teorema 18, mais abaixo); ou aciclicidade e <span class="m"><i>n</i>−1</span> arestas (exercício 102).</li>
+            <li><b>Quer um caminho bem determinado.</b> Use (2): numa árvore, “o” caminho <span class="m"><i>x</i></span>–<span class="m"><i>y</i></span> existe e é único.</li>
+            <li><b>Quer desconectar.</b> Use (3): <i>qualquer</i> aresta de uma árvore é ponte.</li>
+            <li><b>Quer criar um circuito.</b> Use (4): ligar dois não-adjacentes fecha exatamente um circuito — o caminho antigo mais a aresta nova.</li>
+          </ol>
+        </div>
+
+        <div class="box thm">
+          <div class="h">Corolário 16</div>
+          <p>
+            Uma árvore com <span class="m"><i>n</i></span> vértices é um grafo conexo com o <b>menor número possível de arestas</b>
+            dentre todos os grafos conexos com <span class="m"><i>n</i></span> vértices.
+          </p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Pelo Teorema 15(3), nenhuma aresta pode ser retirada sem perder a conexidade.
+              Qualquer grafo conexo com as mesmas <span class="m"><i>n</i></span> pontas e <i>menos</i> arestas que uma árvore
+              seria, portanto, impossível: já a árvore está no limite. <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+
+        <h3 id="s13-folha">13.3 Folhas</h3>
+        <div class="box def">
+          <div class="h">Definição · folha</div>
+          <p>
+            Uma <b>folha</b> é um vértice de grau 1 numa árvore.
+          </p>
+        </div>
+        <p>
+          Toda árvore com pelo menos dois vértices tem folha — de fato, pelo menos duas
+          (o exercício 100 dá uma cota ainda melhor: pelo menos <span class="m">Δ(<i>T</i>)</span> folhas).
+          O motivo curto: se todos os graus fossem pelo menos 2, a Proposição 11 produziria um circuito.
+        </p>
+        <div class="box tip">
+          <div class="h">A folha é o gancho da indução</div>
+          <p>
+            Quase toda prova por indução em árvores começa assim: “seja <span class="m"><i>v</i></span> uma folha;
+            o grafo <span class="m"><i>T</i> − <i>v</i></span> ainda é árvore”. É o Lema 17 que torna isso uma ferramenta,
+            não um truque.
+          </p>
+        </div>
+
+        <h3 id="s13-lema17">13.4 Lema 17: uma árvore com n vértices tem n−1 arestas</h3>
+        <p>
+          Esse é o número que você vai usar em todo o resto do capítulo — e nos exercícios 98, 102 e 103.
+        </p>
+
+        <div class="box thm">
+          <div class="h">Lema 17</div>
+          <p>Toda árvore com <span class="m"><i>n</i></span> vértices tem <span class="m"><i>n</i> − 1</span> arestas.</p>
+          <div class="proof">
+            <p>
+              <b>Demonstração (indução em <span class="m"><i>n</i></span>).</b>
+              Afirmação: se um grafo com <span class="m"><i>n</i></span> vértices é árvore, então tem
+              <span class="m"><i>n</i>−1</span> arestas.
+            </p>
+            <p>
+              <b>Base.</b> Para <span class="m"><i>n</i> = 1</span>, a árvore é <span class="m"><i>K</i><sub>1</sub></span> e tem 0 arestas.
+            </p>
+            <p>
+              <b>Passo.</b> Fixe <span class="m"><i>n</i> ≥ 2</span> e assuma o resultado para árvores com
+              <span class="m"><i>n</i>−1</span> vértices. Seja <span class="m"><i>G</i></span> uma árvore com
+              <span class="m"><i>n</i></span> vértices. Tome uma folha <span class="m"><i>v</i> ∈ <i>V</i>(<i>G</i>)</span>
+              (existe: se <span class="m"><i>n</i> = 2</span>, os dois vértices são folhas; se
+              <span class="m"><i>n</i> ≥ 3</span>, a observação antes do Teorema 15 dá <span class="m">δ = 1</span>).
+            </p>
+            <p>
+              O grafo <span class="m"><i>G</i> − <i>v</i></span> é árvore. De fato:
+            </p>
+            <ul>
+              <li><b>Acíclico:</b> é subgrafo de um grafo acíclico.</li>
+              <li><b>Conexo:</b> para quaisquer <span class="m"><i>a</i>, <i>b</i> ∈ <i>V</i>(<i>G</i>) \ {<i>v</i>}</span>,
+              o único caminho <span class="m"><i>a</i></span>–<span class="m"><i>b</i></span> em <span class="m"><i>G</i></span>
+              (Teorema 15(2)) <i>não passa por <span class="m"><i>v</i></span></i>. Motivo: <span class="m"><i>v</i></span>
+              tem grau 1, então só pode ser extremo de um caminho, nunca vértice interno.
+              Esse caminho sobrevive em <span class="m"><i>G</i> − <i>v</i></span>.</li>
+            </ul>
+            <p>
+              Pela hipótese indutiva, <span class="m">|<i>E</i>(<i>G</i> − <i>v</i>)| = <i>n</i> − 2</span>.
+              Como <span class="m">|<i>E</i>(<i>v</i>)| = 1</span>, recuperamos a aresta da folha e
+              <span class="m">|<i>E</i>(<i>G</i>)| = <i>n</i> − 1</span>.
+            </p>
+            <p>Pelo princípio de indução finita, a afirmação vale para todo <span class="m"><i>n</i> ≥ 1</span>. <span class="qed">□</span></p>
+          </div>
+        </div>
+
+        <figure>
+          <svg class="dg" viewBox="0 0 420 200" role="img" aria-label="Árvore com uma folha destacada; ao remover a folha resta uma árvore menor">
+            <line class="e" x1="160" y1="100" x2="160" y2="32"/>
+            <line class="e" x1="80" y1="100" x2="160" y2="100"/>
+            <line class="e" x1="160" y1="100" x2="250" y2="100"/>
+            <line class="e cut" x1="250" y1="100" x2="340" y2="100"/>
+            <line class="e" x1="160" y1="100" x2="160" y2="170"/>
+            <g class="v"><circle cx="160" cy="100" r="16"/><text x="160" y="100">1</text></g>
+            <g class="v"><circle cx="160" cy="32" r="16"/><text x="160" y="32">2</text></g>
+            <g class="v"><circle cx="250" cy="100" r="16"/><text x="250" y="100">3</text></g>
+            <g class="v"><circle cx="80" cy="100" r="16"/><text x="80" y="100">4</text></g>
+            <g class="v hl2"><circle cx="340" cy="100" r="16"/><text x="340" y="100">5</text></g>
+            <g class="v"><circle cx="160" cy="170" r="16"/><text x="160" y="170">6</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c2)"></i>folha v = 5</span>
+            <span><i class="ln" style="background:var(--c5)"></i>aresta removida com v</span>
+          </div>
+          <figcaption><b>Figura 3.</b> O passo indutivo do Lema 17: <span class="m"><i>G</i></span> tem 6 vértices e 5 arestas; <span class="m"><i>G</i> − 5</span> é a árvore da esquerda, com 5 vértices e 4 arestas. Conferência: <span class="m">4 + 1 = 5 = 6 − 1</span> ✔</figcaption>
+        </figure>
+
+        <div class="box rec">
+          <div class="h">Receita: contar arestas em floresta</div>
+          <ol>
+            <li>Uma árvore com <span class="m"><i>n</i><sub><i>i</i></sub></span> vértices tem <span class="m"><i>n</i><sub><i>i</i></sub> − 1</span> arestas (Lema 17).</li>
+            <li>Uma floresta é união disjunta de <span class="m"><i>k</i></span> árvores. Some:
+              <span class="m">∑(<i>n</i><sub><i>i</i></sub> − 1) = <i>n</i> − <i>k</i></span>.</li>
+            <li>Conferência rápida: <span class="m"><i>k</i> = 1</span> recupera o Lema 17; <span class="m"><i>k</i> = <i>n</i></span> (só isolados) dá 0 arestas.</li>
+          </ol>
+          <p>É exatamente o exercício 98. Na Figura 1: <span class="m">8 − 3 = 5</span> ✔</p>
+        </div>
+
+        <h3 id="s13-iso">13.5 Como distinguir árvores pequenas</h3>
+        <p>
+          Dois grafos são <b>isomorfos</b> quando existe uma bijeção entre os conjuntos de vértices que
+          preserva adjacência. A sequência de graus é um invariante: se as sequências diferem, as árvores
+          não são isomorfas. Quando as sequências coincidem, precisamos de outro invariante
+          (distância entre os vértices de grau alto, número de folhas a uma dada distância do centro, etc.).
+        </p>
+        <p>
+          Em uma árvore com <span class="m"><i>n</i></span> vértices a soma dos graus é
+          <span class="m">2(<i>n</i> − 1)</span>. Para listar as árvores de um <span class="m"><i>n</i></span> pequeno,
+          enumere as sequências não crescentes de <span class="m"><i>n</i></span> inteiros ≥ 1 que somam
+          <span class="m">2<i>n</i> − 2</span> e, para cada sequência, decida quantos desenhos não-isomorfos a realizam.
+        </p>
+
+        <figure>
+          <svg class="dg" viewBox="0 0 480 180" role="img" aria-label="As duas árvores não-isomorfas com 4 vértices: o caminho P4 e a estrela K1,3">
+            <line class="e" x1="40" y1="80" x2="110" y2="80"/>
+            <line class="e" x1="110" y1="80" x2="180" y2="80"/>
+            <line class="e" x1="180" y1="80" x2="250" y2="80"/>
+            <line class="e" x1="390" y1="80" x2="390" y2="28"/>
+            <line class="e" x1="390" y1="80" x2="330" y2="145"/>
+            <line class="e" x1="390" y1="80" x2="450" y2="145"/>
+            <g class="v"><circle cx="40" cy="80" r="15"/><text x="40" y="80">1</text></g>
+            <g class="v"><circle cx="110" cy="80" r="15"/><text x="110" y="80">2</text></g>
+            <g class="v"><circle cx="180" cy="80" r="15"/><text x="180" y="80">3</text></g>
+            <g class="v"><circle cx="250" cy="80" r="15"/><text x="250" y="80">4</text></g>
+            <g class="v hl"><circle cx="390" cy="80" r="15"/><text x="390" y="80">a</text></g>
+            <g class="v"><circle cx="390" cy="28" r="15"/><text x="390" y="28">b</text></g>
+            <g class="v"><circle cx="330" cy="145" r="15"/><text x="330" y="145">c</text></g>
+            <g class="v"><circle cx="450" cy="145" r="15"/><text x="450" y="145">d</text></g>
+            <text class="lbl" x="145" y="170">P4 · (2,2,1,1)</text>
+            <text class="lbl" x="390" y="170">estrela · (3,1,1,1)</text>
+          </svg>
+          <figcaption><b>Figura 4.</b> Exemplo construído para esta versão: as duas únicas árvores não-isomorfas com 4 vértices. Sequências de graus diferentes, logo não são isomorfas. Ambas têm <span class="m">4 − 1 = 3</span> arestas.</figcaption>
+        </figure>
+
+        <div class="box rec">
+          <div class="h">Receita: listar árvores não-isomorfas de n pequeno</div>
+          <ol>
+            <li><b>Soma.</b> Os graus somam <span class="m">2<i>n</i> − 2</span> e cada um está entre 1 e <span class="m"><i>n</i> − 1</span>.</li>
+            <li><b>Particione por Δ.</b> Comece pelo grau máximo possível (<span class="m"><i>n</i>−1</span>, a estrela) e vá descendo.</li>
+            <li><b>Uma sequência, um desenho?</b> Se a sequência tem um único vértice “especial”, em geral há um só desenho. Se há dois vértices de grau ≥ 2, pergunte se eles são adjacentes ou não — isso costuma separar as classes.</li>
+            <li><b>Feche a lista.</b> Não falta nenhuma sequência, e duas árvores da lista não são isomorfas (graus ou outro invariante).</li>
+          </ol>
+        </div>
+
+        <div class="box def">
+          <div class="h">Resumo até aqui</div>
+          <ul>
+            <li>Floresta = acíclico. Árvore = conexo + acíclico.</li>
+            <li>Teorema 15: árvore ⟺ caminho único ⟺ conexo minimal ⟺ acíclico maximal.</li>
+            <li>Folha = grau 1. Remover uma folha de uma árvore deixa uma árvore.</li>
+            <li>Lema 17: árvore com <span class="m"><i>n</i></span> vértices tem <span class="m"><i>n</i>−1</span> arestas. Floresta com <span class="m"><i>k</i></span> componentes tem <span class="m"><i>n</i>−<i>k</i></span>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="chapter" id="s13-1">
+        <h2><span class="num">§13.1</span> Árvores geradoras</h2>
+        <p class="sub-lead">Objetivo do bloco: garantir que todo grafo conexo “esconde” uma árvore com os mesmos vértices, reconhecê-la por <span class="m"><i>n</i>−1</span> arestas, e extraí-la da busca em profundidade.</p>
+
+        <h3 id="s13-existe">13.6 Todo grafo conexo tem uma árvore geradora</h3>
+        <div class="box def">
+          <div class="h">Definição · árvore geradora</div>
+          <p>
+            Se o subgrafo <b>gerador</b> <span class="m"><i>T</i> ⊆ <i>G</i></span> é uma árvore — isto é,
+            <span class="m"><i>V</i>(<i>T</i>) = <i>V</i>(<i>G</i>)</span> e <span class="m"><i>T</i></span> é conexo e acíclico —
+            chamamos <span class="m"><i>T</i></span> de <b>árvore geradora</b> de <span class="m"><i>G</i></span>.
+          </p>
+        </div>
+
+        <div class="box warn">
+          <div class="h">Gerador, não induzido</div>
+          <p>
+            A árvore geradora usa <i>todos</i> os vértices, mas em geral <b>não</b> todas as arestas.
+            Se <span class="m"><i>G</i></span> tem um circuito, o subgrafo induzido por
+            <span class="m"><i>V</i>(<i>G</i>)</span> é o próprio <span class="m"><i>G</i></span>, que não é árvore.
+            Árvore geradora é subgrafo gerador, obtido <i>descartando</i> arestas até sobrar uma árvore.
+          </p>
+        </div>
+
+        <p>
+          <b>Existência.</b> Seja <span class="m"><i>G</i></span> conexo. Entre todos os subgrafos geradores conexos de
+          <span class="m"><i>G</i></span>, escolha um, <span class="m"><i>T</i></span>, com o menor número de arestas
+          possível (o próprio <span class="m"><i>G</i></span> é um candidato, então a família não é vazia).
+          Se <span class="m"><i>T</i></span> tivesse um circuito, remover qualquer aresta desse circuito manteria
+          <span class="m"><i>T</i></span> conexo (exercício 87) e diminuiria o número de arestas — contradição.
+          Logo <span class="m"><i>T</i></span> é conexo e acíclico, portanto é uma árvore geradora.
+        </p>
+        <p>
+          A recíproca do Lema 17 cai de graça. Suponha <span class="m"><i>G</i></span> conexo, com
+          <span class="m"><i>n</i></span> vértices e <span class="m"><i>n</i>−1</span> arestas.
+          Seja <span class="m"><i>T</i> ⊆ <i>G</i></span> uma árvore geradora.
+          Pelo Lema 17, <span class="m"><i>T</i></span> também tem <span class="m"><i>n</i>−1</span> arestas.
+          Como <span class="m"><i>T</i></span> e <span class="m"><i>G</i></span> têm o mesmo conjunto de vértices e o
+          mesmo número de arestas, <span class="m"><i>T</i> = <i>G</i></span>. Logo <span class="m"><i>G</i></span> é árvore.
+        </p>
+
+        <h3 id="s13-thm18">13.7 Teorema 18</h3>
+        <div class="box thm">
+          <div class="h">Teorema 18</div>
+          <p>
+            Um grafo com <span class="m"><i>n</i></span> vértices é uma árvore se, e somente se, é conexo e o número de arestas é
+            <span class="m"><i>n</i> − 1</span>.
+          </p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b>
+              Se é árvore, é conexo por definição e tem <span class="m"><i>n</i>−1</span> arestas pelo Lema 17.
+              A recíproca é o parágrafo anterior: conexo + <span class="m"><i>n</i>−1</span> arestas implica que qualquer
+              árvore geradora coincide com o próprio grafo. <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="box rec">
+          <div class="h">Receita: os três testes equivalentes</div>
+          <p>Para um grafo com <span class="m"><i>n</i></span> vértices, quaisquer duas das três propriedades abaixo implicam a terceira — e as três juntas dizem “é árvore”:</p>
+          <ol>
+            <li>conexo;</li>
+            <li>acíclico;</li>
+            <li><span class="m">|<i>E</i>| = <i>n</i> − 1</span>.</li>
+          </ol>
+          <p>
+            O Teorema 18 é “conexo + <span class="m"><i>n</i>−1</span>”.
+            O exercício 102 pede para fechar o triângulo com “acíclico + <span class="m"><i>n</i>−1</span>”.
+          </p>
+        </div>
+
+        <div class="box warn">
+          <div class="h">Uma hipótese não sobra</div>
+          <p>
+            <span class="m"><i>n</i>−1</span> arestas sozinhas não bastam: uma floresta com 2 componentes e
+            <span class="m"><i>n</i>−1</span> arestas é impossível (teria <span class="m"><i>n</i>−2</span>),
+            mas um grafo <i>com circuito</i> e <span class="m"><i>n</i>−1</span> arestas existe — e é
+            desconexo. Exemplo: um triângulo mais um vértice isolado tem 4 vértices e 3 arestas, não é árvore.
+            Sem a conexidade, o Teorema 18 cai.
+          </p>
+        </div>
+
+        <h3 id="s13-dfs">13.8 A árvore da busca em profundidade</h3>
+        <p>
+          Determinar <i>uma</i> árvore geradora de um grafo conexo é fácil e rápido: rode uma busca em
+          profundidade e fique com as arestas “de descoberta”. Se <span class="m">pai[<i>v</i>]</span> é o vértice
+          a partir do qual <span class="m"><i>v</i></span> foi visitado pela primeira vez (e
+          <span class="m">pai[<i>s</i>] = nulo</span> na raiz), o conjunto
+        </p>
+        <div class="eq"><div class="body">
+          <i>M</i> = { {<i>v</i>, pai[<i>v</i>]} : <i>v</i> ∈ <i>V</i>(<i>G</i>) e pai[<i>v</i>] ≠ nulo }
+        </div><div class="tag">(34)</div></div>
+        <p>
+          induz uma árvore geradora. O vetor <span class="m">pai</span> é o do algoritmo abaixo —
+          a busca em profundidade rotulada (algoritmo 8.2.1 das notas).
+        </p>
+
+        <div class="algo">
+          <div class="nome">Busca-em-Profundidade(G, s)</div>
+<pre><span class="cm">// d(v) = instante de descoberta; pai[v] = predecessor na árvore</span>
+<span class="kw">para cada</span> v ∈ V(G) <span class="kw">faça</span>
+    visitado[v] ← falso; pai[v] ← nulo
+tempo ← 0
+BP-Visita(s)
+
+<span class="cm">// procedimento auxiliar</span>
+BP-Visita(u)
+    visitado[u] ← verdadeiro
+    tempo ← tempo + 1
+    d(u) ← tempo
+    <span class="kw">para cada</span> v ∈ N(u) <span class="kw">faça</span>
+        <span class="kw">se</span> não visitado[v] <span class="kw">então</span>
+            pai[v] ← u
+            BP-Visita(v)</pre>
+        </div>
+        <p>
+          <b>O que garante.</b> Enquanto <span class="m"><i>G</i></span> é conexo, a chamada a partir de
+          <span class="m"><i>s</i></span> visita todos os vértices: um vértice branco vizinho de um vértice já
+          visitado acaba sendo alcançado, e a conexidade impede que sobre alguém em outro “lado”.
+          <b>Por que termina.</b> Cada vértice é pintado de visitado uma única vez; cada aresta é examinada
+          duas vezes (uma em cada extremo).
+          <b>Complexidade:</b> <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span> com lista de adjacências.
+        </p>
+        <p>
+          A árvore tem <span class="m"><i>n</i>−1</span> arestas (todo vértice salvo a raiz ganha exatamente um pai)
+          e é conexa (de qualquer <span class="m"><i>v</i></span>, a cadeia
+          <span class="m"><i>v</i>, pai[<i>v</i>], pai[pai[<i>v</i>]], …</span> chega em <span class="m"><i>s</i></span>,
+          porque os instantes de descoberta <span class="m"><i>d</i>(pai[<i>v</i>]) &lt; <i>d</i>(<i>v</i>)</span> decrescem
+          a cada passo e não podem ciclar). Pelo Teorema 18, é uma árvore. O exercício 101 pede essa verificação com cuidado.
+        </p>
+
+        <figure>
+          <svg class="dg" viewBox="0 0 420 300" role="img" aria-label="Grafo conexo com cinco vértices e a árvore geradora produzida por uma DFS a partir do vértice 1">
+            <line class="e faint" x1="210" y1="45" x2="315" y2="121"/>
+            <line class="e faint" x1="105" y1="121" x2="210" y2="45"/>
+            <line class="e tree" x1="210" y1="45" x2="275" y2="244"/>
+            <line class="e tree" x1="275" y1="244" x2="315" y2="121"/>
+            <line class="e tree" x1="275" y1="244" x2="145" y2="244"/>
+            <line class="e tree" x1="145" y1="244" x2="105" y2="121"/>
+            <g class="v hl"><circle cx="210" cy="45" r="16"/><text x="210" y="45">1</text></g>
+            <g class="v"><circle cx="315" cy="121" r="16"/><text x="315" y="121">2</text></g>
+            <g class="v"><circle cx="275" cy="244" r="16"/><text x="275" y="244">3</text></g>
+            <g class="v"><circle cx="145" cy="244" r="16"/><text x="145" y="244">4</text></g>
+            <g class="v"><circle cx="105" cy="121" r="16"/><text x="105" y="121">5</text></g>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--brand)"></i>aresta da árvore (pai)</span>
+            <span><i class="ln" style="background:var(--line)"></i>aresta de retorno</span>
+            <span><i style="background:var(--brand)"></i>raiz s = 1</span>
+          </div>
+          <figcaption><b>Figura 5.</b> Exemplo construído para esta versão, no lugar da Figura 21 do original. Grafo <span class="m"><i>C</i><sub>5</sub></span> com a corda 1–3. DFS a partir de 1, vizinhos em ordem 3, 2, 5: a árvore é {1–3, 3–2, 3–4, 4–5}.</figcaption>
+        </figure>
+
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>vértice <i>v</i></th><th>pai[<i>v</i>]</th><th><i>d</i>(<i>v</i>)</th></tr></thead>
+          <tbody>
+            <tr><td>1 (raiz)</td><td>nulo</td><td>1</td></tr>
+            <tr><td>3</td><td>1</td><td>2</td></tr>
+            <tr><td>2</td><td>3</td><td>3</td></tr>
+            <tr><td>4</td><td>3</td><td>4</td></tr>
+            <tr><td>5</td><td>4</td><td>5</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Conferência: <span class="m">|<i>M</i>| = 4 = 5 − 1</span>, o grafo das arestas de
+          <span class="m"><i>M</i></span> é conexo, logo é árvore geradora pelo Teorema 18.
+          As duas arestas fracas (1–2 e 1–5) são de retorno: o outro extremo já estava visitado.
+        </p>
+
+        <div class="box warn">
+          <div class="h">A ordem dos vizinhos muda a árvore, não a existência</div>
+          <p>
+            Se a DFS, a partir de 1, tivesse olhado 2 antes de 3, a árvore seria o caminho 1–2–3–4–5.
+            Ambos os resultados são árvores geradoras <i>diferentes</i> do mesmo <span class="m"><i>G</i></span>.
+            O algoritmo não escolhe “a” árvore geradora — escolhe uma, determinada pela raiz e pela ordem de
+            <span class="m"><i>N</i>(<i>u</i>)</span>.
+          </p>
+        </div>
+
+        <div class="box def">
+          <div class="h">Resumo do bloco</div>
+          <ul>
+            <li>Todo grafo conexo tem árvore geradora: tome um gerador conexo com o mínimo de arestas.</li>
+            <li>Teorema 18: árvore ⟺ conexo com <span class="m"><i>n</i>−1</span> arestas.</li>
+            <li>A DFS produz uma: <span class="m"><i>M</i> = {{<i>v</i>, pai[<i>v</i>]} : pai[<i>v</i>] ≠ nulo}</span>.</li>
+            <li>Se <span class="m"><i>G</i></span> não é conexo, o mesmo conjunto induz uma <i>floresta</i> geradora (uma árvore por componente visitado).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex1">
+        <div class="ex-head">
+          <h3>Exercícios 98 a 103</h3>
+          <button class="toggle" type="button" data-scope="#ex1" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: contar arestas de floresta, classificar árvores pequenas, cotas sobre folhas, a árvore da DFS, e as equivalências do Teorema 18.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 98</span><div class="stmt">
+            <p>Determine o número de arestas de uma floresta com <span class="m"><i>n</i></span> vértices e com <span class="m"><i>k</i></span> componentes conexos.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a98" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a98"><div class="plab">Resolução</div>
+            <p>
+              Sejam <span class="m"><i>T</i><sub>1</sub>, …, <i>T</i><sub><i>k</i></sub></span> os componentes.
+              Cada <span class="m"><i>T</i><sub><i>i</i></sub></span> é uma árvore; escreva
+              <span class="m"><i>n</i><sub><i>i</i></sub> = |<i>V</i>(<i>T</i><sub><i>i</i></sub>)|</span>, de modo que
+              <span class="m">∑<sub><i>i</i>=1</sub><sup><i>k</i></sup> <i>n</i><sub><i>i</i></sub> = <i>n</i></span>.
+            </p>
+            <p>
+              Pelo Lema 17, <span class="m">|<i>E</i>(<i>T</i><sub><i>i</i></sub>)| = <i>n</i><sub><i>i</i></sub> − 1</span>.
+              As arestas da floresta são a união disjunta das arestas dos componentes, logo
+            </p>
+            <div class="eq"><div class="body">
+              |<i>E</i>(<i>F</i>)| = <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=1</span></span><sup><i>k</i></sup> (<i>n</i><sub><i>i</i></sub> − 1) = <i>n</i> − <i>k</i>.
+            </div></div>
+            <p>
+              <b>Resposta: <span class="m"><i>n</i> − <i>k</i></span>.</b>
+              Conferência na Figura 1: <span class="m"><i>n</i> = 8</span>, <span class="m"><i>k</i> = 3</span>,
+              <span class="m">|<i>E</i>| = 5 = 8 − 3</span> ✔
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 99</span><div class="stmt">
+            <p>Desenhe todas as árvores não-isomorfas com 5 vértices e todas as árvores não-isomorfas com 7 vértices e com grau máximo pelo menos 4.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h99" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a99" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h99"><div class="plab">Dica</div>
+            <p>
+              Em uma árvore os graus somam <span class="m">2(<i>n</i>−1)</span>. Liste as sequências possíveis
+              particionando pelo grau máximo. Para <span class="m"><i>n</i> = 5</span> há três sequências;
+              para <span class="m"><i>n</i> = 7</span> e <span class="m">Δ ≥ 4</span>, quatro sequências —
+              e uma delas se realiza de duas maneiras não-isomorfas.
+            </p>
+          </div>
+          <div class="panel answer" id="a99"><div class="plab">Resolução</div>
+            <p class="kicker">Parte 1 · árvores com 5 vértices</p>
+            <p>
+              Soma dos graus: <span class="m">2 · 4 = 8</span>. Sequências não crescentes de cinco inteiros em
+              <span class="m">{1,2,3,4}</span> que somam 8:
+            </p>
+            <ul>
+              <li><span class="m">(4,1,1,1,1)</span> — a estrela <span class="m"><i>K</i><sub>1,4</sub></span>;</li>
+              <li><span class="m">(3,2,1,1,1)</span> — um vértice de grau 3, um de grau 2, três folhas;</li>
+              <li><span class="m">(2,2,2,1,1)</span> — o caminho <span class="m"><i>P</i><sub>5</sub></span>.</li>
+            </ul>
+            <p>
+              Não há outra: <span class="m">(3,3,1,1,0)</span> tem um isolado, impossível numa árvore com
+              <span class="m"><i>n</i> ≥ 2</span>; <span class="m">(2,2,2,2,0)</span> idem.
+              Cada sequência determina um único desenho (há um só “vértice especial”, ou nenhum além das folhas do caminho).
+              As três sequências são distintas, logo as três árvores são duas a duas não-isomorfas. São todas.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 540 230" role="img" aria-label="As três árvores não-isomorfas com 5 vértices: o caminho P5, o garfo de graus 3,2,1,1,1 e a estrela K1,4">
+                <line class="e" x1="90" y1="30" x2="90" y2="75"/>
+                <line class="e" x1="90" y1="75" x2="90" y2="120"/>
+                <line class="e" x1="90" y1="120" x2="90" y2="165"/>
+                <line class="e" x1="90" y1="165" x2="90" y2="210"/>
+                <g class="v"><circle cx="90" cy="30" r="15"/><text x="90" y="30">1</text></g>
+                <g class="v"><circle cx="90" cy="75" r="15"/><text x="90" y="75">2</text></g>
+                <g class="v"><circle cx="90" cy="120" r="15"/><text x="90" y="120">3</text></g>
+                <g class="v"><circle cx="90" cy="165" r="15"/><text x="90" y="165">4</text></g>
+                <g class="v"><circle cx="90" cy="210" r="15"/><text x="90" y="210">5</text></g>
+                <line class="e" x1="270" y1="70" x2="210" y2="70"/>
+                <line class="e" x1="270" y1="70" x2="330" y2="70"/>
+                <line class="e" x1="270" y1="70" x2="270" y2="130"/>
+                <line class="e" x1="270" y1="130" x2="270" y2="190"/>
+                <g class="v hl"><circle cx="270" cy="70" r="15"/><text x="270" y="70">a</text></g>
+                <g class="v"><circle cx="210" cy="70" r="15"/><text x="210" y="70">b</text></g>
+                <g class="v"><circle cx="330" cy="70" r="15"/><text x="330" y="70">c</text></g>
+                <g class="v open"><circle cx="270" cy="130" r="15"/><text x="270" y="130">d</text></g>
+                <g class="v"><circle cx="270" cy="190" r="15"/><text x="270" y="190">e</text></g>
+                <line class="e" x1="450" y1="110" x2="450" y2="40"/>
+                <line class="e" x1="450" y1="110" x2="380" y2="160"/>
+                <line class="e" x1="450" y1="110" x2="520" y2="160"/>
+                <line class="e" x1="450" y1="110" x2="450" y2="190"/>
+                <g class="v hl"><circle cx="450" cy="110" r="15"/><text x="450" y="110">a</text></g>
+                <g class="v"><circle cx="450" cy="40" r="15"/><text x="450" y="40">b</text></g>
+                <g class="v"><circle cx="380" cy="160" r="15"/><text x="380" y="160">c</text></g>
+                <g class="v"><circle cx="520" cy="160" r="15"/><text x="520" y="160">d</text></g>
+                <g class="v"><circle cx="450" cy="190" r="15"/><text x="450" y="190">e</text></g>
+              </svg>
+              <div class="legend">
+                <span><i style="background:var(--brand)"></i>grau máximo</span>
+                <span><i style="background:var(--card); border:1px solid var(--ink)"></i>grau 2 no garfo</span>
+              </div>
+              <figcaption><b>Figura 6.</b> As três árvores não-isomorfas de 5 vértices. Esquerda: <span class="m"><i>P</i><sub>5</sub></span>, sequência (2,2,2,1,1). Centro: o garfo, (3,2,1,1,1). Direita: a estrela <span class="m"><i>K</i><sub>1,4</sub></span>, (4,1,1,1,1).</figcaption>
+            </figure>
+
+            <p class="kicker">Parte 2 · árvores com 7 vértices e Δ ≥ 4</p>
+            <p>
+              Soma dos graus: <span class="m">2 · 6 = 12</span>. Sequências com primeiro termo ≥ 4, demais ≥ 1:
+            </p>
+            <ul>
+              <li><span class="m">(6,1,1,1,1,1,1)</span> — a estrela <span class="m"><i>K</i><sub>1,6</sub></span>;</li>
+              <li><span class="m">(5,2,1,1,1,1,1)</span> — estrela com uma aresta subdividida;</li>
+              <li><span class="m">(4,3,1,1,1,1,1)</span> — os dois vértices de grau alto são adjacentes;</li>
+              <li><span class="m">(4,2,2,1,1,1,1)</span> — <b>duas</b> árvores não-isomorfas, conforme os vértices de grau 2 sejam ou não adjacentes.</li>
+            </ul>
+            <p>
+              Não há <span class="m">(4,4,…)</span>: <span class="m">4+4+1+1+1+1+1 = 13 &gt; 12</span>.
+              Não há <span class="m">(5,3,…)</span>: <span class="m">5+3+1+1+1+1 = 12</span> usaria só 6 números.
+              Ficam cinco árvores.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 540 220" role="img" aria-label="Estrela K1,6 e a árvore de graus 5,2,1,1,1,1,1">
+                <line class="e" x1="130" y1="110" x2="130" y2="32"/>
+                <line class="e" x1="130" y1="110" x2="198" y2="71"/>
+                <line class="e" x1="130" y1="110" x2="198" y2="149"/>
+                <line class="e" x1="130" y1="110" x2="130" y2="188"/>
+                <line class="e" x1="130" y1="110" x2="62" y2="149"/>
+                <line class="e" x1="130" y1="110" x2="62" y2="71"/>
+                <g class="v hl"><circle cx="130" cy="110" r="15"/></g>
+                <g class="v"><circle cx="130" cy="32" r="15"/></g>
+                <g class="v"><circle cx="198" cy="71" r="15"/></g>
+                <g class="v"><circle cx="198" cy="149" r="15"/></g>
+                <g class="v"><circle cx="130" cy="188" r="15"/></g>
+                <g class="v"><circle cx="62" cy="149" r="15"/></g>
+                <g class="v"><circle cx="62" cy="71" r="15"/></g>
+                <text class="lbl" x="130" y="214">A · Δ = 6</text>
+                <line class="e" x1="400" y1="95" x2="400" y2="30"/>
+                <line class="e" x1="400" y1="95" x2="470" y2="65"/>
+                <line class="e" x1="400" y1="95" x2="470" y2="140"/>
+                <line class="e" x1="400" y1="95" x2="330" y2="140"/>
+                <line class="e" x1="400" y1="95" x2="330" y2="65"/>
+                <line class="e" x1="470" y1="140" x2="470" y2="195"/>
+                <g class="v hl"><circle cx="400" cy="95" r="15"/></g>
+                <g class="v"><circle cx="400" cy="30" r="15"/></g>
+                <g class="v"><circle cx="470" cy="65" r="15"/></g>
+                <g class="v open"><circle cx="470" cy="140" r="15"/></g>
+                <g class="v"><circle cx="330" cy="140" r="15"/></g>
+                <g class="v"><circle cx="330" cy="65" r="15"/></g>
+                <g class="v"><circle cx="470" cy="195" r="15"/></g>
+                <text class="lbl" x="400" y="214">B · Δ = 5</text>
+              </svg>
+              <figcaption><b>Figura 7.</b> As duas árvores de 7 vértices com <span class="m">Δ ≥ 5</span>. Em B, o vértice vazado é o único de grau 2: a folha extra só pode pendurar nele.</figcaption>
+            </figure>
+            <figure>
+              <svg class="dg" viewBox="0 0 560 210" role="img" aria-label="Três árvores de 7 vértices com grau máximo 4: sequências 4-3 e as duas realizações de 4-2-2">
+                <line class="e" x1="70" y1="100" x2="140" y2="100"/>
+                <line class="e" x1="70" y1="100" x2="70" y2="35"/>
+                <line class="e" x1="70" y1="100" x2="20" y2="160"/>
+                <line class="e" x1="70" y1="100" x2="95" y2="170"/>
+                <line class="e" x1="140" y1="100" x2="140" y2="35"/>
+                <line class="e" x1="140" y1="100" x2="190" y2="160"/>
+                <g class="v hl"><circle cx="70" cy="100" r="15"/></g>
+                <g class="v hl2"><circle cx="140" cy="100" r="15"/></g>
+                <g class="v"><circle cx="70" cy="35" r="15"/></g>
+                <g class="v"><circle cx="20" cy="160" r="15"/></g>
+                <g class="v"><circle cx="95" cy="170" r="15"/></g>
+                <g class="v"><circle cx="140" cy="35" r="15"/></g>
+                <g class="v"><circle cx="190" cy="160" r="15"/></g>
+                <text class="lbl" x="105" y="202">C · (4,3,1,1,1,1,1)</text>
+                <line class="e" x1="300" y1="40" x2="235" y2="40"/>
+                <line class="e" x1="300" y1="40" x2="365" y2="40"/>
+                <line class="e" x1="300" y1="40" x2="260" y2="105"/>
+                <line class="e" x1="300" y1="40" x2="340" y2="105"/>
+                <line class="e" x1="260" y1="105" x2="260" y2="170"/>
+                <line class="e" x1="340" y1="105" x2="340" y2="170"/>
+                <g class="v hl"><circle cx="300" cy="40" r="15"/></g>
+                <g class="v"><circle cx="235" cy="40" r="15"/></g>
+                <g class="v"><circle cx="365" cy="40" r="15"/></g>
+                <g class="v open"><circle cx="260" cy="105" r="15"/></g>
+                <g class="v open"><circle cx="340" cy="105" r="15"/></g>
+                <g class="v"><circle cx="260" cy="170" r="15"/></g>
+                <g class="v"><circle cx="340" cy="170" r="15"/></g>
+                <text class="lbl" x="300" y="202">D · graus 2 não adjacentes</text>
+                <line class="e" x1="455" y1="50" x2="400" y2="50"/>
+                <line class="e" x1="455" y1="50" x2="420" y2="125"/>
+                <line class="e" x1="455" y1="50" x2="490" y2="125"/>
+                <line class="e" x1="455" y1="50" x2="520" y2="50"/>
+                <line class="e" x1="520" y1="50" x2="555" y2="50"/>
+                <line class="e" x1="555" y1="50" x2="555" y2="125"/>
+                <g class="v hl"><circle cx="455" cy="50" r="15"/></g>
+                <g class="v"><circle cx="400" cy="50" r="15"/></g>
+                <g class="v"><circle cx="420" cy="125" r="15"/></g>
+                <g class="v"><circle cx="490" cy="125" r="15"/></g>
+                <g class="v open"><circle cx="520" cy="50" r="15"/></g>
+                <g class="v open"><circle cx="555" cy="50" r="15"/></g>
+                <g class="v"><circle cx="555" cy="125" r="15"/></g>
+                <text class="lbl" x="480" y="202">E · graus 2 adjacentes</text>
+              </svg>
+              <div class="legend">
+                <span><i style="background:var(--brand)"></i>grau 4</span>
+                <span><i style="background:var(--c2)"></i>grau 3 em C</span>
+                <span><i style="background:var(--card); border:1px solid var(--ink)"></i>grau 2 em D e E</span>
+              </div>
+              <figcaption><b>Figura 8.</b> As três árvores de 7 vértices com <span class="m">Δ = 4</span>. D e E compartilham a sequência (4,2,2,1,1,1,1): em D os dois vértices de grau 2 estão a distância 2; em E, a distância 1. Isso impede isomorfismo.</figcaption>
+            </figure>
+            <p>
+              Por que C é única: o vértice de grau 4 e o de grau 3 <b>precisam</b> ser adjacentes.
+              Caso contrário pediram 4 + 3 = 7 vizinhos entre 5 folhas. Ligados, sobram 3 folhas no primeiro e 2 no segundo — um só desenho.
+            </p>
+            <p>
+              <b>Lista final.</b> 3 árvores de 5 vértices (Figura 6) e 5 árvores de 7 vértices com
+              <span class="m">Δ ≥ 4</span> (Figuras 7 e 8).
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 100</span><div class="stmt">
+            <p>Mostre que toda árvore <span class="m"><i>T</i></span> tem pelo menos <span class="m">Δ(<i>T</i>)</span> folhas.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h100" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a100" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h100"><div class="plab">Dica</div>
+            <p>
+              Some os graus com o Lema 17 à direita. À esquerda, dê a cada folha grau 1, ao vértice de grau
+              <span class="m">Δ</span> o valor <span class="m">Δ</span>, e a todos os outros não-folhas pelo menos 2.
+              A desigualdade que sobra é <span class="m"><i>L</i> ≥ Δ</span>.
+            </p>
+          </div>
+          <div class="panel answer" id="a100"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>T</i></span> uma árvore com <span class="m"><i>n</i> = |<i>V</i>(<i>T</i>)|</span> vértices,
+              <span class="m">Δ = Δ(<i>T</i>)</span> e <span class="m"><i>L</i></span> o número de folhas.
+            </p>
+            <p class="kicker">Casos pequenos</p>
+            <p>
+              Se <span class="m"><i>n</i> = 1</span>, então <span class="m">Δ = 0</span> e <span class="m"><i>L</i> = 0</span>.
+              Se <span class="m"><i>n</i> = 2</span>, então <span class="m"><i>T</i> = <i>K</i><sub>2</sub></span>,
+              <span class="m">Δ = 1</span> e <span class="m"><i>L</i> = 2 ≥ 1</span>.
+            </p>
+            <p class="kicker">Caso <span class="m"><i>n</i> ≥ 3</span></p>
+            <p>
+              Aqui <span class="m">Δ ≥ 2</span>, então o vértice de grau máximo <b>não</b> é folha.
+              Pelo Lema 17, <span class="m">∑ <i>d</i>(<i>u</i>) = 2<i>n</i> − 2</span>.
+              Limitando a soma por baixo — <span class="m"><i>L</i></span> folhas de grau 1, um vértice de grau
+              <span class="m">Δ</span>, e os demais <span class="m"><i>n</i> − <i>L</i> − 1</span> vértices com grau pelo menos 2 —
+            </p>
+            <div class="eq"><div class="body">
+              2<i>n</i> − 2 = <span class="sum"><span class="o">∑</span><span class="l"><i>u</i></span></span> <i>d</i>(<i>u</i>)
+              ≥ 1 · <i>L</i> + Δ + 2(<i>n</i> − <i>L</i> − 1)
+            </div></div>
+            <p>Simplificando o lado direito:</p>
+            <div class="eq"><div class="body">
+              <i>L</i> + Δ + 2<i>n</i> − 2<i>L</i> − 2 = 2<i>n</i> − 2 − <i>L</i> + Δ
+            </div></div>
+            <p>A desigualdade <span class="m">2<i>n</i> − 2 ≥ 2<i>n</i> − 2 − <i>L</i> + Δ</span> reduz-se a <span class="m"><i>L</i> ≥ Δ</span>.</p>
+            <p>
+              Igualdade quando os demais têm grau exatamente 2 — a estrela
+              <span class="m"><i>K</i><sub>1,<i>n</i>−1</sub></span> atinge <span class="m"><i>L</i> = Δ = <i>n</i> − 1</span>.
+              Na Figura 6, o garfo tem <span class="m">Δ = 3</span> e 3 folhas; o caminho tem
+              <span class="m">Δ = 2</span> e 2 folhas. ✔
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 101</span><div class="stmt">
+            <p>Prove que o conjunto de arestas <span class="m">{pai[<i>v</i>], <i>v</i>}</span> definido por uma busca em profundidade rotulada induz uma árvore.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h101" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a101" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h101"><div class="plab">Dica</div>
+            <p>
+              O enunciado não diz que o grafo é conexo. A afirmação vale quando a busca parte de um único vértice e visita todos — ou seja, quando <span class="m"><i>G</i></span> é conexo. Mostre que <span class="m"><i>M</i></span> tem <span class="m"><i>n</i>−1</span> arestas e que de todo vértice a cadeia de pais chega na raiz (os instantes de descoberta decrescem).
+            </p>
+          </div>
+          <div class="panel answer" id="a101"><div class="plab">Resolução</div>
+            <p>
+              O enunciado original não afirma que <span class="m"><i>G</i></span> é conexo. Se a busca parte de um único
+              <span class="m"><i>s</i></span> e <span class="m"><i>G</i></span> tem mais de um componente, o conjunto
+              <span class="m"><i>M</i></span> induz uma árvore só no componente de <span class="m"><i>s</i></span>
+              (uma floresta geradora no grafo todo). Resolvemos o caso em que a busca visita todos os vértices —
+              equivalentemente, <span class="m"><i>G</i></span> conexo — que é o contexto da equação (34) e da Figura 5.
+            </p>
+            <p>
+              Seja <span class="m"><i>G</i></span> conexo com <span class="m"><i>n</i></span> vértices e
+              <span class="m"><i>s</i></span> a raiz da DFS. Defina
+            </p>
+            <div class="eq"><div class="body">
+              <i>M</i> = { {<i>v</i>, pai[<i>v</i>]} : <i>v</i> ∈ <i>V</i>(<i>G</i>) e pai[<i>v</i>] ≠ nulo }
+            </div></div>
+            <p>e seja <span class="m"><i>T</i> = (<i>V</i>(<i>G</i>), <i>M</i>)</span>.</p>
+            <p>
+              <b>Cardinalidade.</b> A raiz é o único vértice com pai nulo (a busca é uma só chamada, a partir de
+              <span class="m"><i>s</i></span>, e a conexidade garante que todos são visitados). Cada um dos outros
+              <span class="m"><i>n</i>−1</span> vértices recebe exatamente um pai, no momento em que é descoberto.
+              Logo <span class="m">|<i>M</i>| = <i>n</i> − 1</span>.
+            </p>
+            <p>
+              <b>Conexidade.</b> Para todo <span class="m"><i>v</i></span>, a cadeia
+              <span class="m"><i>v</i>, pai[<i>v</i>], pai[pai[<i>v</i>]], …</span> termina em
+              <span class="m"><i>s</i></span>. O algoritmo só atribui
+              <span class="m">pai[<i>v</i>] ← <i>u</i></span> de dentro de <span class="m">BP-Visita(<i>u</i>)</span>,
+              quando <span class="m"><i>u</i></span> já foi descoberto e <span class="m"><i>v</i></span> ainda não.
+              Portanto <span class="m"><i>d</i>(pai[<i>v</i>]) &lt; <i>d</i>(<i>v</i>)</span> para todo
+              <span class="m"><i>v</i> ≠ <i>s</i></span>. A sequência de instantes de descoberta ao longo da cadeia
+              é estritamente decrescente e de naturais positivos: não pode ciclar, e o único vértice sem pai é
+              <span class="m"><i>s</i></span>. Todo vértice está ligado a <span class="m"><i>s</i></span> em
+              <span class="m"><i>T</i></span>, logo <span class="m"><i>T</i></span> é conexo.
+            </p>
+            <p>
+              <b>Conclusão.</b> <span class="m"><i>T</i></span> é conexo, tem <span class="m"><i>n</i></span> vértices e
+              <span class="m"><i>n</i>−1</span> arestas. Pelo Teorema 18, <span class="m"><i>T</i></span> é uma árvore.
+            </p>
+            <p>
+              Em particular, <span class="m"><i>T</i></span> é acíclico: um circuito em
+              <span class="m"><i>T</i></span> forçaria um ciclo na cadeia de pais e, com ele, um ciclo de instantes
+              de descoberta — impossível.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 102</span><div class="stmt">
+            <p>Seja <span class="m"><i>G</i></span> um grafo. Mostre que as seguintes afirmações são equivalentes:</p>
+            <p>(a) <span class="m"><i>G</i></span> é conexo e <span class="m">|<i>E</i>(<i>G</i>)| = |<i>V</i>(<i>G</i>)| − 1</span>;</p>
+            <p>(b) <span class="m">|<i>E</i>(<i>G</i>)| = |<i>V</i>(<i>G</i>)| − 1</span> e <span class="m"><i>G</i></span> não contém circuito;</p>
+            <p>(c) <span class="m"><i>G</i></span> é uma árvore.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h102" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a102" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h102"><div class="plab">Dica</div>
+            <p>
+              (c) ⇒ (a) é o Teorema 18 numa direção; (a) ⇒ (c) é a outra. Para (b), use o exercício 98:
+              uma floresta com <span class="m"><i>n</i></span> vértices e <span class="m"><i>n</i>−1</span> arestas tem
+              <span class="m"><i>k</i> = 1</span> componente.
+            </p>
+          </div>
+          <div class="panel answer" id="a102"><div class="plab">Resolução</div>
+            <p>Seja <span class="m"><i>n</i> = |<i>V</i>(<i>G</i>)|</span>. Mostramos <span class="m">(c) ⇒ (a) ⇒ (b) ⇒ (c)</span>.</p>
+            <p class="kicker">(c) ⇒ (a)</p>
+            <p>
+              Se <span class="m"><i>G</i></span> é árvore, é conexo por definição e
+              <span class="m">|<i>E</i>(<i>G</i>)| = <i>n</i> − 1</span> pelo Lema 17. É o Teorema 18 numa direção.
+            </p>
+            <p class="kicker">(a) ⇒ (b)</p>
+            <p>
+              Por (a), <span class="m"><i>G</i></span> é conexo com <span class="m"><i>n</i>−1</span> arestas.
+              O Teorema 18 diz que <span class="m"><i>G</i></span> é árvore, logo não contém circuito, e o número de
+              arestas continua <span class="m"><i>n</i>−1</span>.
+            </p>
+            <p class="kicker">(b) ⇒ (c)</p>
+            <p>
+              Por (b), <span class="m"><i>G</i></span> é acíclico — portanto é uma floresta — e tem
+              <span class="m"><i>n</i>−1</span> arestas. Se <span class="m"><i>k</i></span> é o número de componentes,
+              o exercício 98 dá <span class="m">|<i>E</i>(<i>G</i>)| = <i>n</i> − <i>k</i></span>. Então
+              <span class="m"><i>n</i> − <i>k</i> = <i>n</i> − 1</span>, donde <span class="m"><i>k</i> = 1</span>.
+              Uma floresta com um só componente é uma árvore.
+            </p>
+            <p>
+              As três afirmações são equivalentes. Em particular, fecha-se o triângulo anunciado na teoria:
+              quaisquer duas dentre “conexo”, “acíclico” e “<span class="m"><i>n</i>−1</span> arestas” implicam a terceira.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 103</span><div class="stmt">
+            <p>Uma floresta é um grafo acíclico. Considere uma floresta <span class="m"><i>F</i></span> com <span class="m"><i>n</i></span> vértices e <span class="m"><i>m</i></span> arestas.</p>
+            <p>(a) Qual é o número máximo de vértices num componente conexo de <span class="m"><i>F</i></span>?</p>
+            <p>(b) Mostre que há pelo menos <span class="m">max{<i>n</i> − 2<i>m</i>, 0}</span> vértices de grau zero.</p>
+            <p>(c) Mostre que se <span class="m"><i>m</i> &lt; <i>n</i>/2</span> então resta pelo menos um vértice de grau zero.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h103" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a103" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h103"><div class="plab">Dica</div>
+            <p>
+              (a) Um componente com <span class="m"><i>k</i></span> vértices é árvore e gasta <span class="m"><i>k</i>−1</span> arestas.
+              (b) Os não-isolados têm grau pelo menos 1; a soma dos graus é <span class="m">2<i>m</i></span>.
+              (c) é (b) com <span class="m"><i>n</i> − 2<i>m</i> &gt; 0</span>.
+            </p>
+          </div>
+          <div class="panel answer" id="a103"><div class="plab">Resolução</div>
+            <p class="kicker">Parte (a)</p>
+            <p>
+              Cada componente de <span class="m"><i>F</i></span> é uma árvore. Uma árvore com
+              <span class="m"><i>k</i></span> vértices tem <span class="m"><i>k</i> − 1</span> arestas, e essas arestas
+              saem do orçamento global de <span class="m"><i>m</i></span>. Logo
+              <span class="m"><i>k</i> − 1 ≤ <i>m</i></span>, isto é, <span class="m"><i>k</i> ≤ <i>m</i> + 1</span>.
+            </p>
+            <p>
+              O valor <span class="m"><i>m</i> + 1</span> é atingido: coloque todas as
+              <span class="m"><i>m</i></span> arestas num único componente (uma árvore com
+              <span class="m"><i>m</i> + 1</span> vértices) e deixe os demais
+              <span class="m"><i>n</i> − <i>m</i> − 1</span> vértices isolados. Isso é uma floresta.
+              Como toda floresta satisfaz <span class="m"><i>m</i> ≤ <i>n</i> − 1</span> (exercício 98 com
+              <span class="m"><i>k</i> ≥ 1</span>), temos automaticamente <span class="m"><i>m</i> + 1 ≤ <i>n</i></span>.
+            </p>
+            <p><b>Resposta de (a): <span class="m"><i>m</i> + 1</span>.</b></p>
+            <p>
+              Conferência: na Figura 1, <span class="m"><i>m</i> = 5</span> e o maior componente tem 4 vértices,
+              que é menor que 6 — a figura não maximiza. Uma árvore de 6 vértices mais dois isolados realizaria o máximo. ✔
+            </p>
+            <p class="kicker">Parte (b)</p>
+            <p>
+              Seja <span class="m"><i>z</i></span> o número de vértices de grau zero. Os demais
+              <span class="m"><i>n</i> − <i>z</i></span> vértices têm grau pelo menos 1. Pelo teorema do aperto de mão,
+            </p>
+            <div class="eq"><div class="body">
+              2<i>m</i> = <span class="sum"><span class="o">∑</span><span class="l"><i>u</i> ∈ <i>V</i>(<i>F</i>)</span></span> <i>d</i>(<i>u</i>)
+              ≥ 1 · (<i>n</i> − <i>z</i>),
+            </div></div>
+            <p>
+              donde <span class="m"><i>z</i> ≥ <i>n</i> − 2<i>m</i></span>. Como
+              <span class="m"><i>z</i> ≥ 0</span> por definição,
+              <span class="m"><i>z</i> ≥ max{<i>n</i> − 2<i>m</i>, 0}</span>.
+            </p>
+            <p>
+              A cota é justa: um emparelhamento de <span class="m"><i>m</i></span> arestas disjuntas usa
+              <span class="m">2<i>m</i></span> vértices de grau 1 e deixa exatamente
+              <span class="m"><i>n</i> − 2<i>m</i></span> isolados (quando <span class="m"><i>n</i> ≥ 2<i>m</i></span>).
+            </p>
+            <p class="kicker">Parte (c)</p>
+            <p>
+              Se <span class="m"><i>m</i> &lt; <i>n</i>/2</span>, então <span class="m"><i>n</i> − 2<i>m</i> &gt; 0</span>.
+              Pela parte (b),
+            </p>
+            <div class="eq"><div class="body">
+              <i>z</i> ≥ max{<i>n</i> − 2<i>m</i>, 0} = <i>n</i> − 2<i>m</i> ≥ 1.
+            </div></div>
+            <p>
+              Há pelo menos um vértice de grau zero. Equivalentemente: se todos os graus fossem pelo menos 1,
+              teríamos <span class="m">2<i>m</i> ≥ <i>n</i></span>, isto é,
+              <span class="m"><i>m</i> ≥ <i>n</i>/2</span>, contradizendo a hipótese.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="08-conexidade.html"><span class="dir">Capítulo anterior</span><span class="ttl">8. Conexidade</span></a>
+        <a class="next" href="10-arvores-geradoras-minimas.html"><span class="dir">Próximo capítulo</span><span class="ttl">10. Árvores geradoras mínimas</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática da seção “Árvores e Florestas” das notas de
+          Teoria dos Grafos (CI065 / BC1429) do Prof. Jair Donadelli. Enunciados dos exercícios 98 a 103 preservados;
+          explicações, diagramas e resoluções foram escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>

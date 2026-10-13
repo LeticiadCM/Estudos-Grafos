@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4. Representação computacional — Teoria dos Grafos</title>
+<meta name="description" content="Como guardar um grafo no computador: mapeamento dos vértices, matriz e lista de adjacências, complexidade das operações, potências da matriz e 13 exercícios resolvidos.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo 4 · Estruturas de dados</span>
+    <h1>Representação computacional</h1>
+    <p class="lead">
+      Até aqui o grafo era um par de conjuntos. Daqui em diante ele precisa caber na memória e responder perguntas
+      rápido. Ao terminar, você saberá mapear <span class="m"><i>V</i></span> em
+      <span class="m">{1,…,<i>n</i>}</span>, montar a matriz e a lista de adjacências, escolher a estrutura pela
+      tabela de custos, ler o que <span class="m"><i>A</i><sup>2</sup></span> e <span class="m"><i>A</i><sup>3</sup></span>
+      contam, e decidir se um algoritmo é polinomial independentemente da representação.
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> mapeamento de vértices · matriz de adjacências · lista de adjacências · <span class="m"><i>O</i></span>-grande · observação 7 · <span class="m"><i>A</i><sup>2</sup></span> e <span class="m"><i>A</i><sup>3</sup></span> · triângulos · incidência em dígrafos · sorvedouro</span>
+      <span><b>Exercícios:</b> 13 com resolução (40 a 52)</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#como-usar">Como usar</a>
+        <a href="#s6">6. Representação computacional</a>
+        <a class="sub" href="#s6-map">Mapear V em {1,…,n}</a>
+        <a class="sub" href="#s6-mat">Matriz de adjacências</a>
+        <a class="sub" href="#s6-lista">Lista de adjacências</a>
+        <a class="sub" href="#s6-custo">Três tarefas, dois custos</a>
+        <a class="sub" href="#s6-cplx">O-grande e a observação 7</a>
+        <a class="sub" href="#s6-pot">O que A² e A³ contam</a>
+        <a class="sub" href="#s6-spec">Autovalores, o mínimo necessário</a>
+        <a class="sub" href="#s6-dir">Dígrafos: incidência, subjacente, sorvedouro</a>
+        <a class="sub" href="#s6-resumo">Resumo do bloco</a>
+        <a href="#ex1">Exercícios 40 a 52</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <section class="chapter" id="como-usar">
+        <div class="box tip">
+          <div class="h">Como aproveitar este material</div>
+          <ol>
+            <li><b>Leia a teoria do bloco</b> — ela contém exatamente o que os exercícios seguintes exigem, nada além.</li>
+            <li><b>Tente o exercício sem abrir nada.</b> Se travar, use o botão <i>Dica</i> (quando existir) antes da resposta.</li>
+            <li><b>Só então abra <i>Mostrar resposta</i></b> e compare o seu raciocínio com o argumento apresentado.</li>
+          </ol>
+          <p>As respostas ficam ocultas por padrão. O botão no topo da página abre ou fecha todas de uma vez, e a impressão da página já sai com tudo aberto.</p>
+        </div>
+        <p>
+          Este capítulo assume o vocabulário dos anteriores: grafo simples
+          <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span>, grau
+          <span class="m"><i>d</i>(<i>v</i>)</span>, vizinhança
+          <span class="m"><i>N</i>(<i>v</i>)</span>, isomorfismo e (quando o exercício pedir) grafo dirigido.
+          A novidade é estrutural: como o objeto é <i>armazenado</i> e o que isso custa.
+        </p>
+      </section>
+
+      <hr class="sep">
+
+      <section class="chapter" id="s6">
+        <h2><span class="num">§6</span> Representação computacional</h2>
+        <p class="sub-lead">Objetivo do bloco: guardar um grafo em duas estruturas clássicas, comparar o custo das operações elementares e extrair da matriz de adjacências informação combinatória (graus, caminhos de comprimento 2, triângulos).</p>
+
+        <h3 id="s6-map">6.1 Mapear <i>V</i> em {1,…,<i>n</i>}</h3>
+        <p>
+          Máquinas gostam de índices. Conjuntos abstratos, não. O primeiro passo de qualquer algoritmo em grafos é
+          construir um isomorfismo entre <span class="m"><i>V</i>(<i>G</i>)</span> e
+          <span class="m">{1, 2, …, |<i>V</i>(<i>G</i>)|}</span>. Feito isso, o problema original é resolvido sobre um
+          grafo isomorfo <span class="m"><i>G</i>′</span> com
+          <span class="m"><i>V</i>(<i>G</i>′) = {1,…,<i>n</i>}</span>, e a estrutura de busca que realizou o mapeamento
+          (tabela de espalhamento ou árvore binária de busca, por exemplo) traduz a resposta de volta aos nomes originais.
+        </p>
+        <div class="box def">
+          <div class="h">Convenção do resto do texto</div>
+          <p>
+            Daqui em diante, todo grafo tratado computacionalmente tem
+            <span class="m"><i>V</i> = {1, 2, …, <i>n</i>}</span> para algum
+            <span class="m"><i>n</i> ∈ ℕ</span>. Escrevemos <span class="m"><i>n</i> = |<i>V</i>|</span> e
+            <span class="m"><i>m</i> = |<i>E</i>|</span>.
+          </p>
+        </div>
+        <div class="box tip">
+          <div class="h">Por que isso não perde generalidade</div>
+          <p>
+            Isomorfismo preserva tudo o que os algoritmos deste curso perguntam: adjacência, grau, caminhos, ciclos,
+            componentes. Relabelar vértices com <span class="m">1</span> a <span class="m"><i>n</i></span> é só escolher
+            um desenho conveniente do mesmo objeto — o mesmo espírito do capítulo&nbsp;3, agora com um motivo de engenharia.
+          </p>
+        </div>
+
+        <h3 id="s6-mat">6.2 Matriz de adjacências</h3>
+        <p>
+          A ideia é a mais crua possível: uma tabela <span class="m"><i>n</i> × <i>n</i></span> em que a posição
+          <span class="m">(<i>i</i>,<i>j</i>)</span> diz se <span class="m">{<i>i</i>,<i>j</i>}</span> é aresta.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · matriz de adjacências</div>
+          <p>
+            A <b>matriz de adjacências</b> de <span class="m"><i>G</i></span> é a matriz
+            <span class="m"><i>n</i> × <i>n</i></span> denotada por <span class="m"><i>A</i>(<i>G</i>)</span>, ou
+            <span class="m"><i>A</i></span>, definida por
+          </p>
+          <div class="eq"><div class="body">
+            <i>A</i><sub><i>ij</i></sub> = 1 se {<i>i</i>,<i>j</i>} ∈ <i>E</i>(<i>G</i>); &nbsp; 0 caso contrário.
+          </div></div>
+          <p>
+            Em grafo simples não há laço, logo a <b>diagonal é toda zero</b>. A aresta não tem direção, logo
+            <span class="m"><i>A</i></span> é <b>simétrica</b>:
+            <span class="m"><i>A</i><sub><i>ij</i></sub> = <i>A</i><sub><i>ji</i></sub></span>.
+          </p>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · o 1 da posição (i,j) não é um peso</div>
+          <p>
+            Aqui <span class="m">1</span> significa “existe a aresta”, não “a aresta custa 1”. Grafos ponderados usam uma
+            <i>matriz de pesos</i>, com a convenção extra de o que pôr nas posições sem aresta
+            (<span class="m">0</span>, <span class="m">∞</span> ou um sentinela — e isso muda de livro para livro).
+            Neste capítulo, <span class="m"><i>A</i></span> é 0-1.
+          </p>
+        </div>
+        <p>
+          O original ilustrava um grafo de 6 vértices (o <span class="m"><i>G</i></span> do exemplo 8). A figura de lá
+          não pôde ser extraída, e para conferir <span class="m"><i>A</i><sup>2</sup></span> e
+          <span class="m"><i>A</i><sup>3</sup></span> à mão um exemplo menor é mais útil. Usaremos daqui até o fim do
+          bloco o grafo abaixo — construído para esta versão.
+        </p>
+        <div class="box def">
+          <div class="h">Exemplo · um grafo de 4 vértices, daqui até A³</div>
+          <div class="eq"><div class="body">
+            <i>V</i> = {1, 2, 3, 4}<br>
+            <i>E</i> = { {1,2}, {1,3}, {2,3}, {2,4} }
+          </div></div>
+          <p>
+            Um triângulo sobre <span class="m">{1,2,3}</span> e um vértice pendente 4 ligado a 2. Graus:
+            <span class="m"><i>d</i>(1) = 2</span>, <span class="m"><i>d</i>(2) = 3</span>,
+            <span class="m"><i>d</i>(3) = 2</span>, <span class="m"><i>d</i>(4) = 1</span>.
+            Conferência: soma dos graus <span class="m">2+3+2+1 = 8 = 2·4</span> ✔
+          </p>
+        </div>
+        <figure>
+          <svg class="dg" viewBox="0 0 420 220" role="img" aria-label="Grafo G de quatro vértices: triângulo 1-2-3 e aresta 2-4">
+            <line class="e" x1="80" y1="110" x2="200" y2="50"/>
+            <line class="e" x1="80" y1="110" x2="200" y2="170"/>
+            <line class="e" x1="200" y1="50" x2="200" y2="170"/>
+            <line class="e" x1="200" y1="50" x2="340" y2="50"/>
+            <g class="v"><circle cx="80" cy="110" r="17"/><text x="80" y="110">1</text></g>
+            <g class="v"><circle cx="200" cy="50" r="17"/><text x="200" y="50">2</text></g>
+            <g class="v"><circle cx="200" cy="170" r="17"/><text x="200" y="170">3</text></g>
+            <g class="v"><circle cx="340" cy="50" r="17"/><text x="340" y="50">4</text></g>
+          </svg>
+          <figcaption><b>Figura 1.</b> O grafo de referência desta página (exemplo construído para esta versão). Observe o triângulo — ele reaparece quando formos contar com <span class="m"><i>A</i><sup>3</sup></span>.</figcaption>
+        </figure>
+        <div class="scroll">
+        <table class="tbl">
+          <thead>
+            <tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+            <tr><td>2</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+            <tr><td>3</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+            <tr><td>4</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Essa é <span class="m"><i>A</i></span>. A linha 2 tem três uns: o vértice 2 tem três vizinhos. A posição
+          <span class="m">(2,4)</span> é 1 e a <span class="m">(4,2)</span> também — simetria. A diagonal é zero.
+          Espaço: <span class="m">Θ(<i>n</i><sup>2</sup>)</span> entradas, independentemente de
+          <span class="m"><i>m</i></span>.
+        </p>
+
+        <h3 id="s6-lista">6.3 Lista de adjacências</h3>
+        <p>
+          Em vez de reservar uma casa para cada par de vértices, guardamos, para cada vértice, só quem realmente é vizinho.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · lista de adjacências</div>
+          <p>
+            A <b>lista de adjacências</b> de <span class="m"><i>G</i></span> é um vetor
+            <span class="m"><i>N</i>[1..<i>n</i>]</span> de listas ligadas. A lista
+            <span class="m"><i>N</i>[<i>i</i>]</span> contém os vizinhos do vértice
+            <span class="m"><i>i</i></span>. Cada nó da lista armazena um vértice e um ponteiro para o próximo nó.
+          </p>
+        </div>
+        <div class="box warn">
+          <div class="h">Observação 6 · a lista não é única</div>
+          <p>
+            Qualquer permutação dos nós de <span class="m"><i>N</i>[<i>i</i>]</span> é uma lista válida. Algoritmos que
+            “percorrem os vizinhos” podem, portanto, visitar a vizinhança em ordens diferentes conforme a implementação
+            — e isso às vezes muda o caminho que BFS/DFS devolve, nunca a existência do caminho.
+          </p>
+        </div>
+        <figure>
+          <svg class="dg" viewBox="0 0 520 250" role="img" aria-label="Listas de adjacências do grafo de quatro vértices: N[1] contém 2 e 3; N[2] contém 1, 3 e 4; N[3] contém 1 e 2; N[4] contém 2">
+            <defs>
+              <marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <line class="arw" x1="78" y1="32" x2="108" y2="32"/>
+            <line class="arw" x1="166" y1="32" x2="204" y2="32"/>
+            <line class="arw" x1="256" y1="32" x2="294" y2="32"/>
+            <line class="arw" x1="78" y1="92" x2="108" y2="92"/>
+            <line class="arw" x1="166" y1="92" x2="204" y2="92"/>
+            <line class="arw" x1="256" y1="92" x2="294" y2="92"/>
+            <line class="arw" x1="346" y1="92" x2="384" y2="92"/>
+            <line class="arw" x1="78" y1="152" x2="108" y2="152"/>
+            <line class="arw" x1="166" y1="152" x2="204" y2="152"/>
+            <line class="arw" x1="256" y1="152" x2="294" y2="152"/>
+            <line class="arw" x1="78" y1="212" x2="108" y2="212"/>
+            <line class="arw" x1="166" y1="212" x2="204" y2="212"/>
+            <text class="lbl" x="40" y="32">N[1]</text>
+            <text class="lbl" x="40" y="92">N[2]</text>
+            <text class="lbl" x="40" y="152">N[3]</text>
+            <text class="lbl" x="40" y="212">N[4]</text>
+            <g class="v"><circle cx="140" cy="32" r="16"/><text x="140" y="32">2</text></g>
+            <g class="v"><circle cx="230" cy="32" r="16"/><text x="230" y="32">3</text></g>
+            <g class="v open"><circle cx="320" cy="32" r="12"/><text x="320" y="32">×</text></g>
+            <g class="v"><circle cx="140" cy="92" r="16"/><text x="140" y="92">1</text></g>
+            <g class="v"><circle cx="230" cy="92" r="16"/><text x="230" y="92">3</text></g>
+            <g class="v"><circle cx="320" cy="92" r="16"/><text x="320" y="92">4</text></g>
+            <g class="v open"><circle cx="410" cy="92" r="12"/><text x="410" y="92">×</text></g>
+            <g class="v"><circle cx="140" cy="152" r="16"/><text x="140" y="152">1</text></g>
+            <g class="v"><circle cx="230" cy="152" r="16"/><text x="230" y="152">2</text></g>
+            <g class="v open"><circle cx="320" cy="152" r="12"/><text x="320" y="152">×</text></g>
+            <g class="v"><circle cx="140" cy="212" r="16"/><text x="140" y="212">2</text></g>
+            <g class="v open"><circle cx="230" cy="212" r="12"/><text x="230" y="212">×</text></g>
+          </svg>
+          <figcaption><b>Figura 2.</b> Uma lista de adjacências do grafo da Figura 1. Cada aresta aparece duas vezes (uma em cada extremo). Os círculos vazados marcam o fim da lista. Trocar 2 e 3 em <span class="m"><i>N</i>[1]</span> continua válido — observação 6.</figcaption>
+        </figure>
+        <p>
+          Espaço: há <span class="m"><i>n</i></span> cabeças de lista e, no total,
+          <span class="m">2<i>m</i></span> nós (cada aresta contribui um nó em cada extremo). Logo
+          <span class="cplx">Θ(|<i>V</i>| + |<i>E</i>|)</span>. Em grafo esparso isso é muito menor que
+          <span class="m"><i>n</i><sup>2</sup></span>.
+        </p>
+
+        <h3 id="s6-custo">6.4 Três tarefas, dois custos</h3>
+        <p>
+          A pergunta certa não é “qual representação é melhor”, e sim “melhor <i>para quê</i>”. Três operações
+          elementares bastam para sentir a diferença. Os tempos abaixo são no pior caso, para um grafo
+          <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span> já armazenado.
+        </p>
+        <div class="scroll">
+        <table class="tbl livre">
+          <thead>
+            <tr><th>Tarefa</th><th>Matriz de adjacências</th><th>Lista de adjacências</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="m">{<i>i</i>,<i>j</i>} ∈ <i>E</i>?</span></td>
+              <td><span class="cplx"><i>O</i>(1)</span> — lê <span class="m"><i>A</i><sub><i>ij</i></sub></span></td>
+              <td><span class="cplx"><i>O</i>(|<i>V</i>|)</span> — percorre <span class="m"><i>N</i>[<i>i</i>]</span>, que tem no máximo <span class="m"><i>n</i>−1</span> nós</td>
+            </tr>
+            <tr>
+              <td>Determine <span class="m"><i>d</i>(<i>i</i>)</span></td>
+              <td><span class="cplx"><i>O</i>(|<i>V</i>|)</span> — soma a linha <span class="m"><i>i</i></span></td>
+              <td><span class="cplx"><i>O</i>(|<i>V</i>|)</span> — conta os nós de <span class="m"><i>N</i>[<i>i</i>]</span> (na verdade <span class="m"><i>O</i>(<i>d</i>(<i>i</i>))</span>)</td>
+            </tr>
+            <tr>
+              <td>Devolva <span class="m"><i>E</i></span></td>
+              <td><span class="cplx"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span> — varre a matriz</td>
+              <td><span class="cplx"><i>O</i>(|<i>E</i>|)</span> — percorre as listas (mais precisamente <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>)</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Em grafo simples vale
+        </p>
+        <div class="eq"><div class="body">
+          0 ≤ |<i>E</i>| ≤ <span class="frac"><span>|<i>V</i>| · (|<i>V</i>| − 1)</span><span>2</span></span>.
+        </div></div>
+        <p>
+          Por isso “devolva <span class="m"><i>E</i></span>” é mais barato em lista quando há poucas arestas: você
+          paga proporcional ao que existe, não ao que <i>poderia</i> existir. Já o teste
+          “<span class="m">{<i>i</i>,<i>j</i>}</span> é aresta?” é o argumento clássico a favor da matriz.
+        </p>
+        <div class="box rec">
+          <div class="h">Receita: qual estrutura usar</div>
+          <ol>
+            <li><b>O algoritmo pergunta muitas vezes “<span class="m"><i>ij</i></span> é aresta?”.</b> Matriz. Cada pergunta sai de graça.</li>
+            <li><b>O algoritmo percorre vizinhanças (BFS, DFS, Dijkstra, Kruskal…).</b> Lista. Você só toca quem é vizinho.</li>
+            <li><b>O grafo é denso</b> (<span class="m"><i>m</i></span> da ordem de <span class="m"><i>n</i><sup>2</sup></span>). As duas estruturas ocupam <span class="m">Θ(<i>n</i><sup>2</sup>)</span>; a matriz costuma ser mais simples.</li>
+            <li><b>O grafo é esparso</b> (<span class="m"><i>m</i> = <i>O</i>(<i>n</i>)</span>). Lista, sem discussão — a matriz desperdica quase toda a memória.</li>
+          </ol>
+        </div>
+
+        <h3 id="s6-cplx">6.5 <i>O</i>-grande e a observação 7</h3>
+        <p>
+          Neste texto, <b>complexidade</b> de um algoritmo significa <b>complexidade de tempo no pior caso</b>. A
+          expressão é escrita em função do tamanho da representação e em notação assintótica.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · f(n) = O(g(n))</div>
+          <p>
+            Sejam <span class="m"><i>f</i></span> e <span class="m"><i>g</i></span> funções nos naturais. Dizemos que
+            <span class="m"><i>f</i>(<i>n</i>) = <i>O</i>(<i>g</i>(<i>n</i>))</span>, para
+            <span class="m"><i>n</i></span> suficientemente grande, quando existem constantes positivas
+            <span class="m"><i>c</i></span> e <span class="m"><i>n</i><sub>0</sub></span> tais que, para todo
+            <span class="m"><i>n</i> ≥ <i>n</i><sub>0</sub></span>,
+          </p>
+          <div class="eq"><div class="body">
+            <i>f</i>(<i>n</i>) ≤ <i>c</i> · <i>g</i>(<i>n</i>).
+          </div></div>
+          <p>
+            No nosso caso, <span class="m"><i>n</i></span> é o tamanho da representação do grafo — não necessariamente
+            <span class="m">|<i>V</i>|</span>.
+          </p>
+        </div>
+        <div class="box rec">
+          <div class="h">Receita: como provar f = O(g)</div>
+          <ol>
+            <li><b>Exiba as constantes.</b> Não basta dizer “cresce parecido”. Produza <span class="m"><i>c</i></span> e <span class="m"><i>n</i><sub>0</sub></span>.</li>
+            <li><b>Use desigualdades, não limites.</b> Se <span class="m"><i>f</i>(<i>n</i>)∕<i>g</i>(<i>n</i>)</span> tende a uma constante, qualquer cota maior que o limite serve como <span class="m"><i>c</i></span> a partir de algum <span class="m"><i>n</i><sub>0</sub></span>.</li>
+            <li><b>Lembre a álgebra.</b> <span class="m"><i>O</i>(<i>f</i>) + <i>O</i>(<i>g</i>) = <i>O</i>(max{<i>f</i>,<i>g</i>})</span>. Em particular, se <span class="m"><i>f</i> = <i>O</i>(<i>g</i>)</span> então <span class="m"><i>O</i>(<i>f</i>) + <i>O</i>(<i>g</i>) = <i>O</i>(<i>g</i>)</span> — é o exercício 40.</li>
+            <li><b>Uma função, não um grafo isolado.</b> <span class="m"><i>O</i></span> compara funções de <span class="m"><i>n</i></span>. Um grafo só não tem “crescimento”. Quando o enunciado diz “para todo <span class="m"><i>G</i></span>”, leia: a desigualdade vale uniformemente na família de todos os grafos, com as mesmas constantes.</li>
+          </ol>
+        </div>
+        <p>
+          Constantes escondidas mentem em instâncias pequenas. O original compara dois algoritmos para a mesma tarefa:
+          o algoritmo <span class="m"><i>A</i></span> gasta <span class="m">|<i>V</i>|<sup>2</sup></span> passos; o
+          algoritmo <span class="m"><i>B</i></span> gasta
+          <span class="m">(|<i>V</i>| + |<i>E</i>|) log |<i>E</i>|</span> passos (logaritmo natural, que é o que faz
+          as contas do original fecharem).
+        </p>
+        <div class="scroll">
+        <table class="tbl livre">
+          <thead>
+            <tr><th>Família</th><th>Quem ganha</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Grafos com <span class="m"><i>m</i> = <i>n</i><sup>2</sup>∕4</span> arestas (densos)</td>
+              <td><span class="m"><i>A</i></span> é sempre melhor: <span class="m"><i>n</i><sup>2</sup></span> contra cerca de <span class="m">(<i>n</i><sup>2</sup>∕2) ln <i>n</i></span></td>
+            </tr>
+            <tr>
+              <td>Grafos com <span class="m"><i>m</i> = 1000<i>n</i></span> arestas (esparsos)</td>
+              <td><span class="m"><i>A</i></span> é melhor para <span class="m"><i>n</i> ≤ 16&nbsp;644</span>; <span class="m"><i>B</i></span> passa à frente para <span class="m"><i>n</i> ≥ 16&nbsp;645</span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Conferência no limiar esparso, com <span class="m">ln</span>: a desigualdade
+          <span class="m"><i>n</i><sup>2</sup> ? 1001<i>n</i> · ln(1000<i>n</i>)</span> reduz-se a
+          <span class="m"><i>n</i> ? 1001 ln(1000<i>n</i>)</span>. Para
+          <span class="m"><i>n</i> = 16&nbsp;645</span> temos
+          <span class="m">ln(1,6645·10<sup>7</sup>) ≈ 16,628</span> e
+          <span class="m">1001 · 16,628 ≈ 16&nbsp;645</span> ✔
+          (os gráficos do original, figura 9, cobriam entradas até uns 25 mil vértices; a tabela acima substitui os
+          dois desenhos que não puderam ser extraídos.)
+        </p>
+        <div class="box thm">
+          <div class="h">Observação 7</div>
+          <p>
+            Um algoritmo em grafo é de <b>complexidade polinomial</b> se a complexidade de tempo no pior caso é uma
+            função polinomial no tamanho da representação. Complexidade polinomial é <b>independente</b> da
+            representação do grafo por matriz ou por lista de adjacências: as duas representações são
+            <b>polinomialmente relacionadas</b>.
+          </p>
+          <div class="proof">
+            <p>
+              <b>Por que isso é verdade (esboço; a prova completa é o exercício 43).</b>
+              Seja <span class="m"><i>n</i> = |<i>V</i>|</span> e <span class="m"><i>m</i> = |<i>E</i>|</span>.
+              O tamanho da matriz é <span class="m">Θ(<i>n</i><sup>2</sup>)</span>; o da lista é
+              <span class="m">Θ(<i>n</i> + <i>m</i>)</span>. Como
+              <span class="m">0 ≤ <i>m</i> ≤ <i>n</i>(<i>n</i>−1)∕2</span>, cada tamanho é limitado por um polinômio no
+              outro: <span class="m"><i>n</i> + <i>m</i> = <i>O</i>(<i>n</i><sup>2</sup>)</span> e
+              <span class="m"><i>n</i><sup>2</sup> = <i>O</i>((<i>n</i>+<i>m</i>)<sup>2</sup>)</span>. Compor um
+              polinômio com um polinômio continua sendo polinômio. Logo “tempo polinomial no tamanho da matriz” e
+              “tempo polinomial no tamanho da lista” descrevem a mesma classe de algoritmos.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · polinomial ≠ prático</div>
+          <p>
+            A observação 7 fala de <i>classe</i>, não de constante. Um algoritmo
+            <span class="cplx"><i>O</i>(<i>n</i><sup>100</sup>)</span> na matriz continua polinomial na lista, e
+            continua inútil. O que a observação garante é só isto: você não muda de lado da fronteira P / não-P
+            apenas por trocar matriz por lista.
+          </p>
+        </div>
+
+        <h3 id="s6-pot">6.6 O que <i>A</i>² e <i>A</i>³ contam</h3>
+        <p>
+          A matriz de adjacências não é só uma tabela de bits. Produto de matrizes conta caminhos.
+        </p>
+        <div class="box def">
+          <div class="h">Lema · entradas de A<sup>k</sup></div>
+          <p>
+            Seja <span class="m"><i>A</i></span> a matriz de adjacências de <span class="m"><i>G</i></span>. Para todo
+            inteiro <span class="m"><i>k</i> ≥ 1</span>, a entrada
+            <span class="m">(<i>A</i><sup><i>k</i></sup>)<sub><i>ij</i></sub></span> é o número de
+            <b>passeios de comprimento <span class="m"><i>k</i></span></b> de <span class="m"><i>i</i></span> a
+            <span class="m"><i>j</i></span> (sequências de <span class="m"><i>k</i>+1</span> vértices, não
+            necessariamente distintos, em que cada par consecutivo é aresta).
+          </p>
+        </div>
+        <p>
+          O caso <span class="m"><i>k</i> = 2</span> cabe numa frase. Se
+          <span class="m"><i>B</i> = <i>A</i><sup>2</sup></span> e
+          <span class="m"><i>b</i>(<i>i</i>,<i>j</i>)</span> são as entradas de <span class="m"><i>B</i></span>:
+        </p>
+        <ul>
+          <li>
+            Na diagonal,
+            <span class="m"><i>b</i>(<i>i</i>,<i>i</i>) = <i>d</i>(<i>i</i>)</span>.
+            Motivo: um passeio de comprimento 2 que volta a <span class="m"><i>i</i></span> é
+            “ir a um vizinho e voltar”. Há um por vizinho.
+          </li>
+          <li>
+            Fora da diagonal,
+            <span class="m"><i>b</i>(<i>i</i>,<i>j</i>) = |<i>N</i>(<i>i</i>) ∩ <i>N</i>(<i>j</i>)|</span>:
+            o número de vizinhos comuns — equivalentes aos passeios
+            <span class="m"><i>i</i> — <i>w</i> — <i>j</i></span>.
+          </li>
+        </ul>
+        <p>
+          No grafo da Figura 1, o produto dá
+        </p>
+        <div class="scroll">
+        <table class="tbl">
+          <thead>
+            <tr><th><span class="m"><i>A</i><sup>2</sup></span></th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>2</td><td>1</td><td>1</td><td>1</td></tr>
+            <tr><td>2</td><td>1</td><td>3</td><td>1</td><td>0</td></tr>
+            <tr><td>3</td><td>1</td><td>1</td><td>2</td><td>1</td></tr>
+            <tr><td>4</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Conferência: a diagonal é <span class="m">(2, 3, 2, 1)</span>, os graus ✔
+          Fora da diagonal, <span class="m"><i>N</i>(2) ∩ <i>N</i>(4) = ∅</span>, e de fato
+          <span class="m"><i>b</i>(2,4) = 0</span> — não há passeio de comprimento 2 entre 2 e 4
+          (a única ligação é a aresta direta, comprimento 1). Já
+          <span class="m"><i>N</i>(1) ∩ <i>N</i>(4) = {2}</span>, e
+          <span class="m"><i>b</i>(1,4) = 1</span> ✔
+        </p>
+        <div class="box def">
+          <div class="h">Traço</div>
+          <p>
+            O <b>traço</b> <span class="m">tr(<i>A</i>)</span> é a soma das entradas da diagonal. Em grafo simples,
+            <span class="m">tr(<i>A</i>) = 0</span>. E
+          </p>
+          <div class="eq"><div class="body">
+            tr(<i>A</i><sup>2</sup>) =
+            <span class="sum"><span class="o">∑</span><span class="l"><i>i</i> ∈ <i>V</i></span></span>
+            <i>d</i>(<i>i</i>) = 2|<i>E</i>(<i>G</i>)|.
+          </div></div>
+          <p>
+            No exemplo: <span class="m">tr(<i>A</i><sup>2</sup>) = 2+3+2+1 = 8 = 2·4</span> ✔
+          </p>
+        </div>
+        <p>
+          Para <span class="m"><i>k</i> = 3</span>, a diagonal de <span class="m"><i>A</i><sup>3</sup></span> conta
+          passeios fechados de comprimento 3. Cada triângulo
+          <span class="m">{<i>i</i>,<i>j</i>,<i>k</i>}</span> contribui <b>dois</b> passeios fechados em cada um dos
+          três vértices (<span class="m"><i>i</i><i>j</i><i>k</i><i>i</i></span> e
+          <span class="m"><i>i</i><i>k</i><i>j</i><i>i</i></span>). Logo cada triângulo é contado
+          <span class="m">3 · 2 = 6</span> vezes no traço.
+        </p>
+        <div class="eq"><div class="body">
+          número de triângulos de <i>G</i> = <span class="frac"><span>tr(<i>A</i><sup>3</sup>)</span><span>6</span></span>.
+        </div></div>
+        <p>
+          No exemplo, o produto <span class="m"><i>A</i> · <i>A</i><sup>2</sup></span> tem diagonal
+          <span class="m">(2, 2, 2, 0)</span>, traço 6, e
+          <span class="m">6∕6 = 1</span> triângulo — exatamente o
+          <span class="m">{1,2,3}</span> da Figura 1. O vértice 4 não entra em triângulo nenhum, e de fato
+          <span class="m">(<i>A</i><sup>3</sup>)<sub>44</sub> = 0</span> ✔
+        </p>
+        <div class="box rec">
+          <div class="h">Receita: triângulos via álgebra linear</div>
+          <ol>
+            <li><b>Contar.</b> Calcule <span class="m"><i>A</i><sup>3</sup></span> (ou só a diagonal) e devolva <span class="m">tr(<i>A</i><sup>3</sup>)∕6</span>.</li>
+            <li><b>Detectar.</b> Basta saber se existe algum. Equivalente: <span class="m">tr(<i>A</i><sup>3</sup>) &gt; 0</span>, ou: existe par <span class="m"><i>i</i> &lt; <i>j</i></span> com <span class="m"><i>A</i><sub><i>ij</i></sub> = 1</span> e <span class="m">(<i>A</i><sup>2</sup>)<sub><i>ij</i></sub> ≥ 1</span> (aresta cujos extremos têm vizinho comum).</li>
+            <li><b>Complexidade.</b> O produto ingênuo de matrizes <span class="m"><i>n</i> × <i>n</i></span> custa <span class="cplx"><i>O</i>(<i>n</i><sup>3</sup>)</span>. Em 1990, Coppersmith e Winograd mostraram que o produto pode ser feito com <span class="cplx"><i>O</i>(<i>n</i><sup>2,376</sup>)</span> operações aritméticas — e isso já detecta triângulo (exercício 47). O expoente atual é menor; o enunciado usa o número histórico.</li>
+          </ol>
+        </div>
+
+        <h3 id="s6-spec">6.7 Autovalores, o mínimo necessário</h3>
+        <p>
+          Os exercícios 48 e 50 pedem dois fatos de álgebra linear, não um curso de teoria espectral. Aqui está o
+          que eles exigem, e nada mais.
+        </p>
+        <p>
+          Como <span class="m"><i>A</i></span> é real e simétrica, todos os seus autovalores são números reais, e
+          existe base ortonormal de autovetores. Um <b>automorfismo</b> de <span class="m"><i>G</i></span> é uma
+          permutação de <span class="m"><i>V</i></span> que preserva arestas; em matriz, é uma matriz de permutação
+          <span class="m"><i>P</i></span> tal que <span class="m"><i>P</i><i>A</i> = <i>A</i><i>P</i></span>. O
+          conjunto desses automorfismos, com a composição, é o <b>grupo dos automorfismos</b>
+          <span class="m">Aut(<i>G</i>)</span>.
+        </p>
+        <div class="box thm">
+          <div class="h">Dois fatos que os exercícios usam</div>
+          <ol>
+            <li>
+              <b>Completo.</b> <span class="m"><i>A</i>(<i>K</i><sub><i>n</i></sub>) = <i>J</i> − <i>I</i></span>,
+              onde <span class="m"><i>J</i></span> é a matriz de uns. Autovalores:
+              <span class="m"><i>n</i>−1</span> (multiplicidade 1) e
+              <span class="m">−1</span> (multiplicidade <span class="m"><i>n</i>−1</span>).
+            </li>
+            <li>
+              <b>Regular.</b> Se <span class="m"><i>G</i></span> é <span class="m"><i>r</i></span>-regular, cada linha
+              de <span class="m"><i>A</i></span> soma <span class="m"><i>r</i></span>, logo
+              <span class="m"><i>A</i><b>1</b> = <i>r</i><b>1</b></span>:
+              <span class="m"><i>r</i></span> é autovalor, com autovetor o vetor de uns.
+            </li>
+          </ol>
+          <p>
+            Além disso: se os <span class="m"><i>n</i></span> autovalores de <span class="m"><i>A</i></span> são
+            <b>todos distintos</b>, as matrizes que comutam com <span class="m"><i>A</i></span> são
+            simultaneamente diagonalizáveis na base de autovetores — e portanto comutam entre si. Em particular
+            <span class="m">Aut(<i>G</i>)</span> é abeliano. A prova escrita é o exercício 48.
+          </p>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · autovalor distinto não classificou o grafo</div>
+          <p>
+            “Autovalores distintos ⇒ grupo abeliano” é uma implicação, não uma equivalência. Há grafos com
+            autovalores repetidos e mesmo assim <span class="m">Aut(<i>G</i>)</span> abeliano (por exemplo o
+            caminho <span class="m"><i>P</i><sub>2</sub></span>, cujo grupo é trivial). Não use a recíproca.
+          </p>
+        </div>
+
+        <h3 id="s6-dir">6.8 Dígrafos: incidência, subjacente, sorvedouro</h3>
+        <p>
+          Os exercícios 45, 51 e 52 saem do grafo não-dirigido. As três noções abaixo são o vocabulário que eles
+          usam. Em grafo dirigido <span class="m"><i>D</i> = (<i>V</i>, <i>E</i>)</span>, cada aresta é um par
+          <i>ordenado</i> <span class="m">(<i>u</i>,<i>v</i>)</span>: dizemos que a aresta <b>sai</b> de
+          <span class="m"><i>u</i></span> e <b>chega</b> em <span class="m"><i>v</i></span>.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · vetores de incidência S e C</div>
+          <p>
+            Os vetores <span class="m"><i>S</i></span> e <span class="m"><i>C</i></span> são indexados por
+            <span class="m"><i>E</i></span>. Se <span class="m"><i>e</i> = (<i>u</i>,<i>v</i>)</span>, então
+            <span class="m"><i>S</i>[<i>e</i>] = <i>u</i></span> (saída) e
+            <span class="m"><i>C</i>[<i>e</i>] = <i>v</i></span> (chegada). Consultar as extremidades de uma aresta
+            dada é <span class="cplx"><i>O</i>(1)</span>; descobrir todas as arestas que saem (ou chegam) de um
+            vértice exige varrer as <span class="m">|<i>E</i>|</span> posições.
+          </p>
+        </div>
+        <div class="box def">
+          <div class="h">Definição · matriz de incidências B</div>
+          <p>
+            Uma <b>matriz de incidências</b> de <span class="m"><i>D</i></span> é a matriz
+            <span class="m"><i>B</i></span> de dimensão <span class="m">|<i>V</i>| × |<i>E</i>|</span>
+            (linhas = vértices, colunas = arestas) dada por
+          </p>
+          <div class="eq"><div class="body">
+            <i>B</i>(<i>i</i>,<i>j</i>) = −1 se a aresta <i>j</i> sai de <i>i</i>;
+            +1 se chega em <i>i</i>;
+            0 caso contrário.
+          </div></div>
+          <p>
+            Cada coluna tem exatamente um <span class="m">−1</span> e um <span class="m">+1</span>. O produto
+            <span class="m"><i>B</i><i>B</i><sup><i>T</i></sup></span> é
+            <span class="m">|<i>V</i>| × |<i>V</i>|</span> e coincide com o <b>laplaciano do grafo subjacente</b>
+            (possivelmente com arestas múltiplas, se ambos os sentidos existirem): na diagonal, o grau total
+            <span class="m"><i>d</i><sub>in</sub>(<i>i</i>) + <i>d</i><sub>out</sub>(<i>i</i>)</span>; fora da
+            diagonal, <span class="m">−</span>(número de arcos entre os dois vértices, em qualquer sentido).
+          </p>
+        </div>
+        <p>
+          Um exemplo mínimo, para não deixar a fórmula no vácuo. Seja
+          <span class="m"><i>V</i> = {1,2,3}</span> e
+          <span class="m"><i>E</i> = {<i>e</i><sub>1</sub>=(1,2), <i>e</i><sub>2</sub>=(2,3), <i>e</i><sub>3</sub>=(1,3)}</span>.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 380 160" role="img" aria-label="Dígrafo com vértices 1, 2 e 3 e arcos 1 para 2, 2 para 3 e 1 para 3">
+            <defs>
+              <marker id="seta2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <line class="e" x1="98" y1="80" x2="168" y2="48" marker-end="url(#seta2)"/>
+            <line class="e" x1="212" y1="48" x2="282" y2="80" marker-end="url(#seta2)"/>
+            <line class="e" x1="98" y1="92" x2="282" y2="92" marker-end="url(#seta2)"/>
+            <g class="v"><circle cx="80" cy="80" r="17"/><text x="80" y="80">1</text></g>
+            <g class="v"><circle cx="190" cy="40" r="17"/><text x="190" y="40">2</text></g>
+            <g class="v"><circle cx="300" cy="80" r="17"/><text x="300" y="80">3</text></g>
+          </svg>
+          <figcaption><b>Figura 3.</b> Dígrafo de conferência para a matriz <span class="m"><i>B</i></span>. Três arcos, três colunas.</figcaption>
+        </figure>
+        <div class="scroll">
+        <table class="tbl">
+          <thead>
+            <tr><th><span class="m"><i>B</i></span></th><th><span class="m"><i>e</i><sub>1</sub> (1→2)</span></th><th><span class="m"><i>e</i><sub>2</sub> (2→3)</span></th><th><span class="m"><i>e</i><sub>3</sub> (1→3)</span></th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>−1</td><td>0</td><td>−1</td></tr>
+            <tr><td>2</td><td>+1</td><td>−1</td><td>0</td></tr>
+            <tr><td>3</td><td>0</td><td>+1</td><td>+1</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Conferência de <span class="m"><i>B</i><i>B</i><sup><i>T</i></sup></span>:
+          a diagonal é <span class="m">(2, 2, 2)</span> — cada vértice incide em dois arcos.
+          Fora da diagonal, todos os pares estão ligados por um arco, e as entradas valem
+          <span class="m">−1</span>. O grafo subjacente é <span class="m"><i>K</i><sub>3</sub></span>, cujo
+          laplaciano é exatamente <span class="m">2<i>I</i> − (<i>J</i>−<i>I</i>) = 3<i>I</i> − <i>J</i></span> ✔
+        </p>
+        <div class="box def">
+          <div class="h">Grafo subjacente</div>
+          <p>
+            O <b>grafo subjacente</b> de <span class="m"><i>D</i></span> é o grafo não-dirigido obtido ao esquecer a
+            orientação: <span class="m">{<i>u</i>,<i>v</i>}</span> é aresta se pelo menos um entre
+            <span class="m">(<i>u</i>,<i>v</i>)</span> e <span class="m">(<i>v</i>,<i>u</i>)</span> existe.
+            Se os dois sentidos existem, o subjacente tem <i>uma</i> aresta (grafo simples), não duas.
+            O exercício 51 pede essa conversão em
+            <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span> a partir das listas de
+            <span class="m"><i>D</i></span>.
+          </p>
+        </div>
+        <div class="box def">
+          <div class="h">Definição · sorvedouro</div>
+          <p>
+            Um <b>sorvedouro</b> em um grafo dirigido de ordem <span class="m"><i>n</i></span> é um vértice com
+            grau de entrada <span class="m"><i>n</i>−1</span> e grau de saída 0: todo mundo aponta para ele, e ele
+            não aponta para ninguém. Há no máximo um — se existissem dois, cada um precisaria de um arco até o
+            outro, contradizendo grau de saída 0.
+          </p>
+        </div>
+        <p>
+          Com matriz de adjacências, a definição pede para olhar uma linha e uma coluna inteiras, o que parece
+          <span class="cplx"><i>Θ</i>(<i>n</i><sup>2</sup>)</span> se for feito para cada vértice. O exercício 52
+          pede <span class="cplx"><i>O</i>(<i>n</i>)</span>. A ideia é de <b>eliminação de candidatos</b>: cada
+          consulta <span class="m"><i>A</i><sub><i>ij</i></sub></span> descarta <i>pelo menos um</i> entre
+          <span class="m"><i>i</i></span> e <span class="m"><i>j</i></span>
+          (se a entrada é 1, <span class="m"><i>i</i></span> tem arco de saída; se é 0,
+          <span class="m"><i>j</i></span> não tem arco de entrada vindo de <span class="m"><i>i</i></span>).
+          Depois de <span class="m"><i>n</i>−1</span> consultas resta um candidato, verificado em mais
+          <span class="cplx"><i>O</i>(<i>n</i>)</span> leituras.
+        </p>
+        <div class="box rec">
+          <div class="h">Receita: operações em dígrafos pela estrutura</div>
+          <ol>
+            <li><b>Aresta dada, extremos?</b> Vetores <span class="m"><i>S</i></span>, <span class="m"><i>C</i></span>: <span class="cplx"><i>O</i>(1)</span>. Matriz <span class="m"><i>B</i></span>: varrer a coluna, <span class="cplx"><i>O</i>(|<i>V</i>|)</span>.</li>
+            <li><b>Aresta <i>e</i> incide no vértice <i>v</i>?</b> Ambos <span class="cplx"><i>O</i>(1)</span>: compare <span class="m"><i>S</i>[<i>e</i>]</span> e <span class="m"><i>C</i>[<i>e</i>]</span> com <span class="m"><i>v</i></span>, ou leia <span class="m"><i>B</i>(<i>v</i>,<i>e</i>)</span>.</li>
+            <li><b>Tudo o que sai/chega de <i>v</i>?</b> Ambos <span class="cplx"><i>O</i>(|<i>E</i>|)</span>, salvo se você já tiver listas de adjacência (entrada e saída), caso em que a resposta está pronta em <span class="cplx"><i>O</i>(<i>d</i>(<i>v</i>))</span>.</li>
+          </ol>
+        </div>
+
+        <h3 id="s6-resumo">6.9 Resumo do bloco</h3>
+        <div class="box def">
+          <div class="h">Resumo do bloco em oito linhas</div>
+          <ul>
+            <li>Trabalhe sempre com <span class="m"><i>V</i> = {1,…,<i>n</i>}</span>; o mapeamento é um isomorfismo.</li>
+            <li><span class="m"><i>A</i><sub><i>ij</i></sub> = 1</span> sse <span class="m">{<i>i</i>,<i>j</i>}</span> é aresta; diagonal zero; <span class="m"><i>A</i></span> simétrica; espaço <span class="m">Θ(<i>n</i><sup>2</sup>)</span>.</li>
+            <li>Lista: vetor de vizinhanças, espaço <span class="cplx">Θ(|<i>V</i>| + |<i>E</i>|)</span>, ordem dos vizinhos irrelevante.</li>
+            <li>Teste de aresta: matriz <span class="cplx"><i>O</i>(1)</span>, lista <span class="cplx"><i>O</i>(<i>n</i>)</span>. Devolver <span class="m"><i>E</i></span>: o contrário.</li>
+            <li><span class="m"><i>f</i> = <i>O</i>(<i>g</i>)</span> pede constantes <span class="m"><i>c</i></span>, <span class="m"><i>n</i><sub>0</sub></span>. Polinomialidade não depende de matriz versus lista (obs.&nbsp;7).</li>
+            <li><span class="m">(<i>A</i><sup>2</sup>)<sub><i>ii</i></sub> = <i>d</i>(<i>i</i>)</span>, <span class="m">(<i>A</i><sup>2</sup>)<sub><i>ij</i></sub> = |<i>N</i>(<i>i</i>) ∩ <i>N</i>(<i>j</i>)|</span>, <span class="m">tr(<i>A</i><sup>3</sup>)∕6</span> é o número de triângulos.</li>
+            <li><span class="m"><i>K</i><sub><i>n</i></sub></span> tem autovalores <span class="m"><i>n</i>−1</span> e <span class="m">−1</span>; em grafo <span class="m"><i>r</i></span>-regular, <span class="m"><i>r</i></span> é autovalor. Autovalores distintos ⇒ <span class="m">Aut(<i>G</i>)</span> abeliano.</li>
+            <li>Em dígrafo: <span class="m"><i>S</i></span>, <span class="m"><i>C</i></span> e <span class="m"><i>B</i></span> respondem incidência; <span class="m"><i>B</i><i>B</i><sup><i>T</i></sup></span> é o laplaciano do subjacente; sorvedouro se detecta em <span class="cplx"><i>O</i>(<i>n</i>)</span> na matriz.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex1">
+        <div class="ex-head">
+          <h3>Exercícios 40 a 52</h3>
+          <button class="toggle" type="button" data-scope="#ex1" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: álgebra de <span class="m"><i>O</i></span>-grande, independência polinomial das representações, leitura combinatória de <span class="m"><i>A</i><sup>2</sup></span> e <span class="m"><i>A</i><sup>3</sup></span>, incidência em dígrafos, autovalores, conversão ao subjacente e detecção de sorvedouro.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 40</span><div class="stmt">
+            <p>Mostre que se <span class="m"><i>f</i>(<i>n</i>) = <i>O</i>(<i>g</i>(<i>n</i>))</span> então <span class="m"><i>O</i>(<i>f</i>(<i>n</i>)) + <i>O</i>(<i>g</i>(<i>n</i>)) = <i>O</i>(<i>g</i>(<i>n</i>))</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a40" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a40"><div class="plab">Resolução</div>
+            <p>
+              Interpretamos <span class="m"><i>O</i>(<i>h</i>)</span> como o conjunto das funções (nos naturais, positivas
+              a partir de algum ponto) que são <span class="m"><i>O</i>(<i>h</i>)</span>, e a soma de conjuntos como
+              <span class="m">{<i>h</i><sub>1</sub> + <i>h</i><sub>2</sub> : <i>h</i><sub>1</sub> ∈ <i>O</i>(<i>f</i>), <i>h</i><sub>2</sub> ∈ <i>O</i>(<i>g</i>)}</span>.
+            </p>
+            <p class="kicker">Inclusão ⊆</p>
+            <p>
+              Seja <span class="m"><i>h</i> = <i>h</i><sub>1</sub> + <i>h</i><sub>2</sub></span> com
+              <span class="m"><i>h</i><sub>1</sub> = <i>O</i>(<i>f</i>)</span> e
+              <span class="m"><i>h</i><sub>2</sub> = <i>O</i>(<i>g</i>)</span>. Por hipótese
+              <span class="m"><i>f</i> = <i>O</i>(<i>g</i>)</span>, e
+              <span class="m"><i>O</i></span> é transitiva: <span class="m"><i>h</i><sub>1</sub> = <i>O</i>(<i>f</i>) = <i>O</i>(<i>g</i>)</span>.
+              Explicitamente, existem constantes positivas tais que, para
+              <span class="m"><i>n</i></span> grande,
+            </p>
+            <div class="eq"><div class="body">
+              <i>h</i><sub>1</sub>(<i>n</i>) ≤ <i>c</i><sub>1</sub> <i>f</i>(<i>n</i>) ≤ <i>c</i><sub>1</sub><i>c</i><sub><i>f</i></sub> <i>g</i>(<i>n</i>),
+              &nbsp;&nbsp;
+              <i>h</i><sub>2</sub>(<i>n</i>) ≤ <i>c</i><sub>2</sub> <i>g</i>(<i>n</i>).
+            </div></div>
+            <p>
+              Logo
+              <span class="m"><i>h</i>(<i>n</i>) ≤ (<i>c</i><sub>1</sub><i>c</i><sub><i>f</i></sub> + <i>c</i><sub>2</sub>) <i>g</i>(<i>n</i>)</span>,
+              e <span class="m"><i>h</i> = <i>O</i>(<i>g</i>)</span>.
+            </p>
+            <p class="kicker">Inclusão ⊇</p>
+            <p>
+              A função nula está em <span class="m"><i>O</i>(<i>f</i>)</span>, portanto
+              <span class="m"><i>O</i>(<i>g</i>) = {0} + <i>O</i>(<i>g</i>) ⊆ <i>O</i>(<i>f</i>) + <i>O</i>(<i>g</i>)</span>.
+            </p>
+            <p>
+              As duas inclusões dão a igualdade. A hipótese <span class="m"><i>f</i> = <i>O</i>(<i>g</i>)</span> é
+              essencial: sem ela, <span class="m"><i>O</i>(<i>f</i>) + <i>O</i>(<i>g</i>) = <i>O</i>(<i>f</i>+<i>g</i>)</span>,
+              que pode ser estritamente maior que <span class="m"><i>O</i>(<i>g</i>)</span>
+              (tome <span class="m"><i>f</i>(<i>n</i>) = <i>n</i><sup>2</sup></span> e
+              <span class="m"><i>g</i>(<i>n</i>) = <i>n</i></span>).
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 41</span><div class="stmt">
+            <p>É verdade que para todo <span class="m"><i>G</i></span> vale que <span class="m">|<i>E</i>(<i>G</i>)| = <i>O</i>(|<i>V</i>(<i>G</i>)|)</span> para <span class="m">|<i>V</i>(<i>G</i>)|</span> suficientemente grande?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a41" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a41"><div class="plab">Resolução</div>
+            <p><b>Não.</b></p>
+            <p>
+              <span class="m"><i>O</i></span>-grande compara funções, não um grafo isolado (todo grafo finito
+              satisfaz <span class="m"><i>m</i> ≤ <i>c</i><i>n</i></span> para <span class="m"><i>c</i></span>
+              grande o bastante, o que esvazia a pergunta). A leitura razoável — e a única que torna o enunciado
+              não-trivial — é: <i>existem constantes</i> <span class="m"><i>c</i></span> e
+              <span class="m"><i>n</i><sub>0</sub></span> tais que
+              <span class="m">|<i>E</i>(<i>G</i>)| ≤ <i>c</i> |<i>V</i>(<i>G</i>)|</span> para <b>todo</b> grafo
+              <span class="m"><i>G</i></span> com <span class="m">|<i>V</i>(<i>G</i>)| ≥ <i>n</i><sub>0</sub></span>.
+            </p>
+            <p>
+              Isso é falso. Para o grafo completo <span class="m"><i>K</i><sub><i>n</i></sub></span>,
+            </p>
+            <div class="eq"><div class="body">
+              |<i>E</i>(<i>K</i><sub><i>n</i></sub>)| =
+              <span class="frac"><span><i>n</i>(<i>n</i>−1)</span><span>2</span></span>,
+            </div></div>
+            <p>
+              e <span class="m"><i>n</i>(<i>n</i>−1)∕(2<i>n</i>) = (<i>n</i>−1)∕2</span> não é limitado.
+              Qualquer candidato a constante <span class="m"><i>c</i></span> falha em todos os
+              <span class="m"><i>K</i><sub><i>n</i></sub></span> com <span class="m"><i>n</i> &gt; 2<i>c</i>+1</span>.
+            </p>
+            <p>
+              A afirmação <i>passaria</i> a ser verdadeira se restringíssemos a família: grafos com grau máximo
+              limitado, grafos planares, árvores, todos satisfazem <span class="m"><i>m</i> = <i>O</i>(<i>n</i>)</span>.
+              O quantificador do enunciado é “para todo <span class="m"><i>G</i></span>”, e isso inclui os completos.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 42</span><div class="stmt">
+            <p>É verdade que para todo <span class="m"><i>G</i></span> vale que <span class="m">log |<i>E</i>(<i>G</i>)| = <i>O</i>(log |<i>V</i>(<i>G</i>)|)</span> para <span class="m">|<i>V</i>(<i>G</i>)|</span> suficientemente grande?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a42" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a42"><div class="plab">Resolução</div>
+            <p><b>Sim</b>, para grafos simples com pelo menos uma aresta. (Se <span class="m">|<i>E</i>| = 0</span>, <span class="m">log |<i>E</i>|</span> não está definido; o enunciado original não trata esse caso, e é assim que resolvemos.)</p>
+            <p>
+              Em grafo simples,
+              <span class="m">1 ≤ |<i>E</i>(<i>G</i>)| ≤ <i>n</i>(<i>n</i>−1)∕2 ≤ <i>n</i><sup>2</sup></span>,
+              onde <span class="m"><i>n</i> = |<i>V</i>(<i>G</i>)|</span>. O logaritmo (qualquer base &gt; 1) é crescente, logo
+            </p>
+            <div class="eq"><div class="body">
+              0 ≤ log |<i>E</i>(<i>G</i>)| ≤ log(<i>n</i><sup>2</sup>) = 2 log <i>n</i> = 2 log |<i>V</i>(<i>G</i>)|.
+            </div></div>
+            <p>
+              As constantes <span class="m"><i>c</i> = 2</span> e <span class="m"><i>n</i><sub>0</sub> = 2</span>
+              funcionam para <b>todo</b> grafo simples com <span class="m"><i>n</i> ≥ 2</span> e
+              <span class="m"><i>m</i> ≥ 1</span>. A desigualdade é uniforme — o contrário do exercício 41.
+            </p>
+            <p>
+              A intuição: elevar <span class="m"><i>n</i></span> ao quadrado só <i>dobra</i> o logaritmo. Por isso
+              famílias densas e famílias esparsas são indistinguíveis em escala log-log: ambas têm
+              <span class="m">log <i>m</i> = Θ(log <i>n</i>)</span> assim que
+              <span class="m"><i>m</i> ≥ 2</span>.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 43</span><div class="stmt">
+            <p>Prove a afirmação feita na observação 7.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h43" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a43" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h43"><div class="plab">Dica</div>
+            <p>Mostre que o tamanho da matriz e o tamanho da lista são, cada um, limitados por um polinômio no outro. Use <span class="m">0 ≤ <i>m</i> ≤ <i>n</i>(<i>n</i>−1)∕2</span> e <span class="m"><i>n</i> ≤ <i>n</i>+<i>m</i></span>.</p>
+          </div>
+          <div class="panel answer" id="a43"><div class="plab">Resolução</div>
+            <p>
+              Sejam <span class="m"><i>n</i> = |<i>V</i>|</span> e <span class="m"><i>m</i> = |<i>E</i>|</span>.
+              Escreva <span class="m"><i>N</i><sub><i>A</i></sub></span> para o tamanho da representação por matriz
+              e <span class="m"><i>N</i><sub><i>L</i></sub></span> para o tamanho da representação por lista. A menos
+              de constantes de implementação (tamanho da palavra, ponteiros),
+            </p>
+            <div class="eq"><div class="body">
+              <i>N</i><sub><i>A</i></sub> = Θ(<i>n</i><sup>2</sup>),
+              &nbsp;&nbsp;
+              <i>N</i><sub><i>L</i></sub> = Θ(<i>n</i> + <i>m</i>).
+            </div></div>
+            <p>
+              Em grafo simples, <span class="m">0 ≤ <i>m</i> ≤ <i>n</i>(<i>n</i>−1)∕2</span>. Daí as duas comparações:
+            </p>
+            <ul>
+              <li>
+                <span class="m"><i>N</i><sub><i>L</i></sub> = Θ(<i>n</i>+<i>m</i>) = <i>O</i>(<i>n</i> + <i>n</i><sup>2</sup>) = <i>O</i>(<i>n</i><sup>2</sup>) = <i>O</i>(<i>N</i><sub><i>A</i></sub>)</span>.
+                Mais precisamente, <span class="m"><i>N</i><sub><i>L</i></sub> = <i>O</i>(<i>N</i><sub><i>A</i></sub>)</span>.
+              </li>
+              <li>
+                Como <span class="m"><i>n</i> ≤ <i>n</i>+<i>m</i></span>,
+                <span class="m"><i>n</i> = <i>O</i>(<i>N</i><sub><i>L</i></sub>)</span>, logo
+                <span class="m"><i>N</i><sub><i>A</i></sub> = Θ(<i>n</i><sup>2</sup>) = <i>O</i>(<i>N</i><sub><i>L</i></sub><sup>2</sup>)</span>.
+              </li>
+            </ul>
+            <p class="kicker">De polinomial na matriz para polinomial na lista</p>
+            <p>
+              Se o tempo satisfaz <span class="m"><i>T</i> ≤ <i>p</i>(<i>N</i><sub><i>A</i></sub>)</span> para um
+              polinômio <span class="m"><i>p</i></span> de grau <span class="m"><i>k</i></span>, então
+              <span class="m"><i>T</i> = <i>O</i>(<i>N</i><sub><i>A</i></sub><sup><i>k</i></sup>) = <i>O</i>(<i>N</i><sub><i>L</i></sub><sup>2<i>k</i></sup>)</span>,
+              que é polinomial em <span class="m"><i>N</i><sub><i>L</i></sub></span>.
+            </p>
+            <p class="kicker">De polinomial na lista para polinomial na matriz</p>
+            <p>
+              Se <span class="m"><i>T</i> ≤ <i>q</i>(<i>N</i><sub><i>L</i></sub>)</span> com
+              <span class="m"><i>q</i></span> de grau <span class="m"><i>k</i></span>, então
+              <span class="m"><i>T</i> = <i>O</i>(<i>N</i><sub><i>L</i></sub><sup><i>k</i></sup>) = <i>O</i>(<i>N</i><sub><i>A</i></sub><sup><i>k</i></sup>)</span>,
+              polinomial em <span class="m"><i>N</i><sub><i>A</i></sub></span>.
+            </p>
+            <p>
+              Portanto as duas noções de “algoritmo polinomial em grafos” coincidem. (O grau do polinômio pode
+              mudar — típico, dobra — mas a classe é a mesma.) Isso é a observação 7.
+            </p>
+            <div class="box warn">
+              <div class="h">O que a prova usa de grafo simples</div>
+              <p>
+                A cota <span class="m"><i>m</i> = <i>O</i>(<i>n</i><sup>2</sup>)</span> falha em multigrafos com
+                multiplicidade ilimitada. Aí lista e matriz (ainda <span class="m"><i>n</i> × <i>n</i></span>, agora
+                com inteiros) deixam de ser polinomialmente relacionadas se a multiplicidade puder ser exponencial
+                em <span class="m"><i>n</i></span>. O original trata grafos simples, e é esse o cenário da prova.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 44</span><div class="stmt">
+            <p>
+              Sejam <span class="m"><i>G</i></span> um grafo, <span class="m"><i>A</i></span> a sua matriz de
+              adjacências e <span class="m"><i>b</i>(<i>i</i>,<i>j</i>)</span> as entradas da matriz
+              <span class="m"><i>A</i><sup>2</sup></span>. Que parâmetro de
+              <span class="m"><i>G</i></span> está associado ao número
+              <span class="m"><i>b</i>(<i>i</i>,<i>i</i>)</span>, para cada
+              <span class="m"><i>i</i> ∈ {1, 2, …, |<i>V</i>(<i>G</i>)|}</span>?
+              Qual a relação entre <span class="m"><i>b</i>(<i>i</i>,<i>j</i>)</span> e
+              <span class="m"><i>N</i><sub><i>G</i></sub>(<i>i</i>)</span>,
+              <span class="m"><i>N</i><sub><i>G</i></sub>(<i>j</i>)</span> quando
+              <span class="m"><i>i</i> ≠ <i>j</i></span>?
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a44" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a44"><div class="plab">Resolução</div>
+            <p>
+              Por definição do produto,
+              <span class="m"><i>b</i>(<i>i</i>,<i>j</i>) = <span class="sum"><span class="o">∑</span><span class="l"><i>k</i>=1..<i>n</i></span></span> <i>A</i><sub><i>ik</i></sub> <i>A</i><sub><i>kj</i></sub></span>.
+              Como <span class="m"><i>A</i></span> é 0-1,
+              o termo <span class="m"><i>k</i></span> vale 1 exatamente quando
+              <span class="m">{<i>i</i>,<i>k</i>}</span> e <span class="m">{<i>k</i>,<i>j</i>}</span> são arestas —
+              isto é, quando <span class="m"><i>i</i> — <i>k</i> — <i>j</i></span> é um passeio de comprimento 2.
+            </p>
+            <p class="kicker">Diagonal</p>
+            <p>
+              Para <span class="m"><i>i</i> = <i>j</i></span>, o passeio é
+              <span class="m"><i>i</i> — <i>k</i> — <i>i</i></span>, logo
+              <span class="m"><i>k</i></span> percorre exatamente
+              <span class="m"><i>N</i><sub><i>G</i></sub>(<i>i</i>)</span>. Portanto
+            </p>
+            <div class="eq"><div class="body">
+              <i>b</i>(<i>i</i>,<i>i</i>) = <i>d</i><sub><i>G</i></sub>(<i>i</i>).
+            </div></div>
+            <p>
+              O parâmetro associado é o <b>grau</b> de <span class="m"><i>i</i></span>.
+            </p>
+            <p class="kicker">Fora da diagonal</p>
+            <p>
+              Para <span class="m"><i>i</i> ≠ <i>j</i></span>, o índice <span class="m"><i>k</i></span> precisa ser
+              vizinho de ambos. Além disso <span class="m"><i>k</i> ≠ <i>i</i></span> e
+              <span class="m"><i>k</i> ≠ <i>j</i></span> automaticamente (não há laços). Logo
+            </p>
+            <div class="eq"><div class="body">
+              <i>b</i>(<i>i</i>,<i>j</i>) = |<i>N</i><sub><i>G</i></sub>(<i>i</i>) ∩ <i>N</i><sub><i>G</i></sub>(<i>j</i>)|.
+            </div></div>
+            <p>
+              Conferência no grafo da Figura 1:
+              <span class="m"><i>b</i>(1,1) = 2 = <i>d</i>(1)</span>,
+              <span class="m"><i>b</i>(2,4) = 0 = |<i>N</i>(2) ∩ <i>N</i>(4)|</span>,
+              <span class="m"><i>b</i>(1,4) = 1 = |{2}|</span> ✔
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 45</span><div class="stmt">
+            <p>
+              Para um grafo dirigido dizemos que a aresta <span class="m">(<i>u</i>,<i>v</i>) ∈ <i>E</i></span> sai
+              de <span class="m"><i>u</i></span> e chega em <span class="m"><i>v</i></span>. Os
+              <b>vetores de incidências</b> de um grafo dirigido
+              <span class="m"><i>D</i> = (<i>V</i>, <i>E</i>)</span> são os vetores
+              <span class="m"><i>S</i></span> e <span class="m"><i>C</i></span> indexados por
+              <span class="m"><i>E</i></span> tais que, para
+              <span class="m"><i>e</i> = (<i>u</i>,<i>v</i>) ∈ <i>E</i></span>, temos
+              <span class="m"><i>S</i>[<i>e</i>] = <i>u</i></span> e
+              <span class="m"><i>C</i>[<i>e</i>] = <i>v</i></span>. Determine o tempo para:
+            </p>
+            <p>(i) dados <span class="m"><i>e</i> ∈ <i>E</i></span> e <span class="m"><i>v</i> ∈ <i>V</i></span>, determinar se <span class="m"><i>e</i></span> incide em <span class="m"><i>v</i></span>;</p>
+            <p>(ii) dado <span class="m"><i>e</i> ∈ <i>E</i></span>, determinar suas extremidades;</p>
+            <p>(iii) dado <span class="m"><i>v</i> ∈ <i>V</i></span>, determinar as arestas que saem de <span class="m"><i>v</i></span> e determinar as arestas que chegam em <span class="m"><i>v</i></span>.</p>
+            <p>
+              Uma <b>matriz de incidências</b> de um grafo dirigido
+              <span class="m"><i>D</i> = (<i>V</i>, <i>E</i>)</span> é uma matriz
+              <span class="m"><i>B</i></span> de dimensão <span class="m">|<i>V</i>| × |<i>E</i>|</span>
+              (as linhas são indexadas por <span class="m"><i>V</i></span> e as colunas por
+              <span class="m"><i>E</i></span>) tal que
+            </p>
+            <div class="eq"><div class="body">
+              <i>B</i>(<i>i</i>,<i>j</i>) = −1 se a aresta <i>j</i> sai do vértice <i>i</i>;
+              +1 se chega no vértice <i>i</i>;
+              0 caso contrário.
+            </div></div>
+            <p>(a) Determine o tempo para:</p>
+            <p>(i) dados <span class="m"><i>e</i> ∈ <i>E</i></span> e <span class="m"><i>v</i> ∈ <i>V</i></span>, determinar se <span class="m"><i>e</i></span> incide em <span class="m"><i>v</i></span>;</p>
+            <p>(ii) dado <span class="m"><i>e</i> ∈ <i>E</i></span>, determinar suas extremidades;</p>
+            <p>(iii) dado <span class="m"><i>v</i> ∈ <i>V</i></span>, determinar as arestas que saem de <span class="m"><i>v</i></span> e determinar as arestas que chegam em <span class="m"><i>v</i></span>.</p>
+            <p>
+              (b) Determine o que as entradas da matriz <span class="m">|<i>V</i>| × |<i>V</i>|</span> dada por
+              <span class="m"><i>B</i> · <i>B</i><sup><i>T</i></sup></span> representam, onde
+              <span class="m"><i>B</i><sup><i>T</i></sup></span> é a matriz transposta de
+              <span class="m"><i>B</i></span>.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h45" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a45" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h45"><div class="plab">Dica</div>
+            <p>Vetores dão acesso direto por aresta; a matriz <span class="m"><i>B</i></span> dá acesso direto à entrada <span class="m">(<i>v</i>,<i>e</i>)</span>, mas varrer uma coluna custa <span class="m">|<i>V</i>|</span> e varrer uma linha custa <span class="m">|<i>E</i>|</span>. Para (b), calcule <span class="m">(<i>B</i><i>B</i><sup><i>T</i></sup>)<sub><i>ik</i></sub> = ∑<sub><i>e</i></sub> <i>B</i>(<i>i</i>,<i>e</i>) <i>B</i>(<i>k</i>,<i>e</i>)</span> separando os casos <span class="m"><i>i</i> = <i>k</i></span> e <span class="m"><i>i</i> ≠ <i>k</i></span>.</p>
+          </div>
+          <div class="panel answer" id="a45"><div class="plab">Resolução</div>
+            <p class="kicker">Vetores <span class="m"><i>S</i></span> e <span class="m"><i>C</i></span></p>
+            <p>
+              (i) <span class="cplx"><i>O</i>(1)</span>. A aresta <span class="m"><i>e</i></span> incide em
+              <span class="m"><i>v</i></span> se e somente se
+              <span class="m"><i>S</i>[<i>e</i>] = <i>v</i></span> ou
+              <span class="m"><i>C</i>[<i>e</i>] = <i>v</i></span>: duas comparações.
+            </p>
+            <p>
+              (ii) <span class="cplx"><i>O</i>(1)</span>. As extremidades são exatamente
+              <span class="m"><i>S</i>[<i>e</i>]</span> e <span class="m"><i>C</i>[<i>e</i>]</span>.
+            </p>
+            <p>
+              (iii) <span class="cplx"><i>O</i>(|<i>E</i>|)</span>. Não há índice por vértice: é preciso percorrer
+              todas as arestas, e para cada <span class="m"><i>e</i></span> testar se
+              <span class="m"><i>S</i>[<i>e</i>] = <i>v</i></span> (sai) ou
+              <span class="m"><i>C</i>[<i>e</i>] = <i>v</i></span> (chega). Um único scan resolve as duas listas.
+            </p>
+            <p class="kicker">(a) Matriz <span class="m"><i>B</i></span></p>
+            <p>
+              (i) <span class="cplx"><i>O</i>(1)</span>. Basta ler
+              <span class="m"><i>B</i>(<i>v</i>, <i>e</i>)</span>: a aresta incide no vértice se e somente se a
+              entrada é não-nula.
+            </p>
+            <p>
+              (ii) <span class="cplx"><i>O</i>(|<i>V</i>|)</span>. A coluna de
+              <span class="m"><i>e</i></span> tem <span class="m">|<i>V</i>|</span> entradas e exatamente duas
+              delas são não-nulas. Varrê-la devolve o <span class="m">−1</span> (saída) e o
+              <span class="m">+1</span> (chegada).
+            </p>
+            <p>
+              (iii) <span class="cplx"><i>O</i>(|<i>E</i>|)</span>. A linha de
+              <span class="m"><i>v</i></span> tem <span class="m">|<i>E</i>|</span> entradas: cada
+              <span class="m">−1</span> é um arco que sai, cada <span class="m">+1</span> é um arco que chega.
+            </p>
+            <p>
+              Comparando com os vetores: (i) empata; (ii) os vetores ganham
+              (<span class="cplx"><i>O</i>(1)</span> contra <span class="cplx"><i>O</i>(|<i>V</i>|)</span>);
+              (iii) empata em <span class="cplx"><i>O</i>(|<i>E</i>|)</span>. A matriz
+              <span class="m"><i>B</i></span> não é a estrutura certa para “tudo o que toca
+              <span class="m"><i>v</i></span>” — listas de adjacência (de saída e de entrada) resolvem isso em
+              <span class="cplx"><i>O</i>(<i>d</i>(<i>v</i>))</span>.
+            </p>
+            <p class="kicker">(b) O produto <span class="m"><i>B</i><i>B</i><sup><i>T</i></sup></span></p>
+            <p>
+              A entrada <span class="m">(<i>i</i>,<i>k</i>)</span> vale
+              <span class="m">∑<sub><i>e</i> ∈ <i>E</i></sub> <i>B</i>(<i>i</i>,<i>e</i>) <i>B</i>(<i>k</i>,<i>e</i>)</span>.
+            </p>
+            <p>
+              Se <span class="m"><i>i</i> = <i>k</i></span>: para cada arco incidente a
+              <span class="m"><i>i</i></span>, o produto é
+              <span class="m">(±1)<sup>2</sup> = 1</span>. Os demais arcos contribuem 0. Logo
+            </p>
+            <div class="eq"><div class="body">
+              (<i>B</i><i>B</i><sup><i>T</i></sup>)<sub><i>ii</i></sub>
+              = <i>d</i><sub>in</sub>(<i>i</i>) + <i>d</i><sub>out</sub>(<i>i</i>),
+            </div></div>
+            <p>o grau total de <span class="m"><i>i</i></span> no grafo subjacente (contando os dois sentidos, se ambos existirem, como duas incidências).</p>
+            <p>
+              Se <span class="m"><i>i</i> ≠ <i>k</i></span>: o produto
+              <span class="m"><i>B</i>(<i>i</i>,<i>e</i>) <i>B</i>(<i>k</i>,<i>e</i>)</span> só é não-nulo quando
+              <span class="m"><i>e</i></span> tem um extremo em <span class="m"><i>i</i></span> e o outro em
+              <span class="m"><i>k</i></span>. Nesse caso vale
+              <span class="m">(−1)·(+1) = −1</span>, independentemente do sentido. Se há
+              <span class="m"><i>a</i><sub><i>ik</i></sub></span> arcos de
+              <span class="m"><i>i</i></span> para <span class="m"><i>k</i></span> e
+              <span class="m"><i>a</i><sub><i>ki</i></sub></span> no sentido oposto,
+            </p>
+            <div class="eq"><div class="body">
+              (<i>B</i><i>B</i><sup><i>T</i></sup>)<sub><i>ik</i></sub>
+              = −(<i>a</i><sub><i>ik</i></sub> + <i>a</i><sub><i>ki</i></sub>).
+            </div></div>
+            <p>
+              Em dígrafo simples sem 2-ciclo, isso é <span class="m">−1</span> se os dois vértices são adjacentes
+              no subjacente e <span class="m">0</span> caso contrário. Em outras palavras:
+              <span class="m"><i>B</i><i>B</i><sup><i>T</i></sup></span> é o <b>laplaciano</b> do grafo subjacente
+              (com multiplicidade, se ambos os sentidos existirem).
+            </p>
+            <p>
+              Conferência na Figura 3: diagonal <span class="m">(2,2,2)</span>, fora da diagonal todos
+              <span class="m">−1</span>, que é o laplaciano de <span class="m"><i>K</i><sub>3</sub></span> ✔
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 46</span><div class="stmt">
+            <p>Seja <span class="m"><i>G</i></span> um grafo qualquer e <span class="m"><i>A</i></span> sua matriz de adjacências. Como é possível determinar o número de triângulos de um grafo <span class="m"><i>G</i></span> qualquer a partir de <span class="m"><i>A</i><sup>3</sup></span>?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a46" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a46"><div class="plab">Resolução</div>
+            <p>
+              A entrada <span class="m">(<i>A</i><sup>3</sup>)<sub><i>ii</i></sub></span> é o número de passeios
+              fechados de comprimento 3 com início (e fim) em <span class="m"><i>i</i></span>.
+            </p>
+            <p>
+              Cada triângulo <span class="m">{<i>i</i>,<i>j</i>,<i>k</i>}</span> produz, no vértice
+              <span class="m"><i>i</i></span>, exatamente dois tais passeios:
+              <span class="m"><i>i</i><i>j</i><i>k</i><i>i</i></span> e
+              <span class="m"><i>i</i><i>k</i><i>j</i><i>i</i></span>. O mesmo vale em
+              <span class="m"><i>j</i></span> e em <span class="m"><i>k</i></span>. Passeios fechados de
+              comprimento 3 que <i>não</i> vêm de um triângulo não existem em grafo simples: a sequência
+              <span class="m"><i>i</i><i>a</i><i>b</i><i>i</i></span> com
+              <span class="m"><i>a</i> ≠ <i>b</i></span> força as três arestas
+              <span class="m">{<i>i</i>,<i>a</i>}</span>, <span class="m">{<i>a</i>,<i>b</i>}</span>,
+              <span class="m">{<i>b</i>,<i>i</i>}</span>, isto é, um triângulo. (Voltar e ir,
+              <span class="m"><i>i</i><i>a</i><i>i</i><i>a</i></span>, tem comprimento 3 mas termina em
+              <span class="m"><i>a</i> ≠ <i>i</i></span>, e não entra na diagonal.)
+            </p>
+            <p>Portanto cada triângulo é contado <span class="m">3 · 2 = 6</span> vezes no traço, e</p>
+            <div class="eq"><div class="body">
+              número de triângulos de <i>G</i>
+              = <span class="frac"><span>tr(<i>A</i><sup>3</sup>)</span><span>6</span></span>
+              = <span class="frac"><span>1</span><span>6</span></span>
+              <span class="sum"><span class="o">∑</span><span class="l"><i>i</i> ∈ <i>V</i></span></span>
+              (<i>A</i><sup>3</sup>)<sub><i>ii</i></sub>.
+            </div></div>
+            <p>
+              Conferência na Figura 1: diagonal de <span class="m"><i>A</i><sup>3</sup></span> igual a
+              <span class="m">(2,2,2,0)</span>, traço 6, um triângulo ✔
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 47</span><div class="stmt">
+            <p>
+              Em 1990, Coppersmith e Winograd mostraram um algoritmo que determina o produto de duas matrizes
+              <span class="m"><i>n</i> × <i>n</i></span> usando
+              <span class="cplx"><i>O</i>(<i>n</i><sup>2,376</sup>)</span> operações aritméticas. Como esse pode ser
+              usado para determinar se um grafo tem triângulo?
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h47" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a47" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h47"><div class="plab">Dica</div>
+            <p>Você não precisa de <span class="m"><i>A</i><sup>3</sup></span> inteira. Um triângulo é uma aresta cujos extremos têm um vizinho comum — e vizinho comum é entrada positiva de <span class="m"><i>A</i><sup>2</sup></span>.</p>
+          </div>
+          <div class="panel answer" id="a47"><div class="plab">Resolução</div>
+            <p>
+              <b>Algoritmo.</b> Com o produto rápido, calcule <span class="m"><i>A</i><sup>2</sup></span> em
+              <span class="cplx"><i>O</i>(<i>n</i><sup>2,376</sup>)</span>. Em seguida percorra os pares
+              <span class="m"><i>i</i> &lt; <i>j</i></span> e teste se
+            </p>
+            <div class="eq"><div class="body">
+              <i>A</i><sub><i>ij</i></sub> = 1
+              &nbsp; e &nbsp;
+              (<i>A</i><sup>2</sup>)<sub><i>ij</i></sub> ≥ 1.
+            </div></div>
+            <p>
+              Se algum par passa no teste, <span class="m"><i>i</i></span> e <span class="m"><i>j</i></span> são
+              adjacentes e têm um vizinho comum: os três formam um triângulo. Se nenhum par passa, não há triângulo.
+              A varredura custa <span class="cplx"><i>O</i>(<i>n</i><sup>2</sup>)</span>, absorvido por
+              <span class="cplx"><i>O</i>(<i>n</i><sup>2,376</sup>)</span>.
+            </p>
+            <p>
+              Equivalentemente, calcule <span class="m"><i>A</i><sup>3</sup> = <i>A</i>(<i>A</i><sup>2</sup>)</span>
+              com mais um produto e devolva “sim” se e somente se
+              <span class="m">tr(<i>A</i><sup>3</sup>) &gt; 0</span> (exercício 46). Dois produtos continuam
+              <span class="cplx"><i>O</i>(<i>n</i><sup>2,376</sup>)</span>.
+            </p>
+            <p>
+              O expoente 2,376 é o número do artigo de 1990 citado no enunciado. Algoritmos posteriores baixaram
+              o expoente do produto de matrizes; o <i>método</i> (reduzir triângulo a produto) permanece o mesmo.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 48</span><div class="stmt">
+            <p>
+              Sejam <span class="m"><i>G</i></span> um grafo e <span class="m"><i>A</i></span> sua matriz de
+              adjacências. Prove que se os autovalores de <span class="m"><i>A</i></span> são distintos então o
+              grupo dos automorfismos é abeliano.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h48" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a48" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h48"><div class="plab">Dica</div>
+            <p>Um automorfismo vira uma matriz de permutação <span class="m"><i>P</i></span> que comuta com <span class="m"><i>A</i></span>. Se <span class="m"><i>A</i></span> tem autovalores distintos, quem comuta com <span class="m"><i>A</i></span> é diagonal na mesma base de autovetores — e matrizes diagonais comutam entre si.</p>
+          </div>
+          <div class="panel answer" id="a48"><div class="plab">Resolução</div>
+            <p>
+              Como <span class="m"><i>A</i></span> é real simétrica, existe matriz ortogonal
+              <span class="m"><i>Q</i></span> tal que
+              <span class="m"><i>A</i> = <i>Q</i><i>D</i><i>Q</i><sup><i>T</i></sup></span>, com
+              <span class="m"><i>D</i> = diag(λ<sub>1</sub>,…,λ<sub><i>n</i></sub>)</span> e
+              <span class="m">λ<sub>1</sub>, …, λ<sub><i>n</i></sub></span> reais e, por hipótese, dois a dois distintos.
+            </p>
+            <p>
+              Seja <span class="m">φ</span> um automorfismo de <span class="m"><i>G</i></span> e
+              <span class="m"><i>P</i></span> a matriz de permutação associada:
+              <span class="m"><i>P</i><sub><i>i</i>, φ(<i>i</i>)</sub> = 1</span>. Preservar adjacência é equivalente a
+              <span class="m"><i>P</i><sup><i>T</i></sup> <i>A</i> <i>P</i> = <i>A</i></span>, ou ainda
+              <span class="m"><i>P</i><i>A</i> = <i>A</i><i>P</i></span>: todo automorfismo comuta com
+              <span class="m"><i>A</i></span>.
+            </p>
+            <p>
+              <b>Afirmação.</b> Se <span class="m"><i>M</i><i>A</i> = <i>A</i><i>M</i></span>, então
+              <span class="m"><i>Q</i><sup><i>T</i></sup> <i>M</i> <i>Q</i></span> é diagonal.
+            </p>
+            <p>
+              De fato, escreva <span class="m"><i>B</i> = <i>Q</i><sup><i>T</i></sup> <i>M</i> <i>Q</i></span>.
+              A comutação <span class="m"><i>M</i><i>A</i> = <i>A</i><i>M</i></span> traduz-se em
+              <span class="m"><i>B</i><i>D</i> = <i>D</i><i>B</i></span>. Igualando a entrada
+              <span class="m">(<i>i</i>,<i>j</i>)</span>,
+            </p>
+            <div class="eq"><div class="body">
+              <i>B</i><sub><i>ij</i></sub> λ<sub><i>j</i></sub> = λ<sub><i>i</i></sub> <i>B</i><sub><i>ij</i></sub>
+              ⟹
+              <i>B</i><sub><i>ij</i></sub> (λ<sub><i>j</i></sub> − λ<sub><i>i</i></sub>) = 0.
+            </div></div>
+            <p>
+              Se <span class="m"><i>i</i> ≠ <i>j</i></span>, o fator
+              <span class="m">λ<sub><i>j</i></sub> − λ<sub><i>i</i></sub></span> é não-nulo, logo
+              <span class="m"><i>B</i><sub><i>ij</i></sub> = 0</span>. Assim
+              <span class="m"><i>B</i></span> é diagonal.
+            </p>
+            <p>
+              Em particular, as matrizes de permutação <span class="m"><i>P</i><sub>φ</sub></span> e
+              <span class="m"><i>P</i><sub>ψ</sub></span> de dois automorfismos são ambas diagonais na base das
+              colunas de <span class="m"><i>Q</i></span>. Matrizes diagonais comutam, portanto
+              <span class="m"><i>P</i><sub>φ</sub> <i>P</i><sub>ψ</sub> = <i>P</i><sub>ψ</sub> <i>P</i><sub>φ</sub></span>,
+              isto é, <span class="m">φ ∘ ψ = ψ ∘ φ</span>. O grupo
+              <span class="m">Aut(<i>G</i>)</span> é abeliano.
+            </p>
+            <div class="box warn">
+              <div class="h">Onde a hipótese entra</div>
+              <p>
+                Sem autovalores distintos, <span class="m"><i>B</i></span> só é bloco-diagonal por autoespaço, e
+                dois automorfismos podem misturar um autoespaço de dimensão ≥ 2 de formas que não comutam.
+                O contraexemplo clássico é <span class="m"><i>K</i><sub>3</sub></span>: autovalores
+                <span class="m">2, −1, −1</span> (não distintos) e
+                <span class="m">Aut(<i>K</i><sub>3</sub>) ≃ <i>S</i><sub>3</sub></span>, não abeliano.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 49</span><div class="stmt">
+            <p>
+              O traço de uma matriz <span class="m"><i>A</i></span>, denotado por
+              <span class="m">tr(<i>A</i>)</span>, é a soma dos elementos na diagonal da matriz. Quanto vale o
+              traço de uma matriz de adjacências? Quanto vale
+              <span class="m">tr(<i>A</i><sup>2</sup>)</span> em função de
+              <span class="m"><i>E</i>(<i>G</i>)</span>?
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a49" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a49"><div class="plab">Resolução</div>
+            <p>
+              Em grafo simples a diagonal de <span class="m"><i>A</i></span> é toda zero (não há laços). Logo
+            </p>
+            <div class="eq"><div class="body">tr(<i>A</i>) = 0.</div></div>
+            <p>
+              Pelo exercício 44, <span class="m">(<i>A</i><sup>2</sup>)<sub><i>ii</i></sub> = <i>d</i>(<i>i</i>)</span>.
+              O teorema do aperto de mão dá
+            </p>
+            <div class="eq"><div class="body">
+              tr(<i>A</i><sup>2</sup>)
+              =
+              <span class="sum"><span class="o">∑</span><span class="l"><i>i</i> ∈ <i>V</i></span></span>
+              <i>d</i>(<i>i</i>)
+              = 2|<i>E</i>(<i>G</i>)|.
+            </div></div>
+            <p>
+              Conferência na Figura 1:
+              <span class="m">tr(<i>A</i>) = 0</span> e
+              <span class="m">tr(<i>A</i><sup>2</sup>) = 8 = 2·4</span> ✔
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 50</span><div class="stmt">
+            <p>
+              Por <span class="m"><i>A</i></span> ser uma matriz simétrica, sabemos da Álgebra Linear que todos os
+              seus autovalores são números reais. Determine os autovalores da matriz de adjacências do grafo
+              completo <span class="m"><i>K</i><sub><i>n</i></sub></span>. Mostre que se
+              <span class="m"><i>G</i></span> é <span class="m"><i>r</i></span>-regular então
+              <span class="m"><i>r</i></span> é um autovalor de <span class="m"><i>A</i></span>.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h50" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a50" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h50"><div class="plab">Dica</div>
+            <p><span class="m"><i>A</i>(<i>K</i><sub><i>n</i></sub>) = <i>J</i> − <i>I</i></span>. Os autovalores de <span class="m"><i>J</i></span> são <span class="m"><i>n</i></span> (vetor de uns) e <span class="m">0</span> (o hiperplano ortogonal). Para a segunda parte, some cada linha de <span class="m"><i>A</i></span>.</p>
+          </div>
+          <div class="panel answer" id="a50"><div class="plab">Resolução</div>
+            <p class="kicker">Autovalores de <span class="m"><i>K</i><sub><i>n</i></sub></span></p>
+            <p>
+              A matriz de adjacências de <span class="m"><i>K</i><sub><i>n</i></sub></span> é
+              <span class="m"><i>J</i> − <i>I</i></span>, onde <span class="m"><i>J</i></span> é a matriz
+              <span class="m"><i>n</i> × <i>n</i></span> de uns e <span class="m"><i>I</i></span> a identidade.
+              Seja <span class="m"><b>1</b></span> o vetor de uns. Então
+              <span class="m"><i>J</i><b>1</b> = <i>n</i><b>1</b></span>, logo
+            </p>
+            <div class="eq"><div class="body">
+              (<i>J</i> − <i>I</i>)<b>1</b> = (<i>n</i> − 1)<b>1</b>.
+            </div></div>
+            <p>
+              Se <span class="m"><b>x</b></span> é ortogonal a <span class="m"><b>1</b></span>, temos
+              <span class="m"><i>J</i><b>x</b> = <b>0</b></span>, logo
+              <span class="m">(<i>J</i> − <i>I</i>)<b>x</b> = −<b>x</b></span>. Esse autoespaço tem dimensão
+              <span class="m"><i>n</i>−1</span>. Portanto os autovalores são
+            </p>
+            <div class="eq"><div class="body">
+              <i>n</i> − 1
+              &nbsp;(multiplicidade 1)
+              &nbsp;&nbsp; e &nbsp;&nbsp;
+              −1
+              &nbsp;(multiplicidade <i>n</i> − 1).
+            </div></div>
+            <p>
+              Conferência com <span class="m"><i>n</i> = 1</span>:
+              <span class="m"><i>K</i><sub>1</sub></span> tem <span class="m"><i>A</i> = [0]</span>, autovalor
+              <span class="m">0 = 1−1</span>, e o autoespaço de <span class="m">−1</span> tem dimensão 0 ✔
+              Com <span class="m"><i>n</i> = 2</span>:
+              <span class="m"><i>A</i> = <span>(</span>0&nbsp;1; 1&nbsp;0<span>)</span></span>, autovalores
+              <span class="m">1</span> e <span class="m">−1</span> ✔
+            </p>
+            <p class="kicker">Grafo <span class="m"><i>r</i></span>-regular</p>
+            <p>
+              Se todo vértice tem grau <span class="m"><i>r</i></span>, cada linha de
+              <span class="m"><i>A</i></span> tem exatamente <span class="m"><i>r</i></span> uns. Logo
+            </p>
+            <div class="eq"><div class="body">
+              <i>A</i><b>1</b> = <i>r</i><b>1</b>.
+            </div></div>
+            <p>
+              Assim <span class="m"><i>r</i></span> é autovalor, com autovetor
+              <span class="m"><b>1</b></span>. (Em particular, o caso
+              <span class="m"><i>K</i><sub><i>n</i></sub></span> recupera
+              <span class="m"><i>r</i> = <i>n</i>−1</span>, já obtido.)
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 51</span><div class="stmt">
+            <p>
+              Dada uma representação por listas de adjacências de um grafo dirigido
+              <span class="m"><i>D</i></span>, descreva um algoritmo com tempo de execução
+              <span class="cplx"><i>O</i>(|<i>V</i>(<i>D</i>)| + |<i>E</i>(<i>D</i>)|)</span> para computar a
+              representação por listas de adjacências do grafo subjacente.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h51" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a51" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h51"><div class="plab">Dica</div>
+            <p>Construa primeiro as listas reversas (quem aponta para quem) no mesmo tempo. Depois, para cada vértice, una saída e entrada eliminando duplicatas com um vetor booleano de marcas que você <i>reinicia só nos vizinhos marcados</i> — não zere o vetor inteiro a cada vértice, senão cai em <span class="cplx"><i>O</i>(<i>n</i><sup>2</sup>)</span>.</p>
+          </div>
+          <div class="panel answer" id="a51"><div class="plab">Resolução</div>
+            <p>
+              O grafo subjacente tem a mesma ordem, e
+              <span class="m">{<i>u</i>,<i>v</i>}</span> é aresta se pelo menos um entre
+              <span class="m">(<i>u</i>,<i>v</i>)</span> e <span class="m">(<i>v</i>,<i>u</i>)</span> pertence a
+              <span class="m"><i>E</i>(<i>D</i>)</span>. Listas de
+              <span class="m"><i>D</i></span>: <span class="m"><i>N</i>[<i>u</i>]</span> = vértices
+              <span class="m"><i>v</i></span> com <span class="m">(<i>u</i>,<i>v</i>)</span> arco.
+            </p>
+            <div class="algo">
+              <div class="nome">Subjacente(D)</div>
+<pre><span class="cm">// N[u] = lista de saída de u em D; devolve N' do grafo subjacente</span>
+<span class="kw">para cada</span> u ∈ V(D) <span class="kw">faça</span> R[u] ← lista vazia
+<span class="kw">para cada</span> u ∈ V(D) <span class="kw">faça</span>
+    <span class="kw">para cada</span> v ∈ N[u] <span class="kw">faça</span> insere u em R[v]
+<span class="cm">// R[u] = lista de entrada de u</span>
+<span class="kw">para cada</span> u ∈ V(D) <span class="kw">faça</span> M[u] ← falso; N'[u] ← lista vazia
+<span class="kw">para cada</span> u ∈ V(D) <span class="kw">faça</span>
+    <span class="kw">para cada</span> v ∈ N[u] ∪ R[u] <span class="kw">faça</span>
+        <span class="kw">se</span> v ≠ u e M[v] = falso <span class="kw">então</span>
+            M[v] ← verdadeiro; insere v em N'[u]
+    <span class="kw">para cada</span> v ∈ N'[u] <span class="kw">faça</span> M[v] ← falso
+<span class="kw">devolva</span> N'</pre>
+            </div>
+            <p>
+              <b>Correção.</b> Depois do primeiro duplo laço, <span class="m"><i>v</i> ∈ <i>R</i>[<i>u</i>]</span>
+              se e somente se <span class="m">(<i>v</i>,<i>u</i>)</span> é arco. No laço principal,
+              <span class="m"><i>v</i></span> entra em <span class="m"><i>N</i>′[<i>u</i>]</span> se aparece em
+              pelo menos uma das duas listas e <span class="m"><i>v</i> ≠ <i>u</i></span> (laços, se o dígrafo os
+              tiver, não geram aresta no subjacente simples). A marca
+              <span class="m"><i>M</i></span> impede duplicata quando os dois sentidos existem. Reiniciar
+              <span class="m"><i>M</i></span> só em <span class="m"><i>N</i>′[<i>u</i>]</span> deixa o vetor
+              pronto para o próximo vértice.
+            </p>
+            <p>
+              <b>Término.</b> Cada lista é finita; não há laço de espera.
+            </p>
+            <p>
+              <b>Complexidade.</b> Construir <span class="m"><i>R</i></span> percorre cada arco uma vez:
+              <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>. No laço principal, cada arco é
+              inspecionado no máximo quatro vezes (como saída de um extremo, entrada do outro, e as duas
+              redefinições de marca). Reiniciar <span class="m"><i>M</i></span> custa o tamanho de
+              <span class="m"><i>N</i>′[<i>u</i>]</span>, no máximo o grau no subjacente, cuja soma é
+              <span class="m"><i>O</i>(|<i>E</i>|)</span>. Total
+              <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>.
+            </p>
+            <div class="box warn">
+              <div class="h">O erro clássico</div>
+              <p>
+                Zerar <span class="m"><i>M</i>[1..<i>n</i>]</span> a cada vértice custa
+                <span class="cplx"><i>O</i>(<i>n</i><sup>2</sup>)</span> e estraga a cota. Outro erro: inserir
+                <span class="m"><i>v</i></span> em <span class="m"><i>N</i>′[<i>u</i>]</span> e
+                <span class="m"><i>u</i></span> em <span class="m"><i>N</i>′[<i>v</i>]</span> ao ver o arco
+                <span class="m">(<i>u</i>,<i>v</i>)</span>, sem marcas — o 2-ciclo duplica a aresta nas duas listas.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 52</span><div class="stmt">
+            <p>
+              Quando uma representação por uma matriz de adjacências é utilizada, muitos algoritmos sobre grafos
+              gastam tempo <span class="cplx">Θ(|<i>V</i>|<sup>2</sup>)</span>, mas existem algumas exceções.
+              Mostre que determinar se um grafo orientado contém um sorvedouro — isto é, um vértice com grau de
+              entrada <span class="m">|<i>V</i>|−1</span> e grau de saída 0 — pode ser determinado em tempo
+              <span class="cplx"><i>O</i>(|<i>V</i>|)</span> quando uma representação por matriz é utilizada.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h52" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a52" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h52"><div class="plab">Dica</div>
+            <p>Cada leitura <span class="m"><i>A</i><sub><i>ij</i></sub></span> elimina pelo menos um candidato. Depois de <span class="m"><i>n</i>−1</span> leituras resta um só; verifique a linha e a coluna desse candidato.</p>
+          </div>
+          <div class="panel answer" id="a52"><div class="plab">Resolução</div>
+            <p>
+              O enunciado fala em “grafo orientado”. Lemos no sentido usual de dígrafo (possivelmente sem 2-ciclos);
+              a definição de sorvedouro que o próprio enunciado dá não usa essa restrição, e o algoritmo abaixo vale
+              para qualquer dígrafo simples, com
+              <span class="m"><i>A</i><sub><i>ij</i></sub> = 1</span> sse existe o arco
+              <span class="m">(<i>i</i>,<i>j</i>)</span>. Há no máximo um sorvedouro: dois vértices com saída 0 não
+              podem apontar um para o outro, logo nenhum dos dois tem entrada <span class="m"><i>n</i>−1</span>.
+            </p>
+            <div class="algo">
+              <div class="nome">Tem-Sorvedouro(A, n)</div>
+<pre><span class="cm">// A é a matriz n × n do dígrafo; devolve o sorvedouro ou “não existe”</span>
+i ← 1
+<span class="kw">para</span> j ← 2 <span class="kw">até</span> n <span class="kw">faça</span>
+    <span class="kw">se</span> A[i, j] = 1 <span class="kw">então</span> i ← j
+<span class="cm">// i é o único candidato</span>
+<span class="kw">para</span> k ← 1 <span class="kw">até</span> n <span class="kw">faça</span>
+    <span class="kw">se</span> k ≠ i e (A[i, k] = 1 ou A[k, i] = 0) <span class="kw">então</span>
+        <span class="kw">devolva</span> “não existe”
+<span class="kw">devolva</span> i</pre>
+            </div>
+            <p>
+              <b>Invariante da eliminação.</b> No teste <span class="m"><i>A</i>[<i>i</i>,<i>j</i>]</span> temos
+              sempre <span class="m"><i>i</i> ≠ <i>j</i></span> (o candidato só avança para o
+              <span class="m"><i>j</i></span> corrente, e <span class="m"><i>j</i></span> cresce). Se a entrada é 1,
+              o vértice <span class="m"><i>i</i></span> tem arco de saída, logo não é sorvedouro: descartamos
+              <span class="m"><i>i</i></span> e passamos a <span class="m"><i>j</i></span>. Se a entrada é 0, o
+              vértice <span class="m"><i>j</i></span> não recebe arco de <span class="m"><i>i</i></span>, logo não
+              tem entrada <span class="m"><i>n</i>−1</span>: descartamos
+              <span class="m"><i>j</i></span> e mantemos <span class="m"><i>i</i></span>. Cada um dos
+              <span class="m"><i>n</i>−1</span> testes elimina um vértice. O sobrevivente
+              <span class="m"><i>i</i></span> é o único possível sorvedouro.
+            </p>
+            <p>
+              <b>Se o sorvedouro <span class="m"><i>s</i></span> existe, ele sobrevive.</b>
+              Enquanto o candidato <span class="m"><i>i</i></span> é diferente de
+              <span class="m"><i>s</i></span>, o teste contra <span class="m"><i>j</i> = <i>s</i></span> lê
+              <span class="m"><i>A</i>[<i>i</i>,<i>s</i>] = 1</span> (todo mundo aponta para o sorvedouro) e o
+              candidato vira <span class="m"><i>s</i></span>. Depois disso, para todo
+              <span class="m"><i>j</i> ≠ <i>s</i></span> lê-se
+              <span class="m"><i>A</i>[<i>s</i>,<i>j</i>] = 0</span>, e o candidato permanece
+              <span class="m"><i>s</i></span>.
+            </p>
+            <p>
+              <b>Verificação.</b> A segunda etapa confere grau de saída 0 (linha
+              <span class="m"><i>i</i></span> nula fora da diagonal) e grau de entrada
+              <span class="m"><i>n</i>−1</span> (coluna <span class="m"><i>i</i></span> toda 1 fora da diagonal).
+              Se o candidato falhar, não há sorvedouro.
+            </p>
+            <p>
+              <b>Complexidade.</b> Primeira etapa: <span class="m"><i>n</i>−1</span> leituras da matriz.
+              Segunda: no máximo <span class="m">2(<i>n</i>−1)</span> leituras. Total
+              <span class="cplx"><i>O</i>(<i>n</i>)</span> =
+              <span class="cplx"><i>O</i>(|<i>V</i>|)</span>, sem varrer as
+              <span class="m"><i>n</i><sup>2</sup></span> entradas.
+            </p>
+            <p class="kicker">Conferência numérica</p>
+            <p>
+              Dígrafo em <span class="m">{1,2,3,4}</span> com sorvedouro 4 e matriz
+            </p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+                <tr><td>2</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+                <tr><td>3</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+                <tr><td>4</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              Candidato inicial <span class="m"><i>i</i> = 1</span>.
+              <span class="m"><i>j</i> = 2</span>: <span class="m"><i>A</i>[1,2] = 1</span> ⇒
+              <span class="m"><i>i</i> = 2</span>.
+              <span class="m"><i>j</i> = 3</span>: <span class="m"><i>A</i>[2,3] = 1</span> ⇒
+              <span class="m"><i>i</i> = 3</span>.
+              <span class="m"><i>j</i> = 4</span>: <span class="m"><i>A</i>[3,4] = 1</span> ⇒
+              <span class="m"><i>i</i> = 4</span>.
+              Linha 4 nula, coluna 4 igual a <span class="m">(1,1,1,0)</span> ✔
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="03-isomorfismo-e-outras-nocoes.html"><span class="dir">Capítulo anterior</span><span class="ttl">3. Isomorfismo e outras noções de grafos</span></a>
+        <a class="next" href="05-percursos-e-busca.html"><span class="dir">Próximo capítulo</span><span class="ttl">5. Percursos e busca</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática da seção “Representação computacional” das notas de
+          Teoria dos Grafos (CI065 / BC1429) do Prof. Jair Donadelli. Enunciados dos 13 exercícios
+          preservados; explicações, diagramas e resoluções foram escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>

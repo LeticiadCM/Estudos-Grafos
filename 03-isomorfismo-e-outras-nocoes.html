@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3. Isomorfismo e outras noções de grafos — Teoria dos Grafos</title>
+<meta name="description" content="Isomorfismo de grafos, invariantes, automorfismos, transitividade e as variantes com pesos, orientação, digrafos e multigrafos, com 9 exercícios resolvidos.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo 3 · Identidade e variantes</span>
+    <h1>Isomorfismo e outras noções de grafos</h1>
+    <p class="lead">
+      Dois diagramas podem desenhar o mesmo grafo; a bijeção que preserva arestas é o que decide isso.
+      Ao terminar, você saberá provar que dois grafos <i>não</i> são isomorfos por invariantes (graus, cliques, subgrafos induzidos),
+      contar automorfismos de um completo, reconhecer vértice- e aresta-transitividade, e escrever as definições formais de
+      grafo com pesos, grafo orientado, digrafo e multigrafo.
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> isomorfismo · invariantes · Petersen · automorfismo · vértice- e aresta-transitivo · pesos · orientado · digrafo · multigrafo</span>
+      <span><b>Exercícios:</b> 9 com resolução (31 a 39)</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#como-usar">Como usar</a>
+        <a href="#s4">4. Isomorfismo</a>
+        <a class="sub" href="#s4-def">A bijeção que preserva arestas</a>
+        <a class="sub" href="#s4-petersen">Petersen e os completos</a>
+        <a class="sub" href="#s4-ordem3">Quatro grafos de ordem 3</a>
+        <a class="sub" href="#s4-receita">Receita: provar não-isomorfismo</a>
+        <a class="sub" href="#s4-exemplo">Exemplo: três grafos, três argumentos</a>
+        <a class="sub" href="#s4-auto">Automorfismo</a>
+        <a class="sub" href="#s4-trans">Vértice- e aresta-transitivo</a>
+        <a class="sub" href="#s4-resumo">Resumo do bloco</a>
+        <a href="#ex1">Exercícios 31 a 36</a>
+        <a href="#s5">5. Outras noções de grafos</a>
+        <a class="sub" href="#s5-pesos">Grafo com pesos</a>
+        <a class="sub" href="#s5-orient">Grafo orientado</a>
+        <a class="sub" href="#s5-digrafo">Digrafo</a>
+        <a class="sub" href="#s5-multi">Multigrafo</a>
+        <a class="sub" href="#s5-resumo">Resumo do bloco</a>
+        <a href="#ex2">Exercícios 37 a 39</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <section class="chapter" id="como-usar">
+        <div class="box tip">
+          <div class="h">Como aproveitar este material</div>
+          <ol>
+            <li><b>Leia a teoria do bloco</b> — ela contém exatamente o que os exercícios seguintes exigem, nada além.</li>
+            <li><b>Tente o exercício sem abrir nada.</b> Se travar, use o botão <i>Dica</i> (quando existir) antes da resposta.</li>
+            <li><b>Só então abra <i>Mostrar resposta</i></b> e compare o seu raciocínio com o argumento apresentado.</li>
+          </ol>
+          <p>As respostas ficam ocultas por padrão. O botão no topo da página abre ou fecha todas de uma vez, e a impressão da página já sai com tudo aberto.</p>
+        </div>
+        <p>
+          Este capítulo continua dos <a href="01-definicoes-e-grau.html">capítulos 1</a> e
+          <a href="02-subgrafos-cliques-bipartidos.html">2</a> e usa sem cerimônia
+          <span class="m"><i>V</i>(<i>G</i>)</span>, <span class="m"><i>E</i>(<i>G</i>)</span>,
+          <span class="m"><i>d</i>(<i>v</i>)</span>, <span class="m"><i>K</i><sup><i>n</i></sup></span>,
+          <span class="m"><i>G</i>[<i>U</i>]</span> e <span class="m">ω(<i>G</i>)</span>.
+          A pergunta nova é outra: quando dois grafos, possivelmente com rótulos e desenhos diferentes, são <i>o mesmo objeto</i>?
+        </p>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 4 ============================ -->
+      <section class="chapter" id="s4">
+        <h2><span class="num">§4</span> Isomorfismo</h2>
+        <p class="sub-lead">Objetivo do bloco: decidir se dois grafos são o mesmo a menos de relabeling, e usar invariantes para provar que não são.</p>
+
+        <h3 id="s4-def">4.1 A bijeção que preserva arestas</h3>
+        <p>
+          Um diagrama não é o grafo: é uma <i>foto</i> do grafo. Trocar os nomes dos vértices, ou redesenhar as arestas sem cruzamento,
+          não cria um objeto novo. O que importa é <b>quem é adjacente a quem</b>. A definição abaixo formaliza exatamente isso.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · isomorfismo</div>
+          <p>
+            Os grafos <span class="m"><i>G</i></span> e <span class="m"><i>H</i></span> são <b>isomorfos</b>, e escrevemos
+            <span class="m"><i>G</i> ≃ <i>H</i></span>, se existe uma bijeção
+          </p>
+          <div class="eq"><div class="body"><i>f</i> : <i>V</i>(<i>G</i>) → <i>V</i>(<i>H</i>)</div><div class="tag">(14)</div></div>
+          <p>tal que, para todos <span class="m"><i>u</i>, <i>v</i> ∈ <i>V</i>(<i>G</i>)</span>,</p>
+          <div class="eq"><div class="body">{<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) &nbsp;⟺&nbsp; {<i>f</i>(<i>u</i>), <i>f</i>(<i>v</i>)} ∈ <i>E</i>(<i>H</i>)</div><div class="tag">(15)</div></div>
+          <p>Uma função <span class="m"><i>f</i></span> nessas condições é um <b>isomorfismo</b> de <span class="m"><i>G</i></span> em <span class="m"><i>H</i></span>.</p>
+        </div>
+        <div class="box tip">
+          <div class="h">O que a definição exige, em uma frase</div>
+          <p>
+            <span class="m"><i>f</i></span> é só uma troca de nomes: <span class="m"><i>u</i></span> passa a se chamar
+            <span class="m"><i>f</i>(<i>u</i>)</span>. A condição (15) pede que a troca <b>não invente nem apague arestas</b>.
+            A seta vale nos dois sentidos — por isso um isomorfismo também é um isomorfismo do complemento, e leva subgrafos induzidos em subgrafos induzidos (exercício 33).
+          </p>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · bijeção sozinha não basta</div>
+          <p>
+            Qualquer dois grafos da mesma ordem admitem uma bijeção entre os conjuntos de vértices.
+            O que distingue o isomorfismo é preservar <i>adjacência</i>. Se você exibiu uma bijeção e não conferiu (15) em todo par,
+            ainda não provou nada.
+          </p>
+        </div>
+
+        <h3 id="s4-petersen">4.2 Petersen e os completos</h3>
+        <p>
+          Qualquer dois completos da mesma ordem são isomorfos: em <span class="m"><i>K</i><sup><i>n</i></sup></span> todo par é aresta,
+          então <b>qualquer</b> bijeção entre os conjuntos de vértices satisfaz (15). Dizemos que o completo de ordem
+          <span class="m"><i>n</i></span> é único a menos de isomorfismo, e por isso todos recebem o mesmo nome
+          <span class="m"><i>K</i><sup><i>n</i></sup></span> (o original escreve <span class="m"><i>K</i><sub><i>n</i></sub></span>).
+        </p>
+        <p>
+          O exemplo clássico de “dois desenhos, um só grafo” é o <b>grafo de Petersen</b>: 10 vértices, 3-regular, sem triângulos.
+          Conferência: <span class="m">10 · 3 = 30 = 2 · 15</span>, logo 15 arestas ✔
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 400 380" role="img" aria-label="Grafo de Petersen: pentágono externo 1-2-3-4-5, raios 1-6 2-7 3-8 4-9 5-10, e estrela interna 6-8-10-7-9">
+            <g>
+              <line class="e" x1="200" y1="40" x2="343" y2="144"/>
+              <line class="e" x1="343" y1="144" x2="288" y2="311"/>
+              <line class="e" x1="288" y1="311" x2="112" y2="311"/>
+              <line class="e" x1="112" y1="311" x2="57" y2="144"/>
+              <line class="e" x1="57" y1="144" x2="200" y2="40"/>
+              <line class="e" x1="200" y1="40" x2="200" y2="130"/>
+              <line class="e" x1="343" y1="144" x2="257" y2="171"/>
+              <line class="e" x1="288" y1="311" x2="235" y2="239"/>
+              <line class="e" x1="112" y1="311" x2="165" y2="239"/>
+              <line class="e" x1="57" y1="144" x2="143" y2="171"/>
+              <line class="e" x1="200" y1="130" x2="235" y2="239"/>
+              <line class="e" x1="235" y1="239" x2="143" y2="171"/>
+              <line class="e" x1="143" y1="171" x2="257" y2="171"/>
+              <line class="e" x1="257" y1="171" x2="165" y2="239"/>
+              <line class="e" x1="165" y1="239" x2="200" y2="130"/>
+            </g>
+            <g class="v"><circle cx="200" cy="40" r="16"/><text x="200" y="40">1</text></g>
+            <g class="v"><circle cx="343" cy="144" r="16"/><text x="343" y="144">2</text></g>
+            <g class="v"><circle cx="288" cy="311" r="16"/><text x="288" y="311">3</text></g>
+            <g class="v"><circle cx="112" cy="311" r="16"/><text x="112" y="311">4</text></g>
+            <g class="v"><circle cx="57" cy="144" r="16"/><text x="57" y="144">5</text></g>
+            <g class="v"><circle cx="200" cy="130" r="16"/><text x="200" y="130">6</text></g>
+            <g class="v"><circle cx="257" cy="171" r="16"/><text x="257" y="171">7</text></g>
+            <g class="v"><circle cx="235" cy="239" r="16"/><text x="235" y="239">8</text></g>
+            <g class="v"><circle cx="165" cy="239" r="16"/><text x="165" y="239">9</text></g>
+            <g class="v"><circle cx="143" cy="171" r="16"/><text x="143" y="171">10</text></g>
+          </svg>
+          <figcaption>
+            <b>Figura 1.</b> O grafo de Petersen no desenho clássico: pentágono externo
+            <span class="m">1–2–3–4–5</span>, raios <span class="m">{<i>i</i>, <i>i</i>+5}</span> e estrela interna
+            <span class="m">6–8–10–7–9</span>. Qualquer outro desenho com as mesmas 15 adjacências é isomorfo a este
+            (no original, a Figura 3 exibia dois diagramas ligados pela bijeção
+            <span class="m"><i>f</i>(1)=<i>a</i>, …, <i>f</i>(10)=<i>j</i></span>).
+          </figcaption>
+        </figure>
+        <p>
+          Petersen é 3-regular, tem girth 5 (o menor ciclo tem comprimento 5) e é um dos grafos mais simétricos da teoria:
+          qualquer vértice pode ser levado em qualquer outro por um automorfismo, e o mesmo vale para arestas.
+          Voltamos a isso na seção 4.6.
+        </p>
+
+        <h3 id="s4-ordem3">4.3 Quatro grafos de ordem 3</h3>
+        <p>
+          Com vértices rotulados <span class="m">{1,2,3}</span> existem exatamente 8 grafos: cada um dos 3 pares possíveis
+          ou é aresta ou não é, e <span class="m">2<sup>3</sup> = 8</span>. São os diagramas abaixo.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 560 250" role="img" aria-label="Os oito grafos rotulados de ordem 3, um para cada subconjunto das três arestas possíveis entre 1, 2 e 3">
+            <text class="lbl" x="70" y="22">∅</text>
+            <g class="v"><circle cx="40" cy="55" r="15"/><text x="40" y="55">1</text></g>
+            <g class="v"><circle cx="100" cy="55" r="15"/><text x="100" y="55">2</text></g>
+            <g class="v"><circle cx="70" cy="108" r="15"/><text x="70" y="108">3</text></g>
+
+            <text class="lbl" x="210" y="22">{1,2}</text>
+            <line class="e" x1="180" y1="55" x2="240" y2="55"/>
+            <g class="v"><circle cx="180" cy="55" r="15"/><text x="180" y="55">1</text></g>
+            <g class="v"><circle cx="240" cy="55" r="15"/><text x="240" y="55">2</text></g>
+            <g class="v"><circle cx="210" cy="108" r="15"/><text x="210" y="108">3</text></g>
+
+            <text class="lbl" x="350" y="22">{1,3}</text>
+            <line class="e" x1="320" y1="55" x2="350" y2="108"/>
+            <g class="v"><circle cx="320" cy="55" r="15"/><text x="320" y="55">1</text></g>
+            <g class="v"><circle cx="380" cy="55" r="15"/><text x="380" y="55">2</text></g>
+            <g class="v"><circle cx="350" cy="108" r="15"/><text x="350" y="108">3</text></g>
+
+            <text class="lbl" x="490" y="22">{2,3}</text>
+            <line class="e" x1="520" y1="55" x2="490" y2="108"/>
+            <g class="v"><circle cx="460" cy="55" r="15"/><text x="460" y="55">1</text></g>
+            <g class="v"><circle cx="520" cy="55" r="15"/><text x="520" y="55">2</text></g>
+            <g class="v"><circle cx="490" cy="108" r="15"/><text x="490" y="108">3</text></g>
+
+            <text class="lbl" x="70" y="155">{1,2}{1,3}</text>
+            <line class="e" x1="40" y1="188" x2="100" y2="188"/>
+            <line class="e" x1="40" y1="188" x2="70" y2="241"/>
+            <g class="v"><circle cx="40" cy="188" r="15"/><text x="40" y="188">1</text></g>
+            <g class="v"><circle cx="100" cy="188" r="15"/><text x="100" y="188">2</text></g>
+            <g class="v"><circle cx="70" cy="241" r="15"/><text x="70" y="241">3</text></g>
+
+            <text class="lbl" x="210" y="155">{1,2}{2,3}</text>
+            <line class="e" x1="180" y1="188" x2="240" y2="188"/>
+            <line class="e" x1="240" y1="188" x2="210" y2="241"/>
+            <g class="v"><circle cx="180" cy="188" r="15"/><text x="180" y="188">1</text></g>
+            <g class="v"><circle cx="240" cy="188" r="15"/><text x="240" y="188">2</text></g>
+            <g class="v"><circle cx="210" cy="241" r="15"/><text x="210" y="241">3</text></g>
+
+            <text class="lbl" x="350" y="155">{1,3}{2,3}</text>
+            <line class="e" x1="320" y1="188" x2="350" y2="241"/>
+            <line class="e" x1="380" y1="188" x2="350" y2="241"/>
+            <g class="v"><circle cx="320" cy="188" r="15"/><text x="320" y="188">1</text></g>
+            <g class="v"><circle cx="380" cy="188" r="15"/><text x="380" y="188">2</text></g>
+            <g class="v"><circle cx="350" cy="241" r="15"/><text x="350" y="241">3</text></g>
+
+            <text class="lbl" x="490" y="155"><i>K</i>³</text>
+            <line class="e" x1="460" y1="188" x2="520" y2="188"/>
+            <line class="e" x1="460" y1="188" x2="490" y2="241"/>
+            <line class="e" x1="520" y1="188" x2="490" y2="241"/>
+            <g class="v"><circle cx="460" cy="188" r="15"/><text x="460" y="188">1</text></g>
+            <g class="v"><circle cx="520" cy="188" r="15"/><text x="520" y="188">2</text></g>
+            <g class="v"><circle cx="490" cy="241" r="15"/><text x="490" y="241">3</text></g>
+          </svg>
+          <figcaption><b>Figura 2.</b> Os 8 grafos <i>rotulados</i> de ordem 3. Os três da segunda linha (duas arestas) são isomorfos entre si; os três da primeira linha com uma aresta, também.</figcaption>
+        </figure>
+        <p>
+          A menos de isomorfismo sobram quatro: o número de arestas já separa as classes, e dentro de cada
+          <span class="m"><i>m</i></span> há uma só configuração possível em 3 vértices.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 560 170" role="img" aria-label="Os quatro grafos não-isomorfos de ordem 3: três isolados, uma aresta e um isolado, o caminho P3, e o triângulo K3">
+            <text class="lbl" x="70" y="20"><i>m</i> = 0</text>
+            <g class="v"><circle cx="30" cy="90" r="16"/><text x="30" y="90">1</text></g>
+            <g class="v"><circle cx="80" cy="90" r="16"/><text x="80" y="90">2</text></g>
+            <g class="v"><circle cx="130" cy="90" r="16"/><text x="130" y="90">3</text></g>
+
+            <text class="lbl" x="230" y="20"><i>m</i> = 1</text>
+            <line class="e" x1="190" y1="90" x2="250" y2="90"/>
+            <g class="v"><circle cx="190" cy="90" r="16"/><text x="190" y="90">1</text></g>
+            <g class="v"><circle cx="250" cy="90" r="16"/><text x="250" y="90">2</text></g>
+            <g class="v"><circle cx="300" cy="90" r="16"/><text x="300" y="90">3</text></g>
+
+            <text class="lbl" x="400" y="20"><i>m</i> = 2</text>
+            <line class="e" x1="360" y1="70" x2="400" y2="130"/>
+            <line class="e" x1="440" y1="70" x2="400" y2="130"/>
+            <g class="v"><circle cx="360" cy="70" r="16"/><text x="360" y="70">1</text></g>
+            <g class="v"><circle cx="440" cy="70" r="16"/><text x="440" y="70">3</text></g>
+            <g class="v"><circle cx="400" cy="130" r="16"/><text x="400" y="130">2</text></g>
+
+            <text class="lbl" x="520" y="20"><i>m</i> = 3</text>
+            <line class="e" x1="490" y1="70" x2="550" y2="70"/>
+            <line class="e" x1="490" y1="70" x2="520" y2="130"/>
+            <line class="e" x1="550" y1="70" x2="520" y2="130"/>
+            <g class="v"><circle cx="490" cy="70" r="16"/><text x="490" y="70">1</text></g>
+            <g class="v"><circle cx="550" cy="70" r="16"/><text x="550" y="70">3</text></g>
+            <g class="v"><circle cx="520" cy="130" r="16"/><text x="520" y="130">2</text></g>
+          </svg>
+          <figcaption>
+            <b>Figura 3.</b> Os 4 grafos não-isomorfos de ordem 3: o vazio, uma aresta mais um isolado,
+            o caminho <span class="m"><i>P</i><sub>3</sub></span> e o triângulo <span class="m"><i>K</i><sup>3</sup></span>.
+            Com 4 vértices a conta sobe para 11 — é o exercício 32.
+          </figcaption>
+        </figure>
+
+        <h3 id="s4-receita">4.4 Receita: como provar que <i>não</i> são isomorfos</h3>
+        <p>
+          Não existe caracterização simples de grafos isomorfos, e não se conhece algoritmo de tempo polinomial que,
+          dados <span class="m"><i>G</i></span> e <span class="m"><i>H</i></span>, decida se
+          <span class="m"><i>G</i> ≃ <i>H</i></span>. O problema do isomorfismo está em NP — dada uma bijeção candidata,
+          conferir (15) é imediato — e não se sabe se é NP-completo. O problema complementar (decidir
+          <i>não</i>-isomorfismo) nem sequer se sabe se está em NP: não há, em geral, um certificado curto e facilmente
+          verificável de que dois grafos são distintos.
+        </p>
+        <p>
+          Na prática da disciplina isso tem uma consequência útil. Para afirmar <span class="m"><i>G</i> ≃ <i>H</i></span>
+          você <b>exibe</b> a bijeção e confere as arestas. Para afirmar que <b>não</b> são isomorfos, você aponta um
+          <b>invariante</b>: uma propriedade que todo isomorfismo preserva e que os dois grafos não compartilham.
+        </p>
+        <div class="box rec">
+          <div class="h">Receita: atacar um par “são isomorfos?”</div>
+          <ol>
+            <li><b>Ordem e tamanho.</b> Se <span class="m">|<i>V</i>(<i>G</i>)| ≠ |<i>V</i>(<i>H</i>)|</span> ou <span class="m">|<i>E</i>(<i>G</i>)| ≠ |<i>E</i>(<i>H</i>)|</span>, acabou: não são isomorfos.</li>
+            <li><b>Sequência de graus</b> (ordem não-crescente). Um isomorfismo leva vértice de grau <span class="m"><i>k</i></span> em vértice de grau <span class="m"><i>k</i></span>. Se as listas diferem, não são isomorfos.</li>
+            <li><b>Subgrafos especiais.</b> Compare <span class="m">ω</span>, a existência de um triângulo, de um <span class="m"><i>C</i><sub>4</sub></span>, de um vértice cuja vizinhança induz isto ou aquilo. O induzido pelos vértices de grau máximo é o invariante que mais resolve exercício deste bloco.</li>
+            <li><b>O vizinho do pendente.</b> Se há um único vértice de grau 1, olhe o grau e a vizinhança do vizinho dele. Esse “tipo” também é invariante.</li>
+            <li><b>Se nenhum invariante separa,</b> tente construir a bijeção: comece pelos vértices de grau extremo e estenda preservando vizinhanças. Se a construção fecha, você tem um isomorfismo; se trava em todos os ramos, os grafos não são isomorfos.</li>
+          </ol>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · invariante igual não prova isomorfismo</div>
+          <p>
+            A sequência de graus é um invariante <i>necessário</i>, não suficiente. Existem pares não-isomorfos com a
+            mesma sequência — o exemplo da próxima seção é um deles, e o exercício 31 é outro.
+            Graus iguais só dizem “ainda não separou”. Aí você desce para o próximo invariante, ou constrói a bijeção.
+          </p>
+        </div>
+
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Invariante</th><th>O que um isomorfismo preserva</th><th>Quando resolve</th></tr></thead>
+          <tbody>
+            <tr><td>Ordem, tamanho</td><td><span class="m">|<i>V</i>|</span>, <span class="m">|<i>E</i>|</span></td><td>Primeiro filtro, quase automático</td></tr>
+            <tr><td>Sequência de graus</td><td>A lista <span class="m"><i>d</i>(<i>v</i>)</span> ordenada</td><td>Separa a maioria dos pares “parecidos”</td></tr>
+            <tr><td>Clique máximo</td><td><span class="m">ω(<i>G</i>)</span></td><td>Quando um tem triângulo e o outro não</td></tr>
+            <tr><td>Induzido por um tipo</td><td><span class="m"><i>G</i>[{<i>v</i> : <i>d</i>(<i>v</i>)=<i>k</i>}]</span></td><td>Mesma sequência, estruturas diferentes</td></tr>
+            <tr><td>Complemento</td><td><span class="m"><i>G</i> ≃ <i>H</i> ⟺ <span class="ovl"><i>G</i></span> ≃ <span class="ovl"><i>H</i></span></span></td><td>Às vezes o complemento é mais simples</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h3 id="s4-exemplo">4.5 Exemplo: três grafos, três argumentos</h3>
+        <p>
+          O original apresenta três grafos <span class="m"><i>G</i></span>, <span class="m"><i>H</i></span> e
+          <span class="m"><i>K</i></span> (Figura 6) e conclui que nenhum par é isomorfo, com argumentos diferentes.
+          A figura original não tinha texto alternativo; o trio abaixo foi reconstruído para esta versão de modo a
+          realizar exatamente os invariantes citados no texto.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 560 230" role="img" aria-label="Três grafos de 6 vértices: G tem triângulo nos vértices de grau 3; H tem um vértice de grau 4; K tem a mesma sequência de G mas sem triângulo nos vértices de grau 3">
+            <text class="lbl" x="90" y="18"><i>G</i></text>
+            <line class="e" x1="50" y1="50" x2="20" y2="110"/>
+            <line class="e" x1="50" y1="50" x2="80" y2="110"/>
+            <line class="e" x1="20" y1="110" x2="80" y2="110"/>
+            <line class="e" x1="20" y1="110" x2="50" y2="160"/>
+            <line class="e" x1="80" y1="110" x2="50" y2="160"/>
+            <line class="e" x1="50" y1="160" x2="50" y2="210"/>
+            <line class="e" x1="50" y1="210" x2="90" y2="210"/>
+            <g class="v"><circle cx="50" cy="50" r="15"/><text x="50" y="50">1</text></g>
+            <g class="v c1"><circle cx="20" cy="110" r="15"/><text x="20" y="110">2</text></g>
+            <g class="v c1"><circle cx="80" cy="110" r="15"/><text x="80" y="110">3</text></g>
+            <g class="v c1"><circle cx="50" cy="160" r="15"/><text x="50" y="160">5</text></g>
+            <g class="v"><circle cx="50" cy="210" r="15"/><text x="50" y="210">4</text></g>
+            <g class="v"><circle cx="90" cy="210" r="15"/><text x="90" y="210">6</text></g>
+
+            <text class="lbl" x="270" y="18"><i>H</i></text>
+            <line class="e" x1="270" y1="115" x2="195" y2="50"/>
+            <line class="e" x1="270" y1="115" x2="245" y2="50"/>
+            <line class="e" x1="270" y1="115" x2="295" y2="50"/>
+            <line class="e" x1="270" y1="115" x2="345" y2="50"/>
+            <line class="e" x1="195" y1="50" x2="245" y2="50"/>
+            <line class="e" x1="295" y1="50" x2="345" y2="50"/>
+            <line class="e" x1="245" y1="50" x2="245" y2="180"/>
+            <g class="v"><circle cx="195" cy="50" r="15"/><text x="195" y="50">1</text></g>
+            <g class="v"><circle cx="245" cy="50" r="15"/><text x="245" y="50">2</text></g>
+            <g class="v"><circle cx="295" cy="50" r="15"/><text x="295" y="50">3</text></g>
+            <g class="v"><circle cx="345" cy="50" r="15"/><text x="345" y="50">4</text></g>
+            <g class="v hl"><circle cx="270" cy="115" r="15"/><text x="270" y="115">5</text></g>
+            <g class="v"><circle cx="245" cy="180" r="15"/><text x="245" y="180">6</text></g>
+
+            <text class="lbl" x="480" y="18"><i>K</i></text>
+            <line class="e" x1="415" y1="50" x2="430" y2="110"/>
+            <line class="e" x1="430" y1="110" x2="485" y2="110"/>
+            <line class="e" x1="485" y1="110" x2="540" y2="110"/>
+            <line class="e" x1="430" y1="110" x2="455" y2="185"/>
+            <line class="e" x1="485" y1="110" x2="540" y2="50"/>
+            <line class="e" x1="455" y1="185" x2="540" y2="110"/>
+            <line class="e" x1="540" y1="110" x2="540" y2="50"/>
+            <g class="v"><circle cx="415" cy="50" r="15"/><text x="415" y="50">1</text></g>
+            <g class="v c1"><circle cx="430" cy="110" r="15"/><text x="430" y="110">2</text></g>
+            <g class="v c1"><circle cx="485" cy="110" r="15"/><text x="485" y="110">3</text></g>
+            <g class="v"><circle cx="455" cy="185" r="15"/><text x="455" y="185">4</text></g>
+            <g class="v c1"><circle cx="540" cy="110" r="15"/><text x="540" y="110">5</text></g>
+            <g class="v"><circle cx="540" cy="50" r="15"/><text x="540" y="50">6</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c1)"></i>vértice de grau 3</span>
+            <span><i style="background:var(--c2)"></i>vértice de grau 4</span>
+          </div>
+          <figcaption>
+            <b>Figura 4.</b> Exemplo reconstruído para esta versão, com os invariantes do Exemplo 8 do original.
+            <span class="m"><i>G</i></span> e <span class="m"><i>K</i></span> têm sequência <span class="m">3,3,3,2,2,1</span>;
+            <span class="m"><i>H</i></span> tem um vértice de grau 4.
+            Em <span class="m"><i>G</i></span> o conjunto <span class="m">{2,3,5}</span> induz um triângulo; em
+            <span class="m"><i>K</i></span>, um caminho.
+          </figcaption>
+        </figure>
+        <p>
+          Os três argumentos, um para cada par:
+        </p>
+        <ul>
+          <li>
+            <span class="m"><i>G</i> ≄ <i>H</i></span> porque <span class="m"><i>H</i></span> tem um vértice de grau 4
+            (o vértice 5) e <span class="m"><i>G</i></span> não tem. Nenhuma bijeção pode levar um vértice de grau
+            <span class="m">≤ 3</span> a um de grau 4.
+          </li>
+          <li>
+            <span class="m"><i>H</i> ≄ <i>K</i></span> pelo mesmo motivo: <span class="m"><i>K</i></span> também não tem grau 4.
+          </li>
+          <li>
+            <span class="m"><i>G</i> ≄ <i>K</i></span> <i>apesar</i> da mesma sequência de graus. Qualquer isomorfismo teria de
+            levar o conjunto dos três vértices de grau 3 de <span class="m"><i>G</i></span>, que é
+            <span class="m">{2,3,5}</span>, ao conjunto dos três de grau 3 de <span class="m"><i>K</i></span>, que o original
+            também rotula <span class="m">{2,3,5}</span>. Mas <span class="m"><i>G</i>[{2,3,5}]</span> é um triângulo e
+            <span class="m"><i>K</i>[{2,3,5}]</span> não é. A restrição de um isomorfismo seria um isomorfismo entre esses
+            induzidos (exercício 33), o que é impossível.
+          </li>
+        </ul>
+        <p>
+          O terceiro argumento é o que o segundo passo da receita não alcança. Graus iguais; o que separa é o subgrafo
+          induzido por um tipo de vértice.
+        </p>
+
+        <h3 id="s4-auto">4.6 Automorfismo</h3>
+        <p>
+          Um isomorfismo de um grafo <i>com ele mesmo</i> é uma simetria do grafo: uma permutação dos vértices que não
+          altera as adjacências. Essas permutações serão cobradas nos exercícios 34 e 35.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · automorfismo</div>
+          <p>
+            Um <b>automorfismo</b> de <span class="m"><i>G</i></span> é um isomorfismo
+            <span class="m"><i>f</i> : <i>V</i>(<i>G</i>) → <i>V</i>(<i>G</i>)</span>.
+            O conjunto de todos os automorfismos de <span class="m"><i>G</i></span> se denota
+            <span class="m">Aut(<i>G</i>)</span>.
+          </p>
+        </div>
+        <p>
+          A identidade é sempre automorfismo. Se <span class="m"><i>f</i></span> e <span class="m"><i>g</i></span> são
+          automorfismos, a composta <span class="m"><i>g</i> ∘ <i>f</i></span> também é: é bijeção, e
+        </p>
+        <div class="eq"><div class="body">
+          {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) &nbsp;⟺&nbsp; {<i>f</i>(<i>u</i>),<i>f</i>(<i>v</i>)} ∈ <i>E</i>(<i>G</i>)
+          &nbsp;⟺&nbsp; {<i>g</i>(<i>f</i>(<i>u</i>)), <i>g</i>(<i>f</i>(<i>v</i>))} ∈ <i>E</i>(<i>G</i>).
+        </div></div>
+        <p>
+          A inversa <span class="m"><i>f</i><sup>−1</sup></span> também é automorfismo: troque os papéis de
+          <span class="m"><i>u</i></span> e <span class="m"><i>f</i>(<i>u</i>)</span> em (15). Composição de funções é associativa.
+          Portanto <span class="m">(Aut(<i>G</i>), ∘)</span> é um grupo — é o exercício 35, escrito aqui para você só ter de
+          organizar os axiomas.
+        </p>
+        <p>
+          No completo, a restrição (15) é vazia: toda permutação preserva arestas, porque todas as arestas existem.
+          Logo
+        </p>
+        <div class="eq"><div class="body">|Aut(<i>K</i><sup><i>n</i></sup>)| = <i>n</i>!</div></div>
+        <p>
+          (exercício 34). No outro extremo, um grafo “assimétrico” — por exemplo um caminho com um pendente num extremo
+          e dois no outro, para <span class="m"><i>n</i></span> grande o bastante — tem
+          <span class="m">Aut(<i>G</i>) = {id}</span>.
+        </p>
+
+        <h3 id="s4-trans">4.7 Vértice-transitivo e aresta-transitivo</h3>
+        <div class="box def">
+          <div class="h">Definição · transitividade</div>
+          <p>
+            <span class="m"><i>G</i> = (<i>V</i>,<i>E</i>)</span> é <b>vértice-transitivo</b> se para quaisquer
+            <span class="m"><i>u</i>, <i>v</i> ∈ <i>V</i></span> existe um automorfismo
+            <span class="m"><i>f</i></span> de <span class="m"><i>G</i></span> com
+            <span class="m"><i>f</i>(<i>v</i>) = <i>u</i></span>.
+          </p>
+          <p>
+            Analogamente, <span class="m"><i>G</i></span> é <b>aresta-transitivo</b> se para quaisquer arestas
+            <span class="m">{<i>x</i>,<i>y</i>}, {<i>z</i>,<i>w</i>} ∈ <i>E</i></span> existe um automorfismo
+            <span class="m"><i>f</i></span> com <span class="m">{<i>f</i>(<i>x</i>), <i>f</i>(<i>y</i>)} = {<i>z</i>,<i>w</i>}</span>.
+          </p>
+        </div>
+        <div class="box tip">
+          <div class="h">Leitura</div>
+          <p>
+            Vértice-transitivo: “todos os vértices ocupam o mesmo papel”. Consequência imediata: o grafo é regular
+            (todos os graus iguais). A recíproca é falsa — dois 3-regulares não-isomorfos já mostram que regularidade
+            não é simetria.
+            Aresta-transitivo: “todas as arestas ocupam o mesmo papel”. Isso <b>não</b> força os extremos de uma aresta
+            a ter o mesmo grau: a estrela <span class="m"><i>K</i><sub>1,<i>n</i></sub></span> é o exemplo-padrão.
+          </p>
+        </div>
+        <p>
+          Exemplos que você vai querer ter à mão no exercício 36:
+        </p>
+        <ul>
+          <li>
+            <span class="m"><i>K</i><sup><i>n</i></sup></span> e o ciclo <span class="m"><i>C</i><sub><i>n</i></sub></span>
+            (<span class="m"><i>n</i> ≥ 3</span>) são vértice-transitivos <i>e</i> aresta-transitivos.
+            Petersen também (a Figura 1 já sugere: qualquer vértice do pentágono externo “parece” qualquer outro,
+            e um automorfismo leva o externo no interno).
+          </li>
+          <li>
+            A estrela <span class="m"><i>K</i><sub>1,3</sub></span> é aresta-transitiva — qualquer folha pode ser
+            levada a qualquer outra, e toda aresta é do tipo centro–folha — mas <b>não</b> é vértice-transitiva:
+            o centro tem grau 3 e as folhas têm grau 1.
+          </li>
+        </ul>
+        <div class="box warn">
+          <div class="h">Atenção · as duas noções são independentes</div>
+          <p>
+            Há grafos vértice-transitivos que não são aresta-transitivos (o prisma triangular, por exemplo: arestas
+            da base e arestas “verticais” formam duas órbitas). E há grafos aresta-transitivos que não são
+            vértice-transitivos, como toda estrela <span class="m"><i>K</i><sub>1,<i>n</i></sub></span> com
+            <span class="m"><i>n</i> ≥ 2</span>. O exercício 36 pede um exemplo de cada lado que interessa:
+            um vértice-transitivo, um aresta-transitivo, e um aresta-transitivo que falhe a transitividade em vértices.
+          </p>
+        </div>
+
+        <h3 id="s4-resumo">4.8 Resumo do bloco</h3>
+        <div class="box def">
+          <div class="h">O essencial em sete linhas</div>
+          <ul>
+            <li><b>Isomorfismo:</b> bijeção <span class="m"><i>f</i> : <i>V</i>(<i>G</i>) → <i>V</i>(<i>H</i>)</span> com <span class="m">{<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) ⟺ {<i>f</i>(<i>u</i>),<i>f</i>(<i>v</i>)} ∈ <i>E</i>(<i>H</i>)</span>.</li>
+            <li><b>Para afirmar ≃:</b> exiba <span class="m"><i>f</i></span> e confira as arestas.</li>
+            <li><b>Para afirmar ≄:</b> aponte um invariante (graus, clique, induzido por um tipo de vértice).</li>
+            <li>Graus iguais não bastam. Petersen é o exemplo de “desenhos diferentes, mesmo grafo”; o trio <span class="m"><i>G</i>,<i>H</i>,<i>K</i></span> é o de “graus iguais, grafos diferentes”.</li>
+            <li>Há 4 grafos não-isomorfos de ordem 3 e 11 de ordem 4.</li>
+            <li><b>Automorfismo:</b> isomorfismo de <span class="m"><i>G</i></span> em si; <span class="m">Aut(<i>G</i>)</span> é grupo e <span class="m">|Aut(<i>K</i><sup><i>n</i></sup>)| = <i>n</i>!</span>.</li>
+            <li><b>Vértice-transitivo</b> ⟹ regular. <b>Aresta-transitivo</b> não implica vértice-transitivo (estrela).</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================ EXERCÍCIOS 31–36 ============================ -->
+      <section class="chapter" id="ex1">
+        <div class="ex-head">
+          <h3>Exercícios 31 a 36</h3>
+          <button class="toggle" type="button" data-scope="#ex1" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: decidir isomorfismo por invariantes, enumerar classes em ordem 4, preservar subgrafos induzidos, contar e estruturar Aut(G), dar exemplos de transitividade.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 31</span><div class="stmt">
+            <p>Determine quais pares dentre os grafos abaixo são isomorfos.</p>
+            <p>
+              <span class="m"><i>G</i><sub>1</sub></span> dado por
+              <span class="m"><i>V</i>(<i>G</i><sub>1</sub>) = {<i>v</i><sub>1</sub>, <i>u</i><sub>1</sub>, <i>w</i><sub>1</sub>, <i>x</i><sub>1</sub>, <i>y</i><sub>1</sub>, <i>z</i><sub>1</sub>}</span>
+              e
+              <span class="m"><i>E</i>(<i>G</i><sub>1</sub>) = {{<i>u</i><sub>1</sub>,<i>v</i><sub>1</sub>}, {<i>u</i><sub>1</sub>,<i>w</i><sub>1</sub>}, {<i>v</i><sub>1</sub>,<i>w</i><sub>1</sub>}, {<i>v</i><sub>1</sub>,<i>x</i><sub>1</sub>}, {<i>w</i><sub>1</sub>,<i>y</i><sub>1</sub>}, {<i>x</i><sub>1</sub>,<i>y</i><sub>1</sub>}, {<i>x</i><sub>1</sub>,<i>z</i><sub>1</sub>}}</span>;
+            </p>
+            <p>
+              <span class="m"><i>G</i><sub>2</sub></span> dado por
+              <span class="m"><i>V</i>(<i>G</i><sub>2</sub>) = {<i>v</i><sub>2</sub>, <i>u</i><sub>2</sub>, <i>w</i><sub>2</sub>, <i>x</i><sub>2</sub>, <i>y</i><sub>2</sub>, <i>z</i><sub>2</sub>}</span>
+              e
+              <span class="m"><i>E</i>(<i>G</i><sub>2</sub>) = {{<i>u</i><sub>2</sub>,<i>v</i><sub>2</sub>}, {<i>u</i><sub>2</sub>,<i>w</i><sub>2</sub>}, {<i>v</i><sub>2</sub>,<i>w</i><sub>2</sub>}, {<i>v</i><sub>2</sub>,<i>x</i><sub>2</sub>}, {<i>w</i><sub>2</sub>,<i>y</i><sub>2</sub>}, {<i>x</i><sub>2</sub>,<i>y</i><sub>2</sub>}, {<i>y</i><sub>2</sub>,<i>z</i><sub>2</sub>}}</span>;
+            </p>
+            <p>
+              <span class="m"><i>G</i><sub>3</sub></span> dado por
+              <span class="m"><i>V</i>(<i>G</i><sub>3</sub>) = {<i>v</i><sub>3</sub>, <i>u</i><sub>3</sub>, <i>w</i><sub>3</sub>, <i>x</i><sub>3</sub>, <i>y</i><sub>3</sub>, <i>z</i><sub>3</sub>}</span>
+              e
+              <span class="m"><i>E</i>(<i>G</i><sub>3</sub>) = {{<i>u</i><sub>3</sub>,<i>v</i><sub>3</sub>}, {<i>u</i><sub>3</sub>,<i>w</i><sub>3</sub>}, {<i>v</i><sub>3</sub>,<i>w</i><sub>3</sub>}, {<i>v</i><sub>3</sub>,<i>x</i><sub>3</sub>}, {<i>w</i><sub>3</sub>,<i>y</i><sub>3</sub>}, {<i>x</i><sub>3</sub>,<i>y</i><sub>3</sub>}, {<i>u</i><sub>3</sub>,<i>z</i><sub>3</sub>}}</span>.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 560 240" role="img" aria-label="Os três grafos do exercício 31: cada um é um triângulo uvw com um C4 pendurado, e o vértice z ligado a x, a y ou a u">
+                <text class="lbl" x="90" y="18"><i>G</i>₁</text>
+                <line class="e" x1="90" y1="50" x2="50" y2="100"/>
+                <line class="e" x1="90" y1="50" x2="130" y2="100"/>
+                <line class="e" x1="50" y1="100" x2="130" y2="100"/>
+                <line class="e" x1="50" y1="100" x2="50" y2="160"/>
+                <line class="e" x1="130" y1="100" x2="130" y2="160"/>
+                <line class="e" x1="50" y1="160" x2="130" y2="160"/>
+                <line class="e" x1="50" y1="160" x2="50" y2="210"/>
+                <g class="v"><circle cx="90" cy="50" r="15"/><text x="90" y="50">u</text></g>
+                <g class="v"><circle cx="50" cy="100" r="15"/><text x="50" y="100">v</text></g>
+                <g class="v"><circle cx="130" cy="100" r="15"/><text x="130" y="100">w</text></g>
+                <g class="v"><circle cx="50" cy="160" r="15"/><text x="50" y="160">x</text></g>
+                <g class="v"><circle cx="130" cy="160" r="15"/><text x="130" y="160">y</text></g>
+                <g class="v"><circle cx="50" cy="210" r="15"/><text x="50" y="210">z</text></g>
+
+                <text class="lbl" x="280" y="18"><i>G</i>₂</text>
+                <line class="e" x1="280" y1="50" x2="240" y2="100"/>
+                <line class="e" x1="280" y1="50" x2="320" y2="100"/>
+                <line class="e" x1="240" y1="100" x2="320" y2="100"/>
+                <line class="e" x1="240" y1="100" x2="240" y2="160"/>
+                <line class="e" x1="320" y1="100" x2="320" y2="160"/>
+                <line class="e" x1="240" y1="160" x2="320" y2="160"/>
+                <line class="e" x1="320" y1="160" x2="320" y2="210"/>
+                <g class="v"><circle cx="280" cy="50" r="15"/><text x="280" y="50">u</text></g>
+                <g class="v"><circle cx="240" cy="100" r="15"/><text x="240" y="100">v</text></g>
+                <g class="v"><circle cx="320" cy="100" r="15"/><text x="320" y="100">w</text></g>
+                <g class="v"><circle cx="240" cy="160" r="15"/><text x="240" y="160">x</text></g>
+                <g class="v"><circle cx="320" cy="160" r="15"/><text x="320" y="160">y</text></g>
+                <g class="v"><circle cx="320" cy="210" r="15"/><text x="320" y="210">z</text></g>
+
+                <text class="lbl" x="470" y="18"><i>G</i>₃</text>
+                <line class="e" x1="470" y1="50" x2="410" y2="50"/>
+                <line class="e" x1="470" y1="50" x2="430" y2="100"/>
+                <line class="e" x1="470" y1="50" x2="510" y2="100"/>
+                <line class="e" x1="430" y1="100" x2="510" y2="100"/>
+                <line class="e" x1="430" y1="100" x2="430" y2="160"/>
+                <line class="e" x1="510" y1="100" x2="510" y2="160"/>
+                <line class="e" x1="430" y1="160" x2="510" y2="160"/>
+                <g class="v"><circle cx="410" cy="50" r="15"/><text x="410" y="50">z</text></g>
+                <g class="v"><circle cx="470" cy="50" r="15"/><text x="470" y="50">u</text></g>
+                <g class="v"><circle cx="430" cy="100" r="15"/><text x="430" y="100">v</text></g>
+                <g class="v"><circle cx="510" cy="100" r="15"/><text x="510" y="100">w</text></g>
+                <g class="v"><circle cx="430" cy="160" r="15"/><text x="430" y="160">x</text></g>
+                <g class="v"><circle cx="510" cy="160" r="15"/><text x="510" y="160">y</text></g>
+              </svg>
+              <figcaption><b>Figura 5.</b> Os três grafos do enunciado, com os índices omitidos nos rótulos. O núcleo é o mesmo (triângulo <span class="m"><i>uvw</i></span> mais o <span class="m"><i>C</i><sub>4</sub></span> <span class="m"><i>vwyx</i></span>); o que muda é o ponto de colagem de <span class="m"><i>z</i></span>.</figcaption>
+            </figure>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h31" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a31" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h31"><div class="plab">Dica</div>
+            <p>
+              Os três têm a mesma sequência de graus. A sequência não decide. Olhe o único vértice de grau 1: a que tipo
+              de vértice ele está ligado? Equivalentemente, compare o subgrafo induzido pelos três vértices de grau 3.
+            </p>
+          </div>
+          <div class="panel answer" id="a31"><div class="plab">Resolução</div>
+            <p><b>Passo 1 — graus.</b> Em cada grafo há 6 vértices e 7 arestas. Conferência da soma: <span class="m">2 · 7 = 14</span>.</p>
+            <ul>
+              <li><span class="m"><i>G</i><sub>1</sub></span>: <span class="m"><i>d</i>(<i>u</i>)=2</span>, <span class="m"><i>d</i>(<i>v</i>)=3</span>, <span class="m"><i>d</i>(<i>w</i>)=3</span>, <span class="m"><i>d</i>(<i>x</i>)=3</span>, <span class="m"><i>d</i>(<i>y</i>)=2</span>, <span class="m"><i>d</i>(<i>z</i>)=1</span> → <span class="m">3,3,3,2,2,1</span>.</li>
+              <li><span class="m"><i>G</i><sub>2</sub></span>: <span class="m"><i>d</i>(<i>u</i>)=2</span>, <span class="m"><i>d</i>(<i>v</i>)=3</span>, <span class="m"><i>d</i>(<i>w</i>)=3</span>, <span class="m"><i>d</i>(<i>x</i>)=2</span>, <span class="m"><i>d</i>(<i>y</i>)=3</span>, <span class="m"><i>d</i>(<i>z</i>)=1</span> → a mesma lista.</li>
+              <li><span class="m"><i>G</i><sub>3</sub></span>: <span class="m"><i>d</i>(<i>u</i>)=3</span>, <span class="m"><i>d</i>(<i>v</i>)=3</span>, <span class="m"><i>d</i>(<i>w</i>)=3</span>, <span class="m"><i>d</i>(<i>x</i>)=2</span>, <span class="m"><i>d</i>(<i>y</i>)=2</span>, <span class="m"><i>d</i>(<i>z</i>)=1</span> → de novo a mesma lista.</li>
+            </ul>
+            <p>Graus não separam ninguém. Desça um invariante.</p>
+            <p><b>Passo 2 — o induzido pelos vértices de grau 3.</b></p>
+            <ul>
+              <li>Em <span class="m"><i>G</i><sub>1</sub></span> os de grau 3 são <span class="m">{<i>v</i>,<i>w</i>,<i>x</i>}</span>. Arestas entre eles: <span class="m">{<i>v</i>,<i>w</i>}</span> e <span class="m">{<i>v</i>,<i>x</i>}</span>; falta <span class="m">{<i>w</i>,<i>x</i>}</span>. O induzido é um caminho.</li>
+              <li>Em <span class="m"><i>G</i><sub>2</sub></span> os de grau 3 são <span class="m">{<i>v</i>,<i>w</i>,<i>y</i>}</span>. Arestas: <span class="m">{<i>v</i>,<i>w</i>}</span> e <span class="m">{<i>w</i>,<i>y</i>}</span>; falta <span class="m">{<i>v</i>,<i>y</i>}</span>. Outro caminho.</li>
+              <li>Em <span class="m"><i>G</i><sub>3</sub></span> os de grau 3 são <span class="m">{<i>u</i>,<i>v</i>,<i>w</i>}</span> — o triângulo do enunciado. O induzido é <span class="m"><i>K</i><sup>3</sup></span>.</li>
+            </ul>
+            <p>
+              Logo <span class="m"><i>G</i><sub>1</sub> ≄ <i>G</i><sub>3</sub></span> e
+              <span class="m"><i>G</i><sub>2</sub> ≄ <i>G</i><sub>3</sub></span>: um isomorfismo teria de levar o induzido
+              pelos vértices de grau 3 em um induzido do mesmo tipo, e caminho não é isomorfo a triângulo.
+            </p>
+            <p>
+              <b>Passo 3 — <span class="m"><i>G</i><sub>1</sub> ≃ <i>G</i><sub>2</sub></span>.</b>
+              A única diferença é o ponto de colagem de <span class="m"><i>z</i></span>: em
+              <span class="m"><i>G</i><sub>1</sub></span> ele pende de <span class="m"><i>x</i></span>, em
+              <span class="m"><i>G</i><sub>2</sub></span> de <span class="m"><i>y</i></span>.
+              O núcleo sem <span class="m"><i>z</i></span> admite o automorfismo que troca
+              <span class="m"><i>x</i> ↔ <i>y</i></span> e <span class="m"><i>v</i> ↔ <i>w</i></span>, fixando
+              <span class="m"><i>u</i></span>. Estendendo por <span class="m"><i>z</i> ↦ <i>z</i></span> obtemos o isomorfismo
+            </p>
+            <div class="eq"><div class="body">
+              <i>f</i>(<i>u</i><sub>1</sub>)=<i>u</i><sub>2</sub>,&nbsp;
+              <i>f</i>(<i>v</i><sub>1</sub>)=<i>w</i><sub>2</sub>,&nbsp;
+              <i>f</i>(<i>w</i><sub>1</sub>)=<i>v</i><sub>2</sub>,&nbsp;
+              <i>f</i>(<i>x</i><sub>1</sub>)=<i>y</i><sub>2</sub>,&nbsp;
+              <i>f</i>(<i>y</i><sub>1</sub>)=<i>x</i><sub>2</sub>,&nbsp;
+              <i>f</i>(<i>z</i><sub>1</sub>)=<i>z</i><sub>2</sub>.
+            </div></div>
+            <p>Conferência das 7 arestas:</p>
+            <div class="scroll">
+            <table class="tbl livre">
+              <thead><tr><th>Aresta em <span class="m"><i>G</i><sub>1</sub></span></th><th>Imagem</th><th>Está em <span class="m"><i>G</i><sub>2</sub></span>?</th></tr></thead>
+              <tbody>
+                <tr><td><span class="m">{<i>u</i>,<i>v</i>}</span></td><td><span class="m">{<i>u</i>,<i>w</i>}</span></td><td>sim</td></tr>
+                <tr><td><span class="m">{<i>u</i>,<i>w</i>}</span></td><td><span class="m">{<i>u</i>,<i>v</i>}</span></td><td>sim</td></tr>
+                <tr><td><span class="m">{<i>v</i>,<i>w</i>}</span></td><td><span class="m">{<i>w</i>,<i>v</i>}</span></td><td>sim</td></tr>
+                <tr><td><span class="m">{<i>v</i>,<i>x</i>}</span></td><td><span class="m">{<i>w</i>,<i>y</i>}</span></td><td>sim</td></tr>
+                <tr><td><span class="m">{<i>w</i>,<i>y</i>}</span></td><td><span class="m">{<i>v</i>,<i>x</i>}</span></td><td>sim</td></tr>
+                <tr><td><span class="m">{<i>x</i>,<i>y</i>}</span></td><td><span class="m">{<i>y</i>,<i>x</i>}</span></td><td>sim</td></tr>
+                <tr><td><span class="m">{<i>x</i>,<i>z</i>}</span></td><td><span class="m">{<i>y</i>,<i>z</i>}</span></td><td>sim</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              Como <span class="m"><i>f</i></span> é bijeção e as duas listas têm 7 arestas, a volta de (15) é automática.
+              Portanto o único par isomorfo é <span class="m"><i>G</i><sub>1</sub> ≃ <i>G</i><sub>2</sub></span>;
+              <span class="m"><i>G</i><sub>3</sub></span> fica sozinho. <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 32</span><div class="stmt">
+            <p>Mostre que existem 11 grafos não-isomorfos com 4 vértices.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h32" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a32" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h32"><div class="plab">Dica</div>
+            <p>
+              Classifique pelo número de arestas <span class="m"><i>m</i> ∈ {0,1,2,3,4,5,6}</span>.
+              O complemento troca <span class="m"><i>m</i></span> por <span class="m">6 − <i>m</i></span> e preserva isomorfismo,
+              então basta enumerar com cuidado <span class="m"><i>m</i> ≤ 3</span> e copiar o resto.
+              Para cada <span class="m"><i>m</i></span>, separe pelas sequências de graus possíveis.
+            </p>
+          </div>
+          <div class="panel answer" id="a32"><div class="plab">Resolução</div>
+            <p>
+              Sejam <span class="m"><i>G</i></span> um grafo simples de ordem 4. Então
+              <span class="m">0 ≤ |<i>E</i>(<i>G</i>)| ≤ <span class="binom"><span class="p">(</span><span class="s"><span>4</span><span>2</span></span><span class="p">)</span></span> = 6</span>.
+              Dois grafos são isomorfos se e somente se seus complementos o são, e o complemento troca
+              <span class="m"><i>m</i></span> arestas por <span class="m">6 − <i>m</i></span>. Enumeramos as classes com
+              <span class="m"><i>m</i> ≤ 3</span> e obtemos as demais por complemento.
+            </p>
+            <p class="kicker"><span class="m"><i>m</i> = 0</span> e <span class="m"><i>m</i> = 1</span></p>
+            <p>
+              Com zero arestas há um só grafo: quatro isolados. Com uma aresta também: a única escolha é qual par
+              recebe a aresta, e qualquer dois pares são equivalentes por relabeling. Isso dá 2 classes.
+              Os complementos serão, respectivamente, <span class="m"><i>K</i><sup>4</sup></span> (<span class="m"><i>m</i> = 6</span>)
+              e <span class="m"><i>K</i><sup>4</sup></span> menos uma aresta, o losango (<span class="m"><i>m</i> = 5</span>).
+            </p>
+            <p class="kicker"><span class="m"><i>m</i> = 2</span></p>
+            <p>Duas arestas em 4 vértices têm exatamente dois tipos:</p>
+            <ul>
+              <li>as duas arestas compartilham um vértice — um caminho <span class="m"><i>P</i><sub>3</sub></span> mais um isolado, sequência <span class="m">2,1,1,0</span>;</li>
+              <li>as duas arestas são disjuntas — um emparelhamento perfeito <span class="m">2<i>K</i><sup>2</sup></span>, sequência <span class="m">1,1,1,1</span>.</li>
+            </ul>
+            <p>
+              As sequências já separam as duas classes. Os complementos terão <span class="m"><i>m</i> = 4</span>:
+              o complemento de <span class="m"><i>P</i><sub>3</sub> ∪ <i>K</i><sub>1</sub></span> é a pata (triângulo com um pendente),
+              e o complemento de <span class="m">2<i>K</i><sup>2</sup></span> é o ciclo <span class="m"><i>C</i><sub>4</sub></span>.
+            </p>
+            <p class="kicker"><span class="m"><i>m</i> = 3</span></p>
+            <p>A soma dos graus é 6. As sequências possíveis em 4 vértices são três:</p>
+            <ul>
+              <li><span class="m">3,1,1,1</span> — a estrela <span class="m"><i>K</i><sub>1,3</sub></span>;</li>
+              <li><span class="m">2,2,2,0</span> — um triângulo mais um isolado, <span class="m"><i>K</i><sup>3</sup> ∪ <i>K</i><sub>1</sub></span>;</li>
+              <li><span class="m">2,2,1,1</span> — o caminho <span class="m"><i>P</i><sub>4</sub></span>.</li>
+            </ul>
+            <p>
+              Não há outra realização: um 3-regular é impossível (precisaria de
+              <span class="m">4 · 3 ∕ 2 = 6</span> arestas), e
+              <span class="m">2,2,2,0</span> força o isolado e um <span class="m"><i>K</i><sup>3</sup></span> nos outros três.
+              As três sequências são distintas, logo são três classes.
+              (Observação: o complemento troca a estrela com o triângulo-mais-isolado, e troca
+              <span class="m"><i>P</i><sub>4</sub></span> consigo mesmo.)
+            </p>
+            <p class="kicker">Contagem</p>
+            <p>
+              Classes com <span class="m"><i>m</i> = 0,1,2,3</span>: <span class="m">1 + 1 + 2 + 3 = 7</span>.
+              Classes com <span class="m"><i>m</i> = 4,5,6</span>, via complemento: mais
+              <span class="m">2 + 1 + 1 = 4</span>. Total <span class="m">7 + 4 = 11</span>.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 560 430" role="img" aria-label="Os onze grafos não-isomorfos de ordem 4, organizados por número de arestas">
+                <text class="lbl" x="70" y="18"><i>m</i> = 0</text>
+                <g class="v"><circle cx="30" cy="55" r="15"/><text x="30" y="55">1</text></g>
+                <g class="v"><circle cx="70" cy="55" r="15"/><text x="70" y="55">2</text></g>
+                <g class="v"><circle cx="30" cy="100" r="15"/><text x="30" y="100">3</text></g>
+                <g class="v"><circle cx="70" cy="100" r="15"/><text x="70" y="100">4</text></g>
+
+                <text class="lbl" x="210" y="18"><i>m</i> = 1</text>
+                <line class="e" x1="170" y1="55" x2="210" y2="55"/>
+                <g class="v"><circle cx="170" cy="55" r="15"/><text x="170" y="55">1</text></g>
+                <g class="v"><circle cx="210" cy="55" r="15"/><text x="210" y="55">2</text></g>
+                <g class="v"><circle cx="170" cy="100" r="15"/><text x="170" y="100">3</text></g>
+                <g class="v"><circle cx="210" cy="100" r="15"/><text x="210" y="100">4</text></g>
+
+                <text class="lbl" x="350" y="18"><i>m</i> = 2 · <i>P</i>₃∪<i>K</i>₁</text>
+                <line class="e" x1="310" y1="55" x2="350" y2="55"/>
+                <line class="e" x1="350" y1="55" x2="350" y2="100"/>
+                <g class="v"><circle cx="310" cy="55" r="15"/><text x="310" y="55">1</text></g>
+                <g class="v"><circle cx="350" cy="55" r="15"/><text x="350" y="55">2</text></g>
+                <g class="v"><circle cx="350" cy="100" r="15"/><text x="350" y="100">3</text></g>
+                <g class="v"><circle cx="390" cy="100" r="15"/><text x="390" y="100">4</text></g>
+
+                <text class="lbl" x="490" y="18"><i>m</i> = 2 · 2<i>K</i>²</text>
+                <line class="e" x1="450" y1="55" x2="490" y2="55"/>
+                <line class="e" x1="450" y1="100" x2="490" y2="100"/>
+                <g class="v"><circle cx="450" cy="55" r="15"/><text x="450" y="55">1</text></g>
+                <g class="v"><circle cx="490" cy="55" r="15"/><text x="490" y="55">2</text></g>
+                <g class="v"><circle cx="450" cy="100" r="15"/><text x="450" y="100">3</text></g>
+                <g class="v"><circle cx="490" cy="100" r="15"/><text x="490" y="100">4</text></g>
+
+                <text class="lbl" x="70" y="150"><i>m</i> = 3 · estrela</text>
+                <line class="e" x1="50" y1="185" x2="30" y2="235"/>
+                <line class="e" x1="50" y1="185" x2="70" y2="235"/>
+                <line class="e" x1="50" y1="185" x2="90" y2="185"/>
+                <g class="v"><circle cx="50" cy="185" r="15"/><text x="50" y="185">1</text></g>
+                <g class="v"><circle cx="30" cy="235" r="15"/><text x="30" y="235">2</text></g>
+                <g class="v"><circle cx="70" cy="235" r="15"/><text x="70" y="235">3</text></g>
+                <g class="v"><circle cx="90" cy="185" r="15"/><text x="90" y="185">4</text></g>
+
+                <text class="lbl" x="210" y="150"><i>m</i> = 3 · <i>P</i>₄</text>
+                <line class="e" x1="170" y1="185" x2="210" y2="185"/>
+                <line class="e" x1="210" y1="185" x2="210" y2="235"/>
+                <line class="e" x1="210" y1="235" x2="250" y2="235"/>
+                <g class="v"><circle cx="170" cy="185" r="15"/><text x="170" y="185">1</text></g>
+                <g class="v"><circle cx="210" cy="185" r="15"/><text x="210" y="185">2</text></g>
+                <g class="v"><circle cx="210" cy="235" r="15"/><text x="210" y="235">3</text></g>
+                <g class="v"><circle cx="250" cy="235" r="15"/><text x="250" y="235">4</text></g>
+
+                <text class="lbl" x="350" y="150"><i>m</i> = 3 · <i>K</i>³∪<i>K</i>₁</text>
+                <line class="e" x1="310" y1="185" x2="350" y2="185"/>
+                <line class="e" x1="310" y1="185" x2="330" y2="235"/>
+                <line class="e" x1="350" y1="185" x2="330" y2="235"/>
+                <g class="v"><circle cx="310" cy="185" r="15"/><text x="310" y="185">1</text></g>
+                <g class="v"><circle cx="350" cy="185" r="15"/><text x="350" y="185">2</text></g>
+                <g class="v"><circle cx="330" cy="235" r="15"/><text x="330" y="235">3</text></g>
+                <g class="v"><circle cx="390" cy="210" r="15"/><text x="390" y="210">4</text></g>
+
+                <text class="lbl" x="490" y="150"><i>m</i> = 4 · <i>C</i>₄</text>
+                <line class="e" x1="450" y1="185" x2="530" y2="185"/>
+                <line class="e" x1="530" y1="185" x2="530" y2="235"/>
+                <line class="e" x1="530" y1="235" x2="450" y2="235"/>
+                <line class="e" x1="450" y1="235" x2="450" y2="185"/>
+                <g class="v"><circle cx="450" cy="185" r="15"/><text x="450" y="185">1</text></g>
+                <g class="v"><circle cx="530" cy="185" r="15"/><text x="530" y="185">2</text></g>
+                <g class="v"><circle cx="530" cy="235" r="15"/><text x="530" y="235">3</text></g>
+                <g class="v"><circle cx="450" cy="235" r="15"/><text x="450" y="235">4</text></g>
+
+                <text class="lbl" x="70" y="285"><i>m</i> = 4 · pata</text>
+                <line class="e" x1="30" y1="320" x2="70" y2="320"/>
+                <line class="e" x1="30" y1="320" x2="50" y2="370"/>
+                <line class="e" x1="70" y1="320" x2="50" y2="370"/>
+                <line class="e" x1="70" y1="320" x2="110" y2="320"/>
+                <g class="v"><circle cx="30" cy="320" r="15"/><text x="30" y="320">1</text></g>
+                <g class="v"><circle cx="70" cy="320" r="15"/><text x="70" y="320">2</text></g>
+                <g class="v"><circle cx="50" cy="370" r="15"/><text x="50" y="370">3</text></g>
+                <g class="v"><circle cx="110" cy="320" r="15"/><text x="110" y="320">4</text></g>
+
+                <text class="lbl" x="245" y="285"><i>m</i> = 5 · losango</text>
+                <line class="e" x1="190" y1="320" x2="270" y2="320"/>
+                <line class="e" x1="190" y1="320" x2="190" y2="370"/>
+                <line class="e" x1="270" y1="320" x2="270" y2="370"/>
+                <line class="e" x1="190" y1="370" x2="270" y2="370"/>
+                <line class="e" x1="190" y1="320" x2="270" y2="370"/>
+                <g class="v"><circle cx="190" cy="320" r="15"/><text x="190" y="320">1</text></g>
+                <g class="v"><circle cx="270" cy="320" r="15"/><text x="270" y="320">2</text></g>
+                <g class="v"><circle cx="190" cy="370" r="15"/><text x="190" y="370">3</text></g>
+                <g class="v"><circle cx="270" cy="370" r="15"/><text x="270" y="370">4</text></g>
+
+                <text class="lbl" x="420" y="285"><i>m</i> = 6 · <i>K</i>⁴</text>
+                <line class="e" x1="370" y1="320" x2="450" y2="320"/>
+                <line class="e" x1="370" y1="320" x2="370" y2="370"/>
+                <line class="e" x1="450" y1="320" x2="450" y2="370"/>
+                <line class="e" x1="370" y1="370" x2="450" y2="370"/>
+                <line class="e" x1="370" y1="320" x2="450" y2="370"/>
+                <line class="e" x1="450" y1="320" x2="370" y2="370"/>
+                <g class="v"><circle cx="370" cy="320" r="15"/><text x="370" y="320">1</text></g>
+                <g class="v"><circle cx="450" cy="320" r="15"/><text x="450" y="320">2</text></g>
+                <g class="v"><circle cx="370" cy="370" r="15"/><text x="370" y="370">3</text></g>
+                <g class="v"><circle cx="450" cy="370" r="15"/><text x="450" y="370">4</text></g>
+              </svg>
+              <figcaption>
+                <b>Figura 6.</b> As 11 classes. Cada uma das sete da primeira metade tem complemento na figura
+                (estrela ↔ triângulo+isolado; <span class="m"><i>P</i><sub>3</sub>∪<i>K</i><sub>1</sub></span> ↔ pata;
+                <span class="m">2<i>K</i><sup>2</sup></span> ↔ <span class="m"><i>C</i><sub>4</sub></span>;
+                uma aresta ↔ losango; vazio ↔ <span class="m"><i>K</i><sup>4</sup></span>;
+                <span class="m"><i>P</i><sub>4</sub></span> é autodual).
+              </figcaption>
+            </figure>
+            <p>
+              Não faltou classe e não há colisão: em cada <span class="m"><i>m</i></span> as sequências de graus (ou, no caso
+              <span class="m"><i>m</i> = 2</span>, o fato de as arestas serem ou não disjuntas) separam as realizações.
+              Logo existem exatamente 11 grafos não-isomorfos de ordem 4. <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 33</span><div class="stmt">
+            <p>
+              Sejam <span class="m"><i>G</i></span> e <span class="m"><i>H</i></span> grafos isomorfos e
+              <span class="m"><i>f</i> : <i>V</i>(<i>G</i>) → <i>V</i>(<i>H</i>)</span> um isomorfismo.
+              É verdade que <span class="m"><i>G</i>[<i>U</i>]</span> é isomorfo a
+              <span class="m"><i>H</i>[<i>f</i>(<i>U</i>)]</span> para todo
+              <span class="m"><i>U</i> ⊆ <i>V</i>(<i>G</i>)</span>? Justifique.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h33" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a33" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h33"><div class="plab">Dica</div>
+            <p>
+              A candidata a isomorfismo é a restrição <span class="m"><i>f</i>|<i>U</i></span>.
+              Lembre o que “induzido” guarda: todas as arestas de <span class="m"><i>G</i></span> com os dois extremos em
+              <span class="m"><i>U</i></span>, e nenhuma outra. A condição (15) já fala de <i>todas</i> as arestas de
+              <span class="m"><i>G</i></span>.
+            </p>
+          </div>
+          <div class="panel answer" id="a33"><div class="plab">Resolução</div>
+            <p><b>Sim, é verdade.</b></p>
+            <p>
+              Fixe <span class="m"><i>U</i> ⊆ <i>V</i>(<i>G</i>)</span> e escreva
+              <span class="m"><i>f</i>(<i>U</i>) = {<i>f</i>(<i>u</i>) : <i>u</i> ∈ <i>U</i>}</span>.
+              A restrição <span class="m"><i>f</i>|<i>U</i> : <i>U</i> → <i>f</i>(<i>U</i>)</span> é bijeção: é injetora
+              porque <span class="m"><i>f</i></span> é, e é sobrejetora por construção do contradomínio.
+            </p>
+            <p>Resta (15) nos induzidos. Para <span class="m"><i>u</i>, <i>v</i> ∈ <i>U</i></span>,</p>
+            <div class="eq"><div class="body">
+              {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>[<i>U</i>])
+              &nbsp;⟺&nbsp; {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>) e <i>u</i>,<i>v</i> ∈ <i>U</i>
+              &nbsp;⟺&nbsp; {<i>f</i>(<i>u</i>),<i>f</i>(<i>v</i>)} ∈ <i>E</i>(<i>H</i>) e <i>f</i>(<i>u</i>),<i>f</i>(<i>v</i>) ∈ <i>f</i>(<i>U</i>)
+              &nbsp;⟺&nbsp; {<i>f</i>(<i>u</i>),<i>f</i>(<i>v</i>)} ∈ <i>E</i>(<i>H</i>[<i>f</i>(<i>U</i>)]).
+            </div></div>
+            <p>
+              A segunda equivalência é (15) em <span class="m"><i>G</i></span> e <span class="m"><i>H</i></span>;
+              a terceira é a definição de subgrafo induzido. Portanto
+              <span class="m"><i>f</i>|<i>U</i></span> é um isomorfismo
+              <span class="m"><i>G</i>[<i>U</i>] ≃ <i>H</i>[<i>f</i>(<i>U</i>)]</span>.
+            </p>
+            <p>
+              Foi esse o fato usado no Exemplo 8 (Figura 4) e no exercício 31: o induzido pelos vértices de um grau
+              fixo é um invariante, porque qualquer isomorfismo restringe a um isomorfismo entre esses induzidos.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 34</span><div class="stmt">
+            <p>Um automorfismo de um grafo é um isomorfismo do grafo sobre ele mesmo. Quantos automorfismos tem um grafo completo?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a34" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a34"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>K</i><sup><i>n</i></sup></span> o completo de ordem
+              <span class="m"><i>n</i></span>, com <span class="m"><i>V</i> = {1, …, <i>n</i>}</span>.
+              Uma bijeção <span class="m"><i>f</i> : <i>V</i> → <i>V</i></span> é um automorfismo se e somente se
+            </p>
+            <div class="eq"><div class="body">
+              {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>K</i><sup><i>n</i></sup>) &nbsp;⟺&nbsp; {<i>f</i>(<i>u</i>), <i>f</i>(<i>v</i>)} ∈ <i>E</i>(<i>K</i><sup><i>n</i></sup>)
+            </div></div>
+            <p>
+              para todos <span class="m"><i>u</i> ≠ <i>v</i></span>. O lado esquerdo é <i>sempre</i> verdadeiro
+              (todo par é aresta) e o lado direito também (a imagem de um par distinto ainda é um par distinto).
+              A equivalência vale para <b>qualquer</b> bijeção.
+            </p>
+            <p>
+              O número de bijeções de um conjunto de <span class="m"><i>n</i></span> elementos em si mesmo é
+              <span class="m"><i>n</i>!</span>. Portanto
+              <span class="m">|Aut(<i>K</i><sup><i>n</i></sup>)| = <i>n</i>!</span>.
+            </p>
+            <p>
+              Conferência: <span class="m"><i>n</i> = 1</span> dá 1; <span class="m"><i>n</i> = 2</span> dá 2
+              (identidade e a troca dos dois vértices); <span class="m"><i>n</i> = 3</span> dá 6, que são as
+              3 rotações e 3 reflexões do triângulo. <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 35</span><div class="stmt">
+            <p>Mostre que o conjunto de automorfismos de um grafo com a operação de composição de funções define um grupo.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h35" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a35" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h35"><div class="plab">Dica</div>
+            <p>
+              Os quatro axiomas: fechamento, associatividade, identidade, inversos. Associatividade vem de graça
+              (composição de funções). O trabalho está em verificar que a composta e a inversa de automorfismos
+              ainda satisfazem (15).
+            </p>
+          </div>
+          <div class="panel answer" id="a35"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>G</i></span> um grafo e <span class="m">Aut(<i>G</i>)</span> o conjunto dos
+              automorfismos de <span class="m"><i>G</i></span>. A operação é a composição
+              <span class="m">(<i>g</i> ∘ <i>f</i>)(<i>v</i>) = <i>g</i>(<i>f</i>(<i>v</i>))</span>.
+            </p>
+            <p><b>Fechamento.</b> Se <span class="m"><i>f</i>, <i>g</i> ∈ Aut(<i>G</i>)</span>, então
+            <span class="m"><i>g</i> ∘ <i>f</i></span> é bijeção (composta de bijeções) e, para quaisquer vértices
+            <span class="m"><i>u</i>, <i>v</i></span>,</p>
+            <div class="eq"><div class="body">
+              {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>)
+              &nbsp;⟺&nbsp; {<i>f</i>(<i>u</i>), <i>f</i>(<i>v</i>)} ∈ <i>E</i>(<i>G</i>)
+              &nbsp;⟺&nbsp; {<i>g</i>(<i>f</i>(<i>u</i>)), <i>g</i>(<i>f</i>(<i>v</i>))} ∈ <i>E</i>(<i>G</i>),
+            </div></div>
+            <p>usando (15) primeiro em <span class="m"><i>f</i></span> e depois em <span class="m"><i>g</i></span>. Logo <span class="m"><i>g</i> ∘ <i>f</i> ∈ Aut(<i>G</i>)</span>.</p>
+            <p>
+              <b>Associatividade.</b> Composição de funções é associativa:
+              <span class="m">((<i>h</i> ∘ <i>g</i>) ∘ <i>f</i>)(<i>v</i>) = (<i>h</i> ∘ (<i>g</i> ∘ <i>f</i>))(<i>v</i>)</span>
+              para todo vértice. Não usamos nada do grafo.
+            </p>
+            <p>
+              <b>Identidade.</b> A função <span class="m">id(<i>v</i>) = <i>v</i></span> é bijeção e satisfaz (15)
+              com igualdade literal dos pares. Além disso
+              <span class="m">id ∘ <i>f</i> = <i>f</i> ∘ id = <i>f</i></span>.
+            </p>
+            <p>
+              <b>Inversos.</b> Se <span class="m"><i>f</i> ∈ Aut(<i>G</i>)</span>, a inversa conjuntista
+              <span class="m"><i>f</i><sup>−1</sup></span> existe porque <span class="m"><i>f</i></span> é bijeção.
+              Dados <span class="m"><i>x</i>, <i>y</i> ∈ <i>V</i>(<i>G</i>)</span>, ponha
+              <span class="m"><i>u</i> = <i>f</i><sup>−1</sup>(<i>x</i>)</span> e
+              <span class="m"><i>v</i> = <i>f</i><sup>−1</sup>(<i>y</i>)</span>. Então
+            </p>
+            <div class="eq"><div class="body">
+              {<i>x</i>,<i>y</i>} ∈ <i>E</i>(<i>G</i>)
+              &nbsp;⟺&nbsp; {<i>f</i>(<i>u</i>), <i>f</i>(<i>v</i>)} ∈ <i>E</i>(<i>G</i>)
+              &nbsp;⟺&nbsp; {<i>u</i>,<i>v</i>} ∈ <i>E</i>(<i>G</i>)
+              &nbsp;⟺&nbsp; {<i>f</i><sup>−1</sup>(<i>x</i>), <i>f</i><sup>−1</sup>(<i>y</i>)} ∈ <i>E</i>(<i>G</i>),
+            </div></div>
+            <p>
+              onde a segunda equivalência é (15) para <span class="m"><i>f</i></span>. Logo
+              <span class="m"><i>f</i><sup>−1</sup> ∈ Aut(<i>G</i>)</span>, e por construção
+              <span class="m"><i>f</i> ∘ <i>f</i><sup>−1</sup> = <i>f</i><sup>−1</sup> ∘ <i>f</i> = id</span>.
+            </p>
+            <p>
+              Os quatro axiomas valem, portanto <span class="m">(Aut(<i>G</i>), ∘)</span> é um grupo.
+              Em geral ele não é comutativo: já em <span class="m"><i>K</i><sup>3</sup></span> a composição de duas
+              transposições distintas é um 3-ciclo, e a ordem das transposições muda o ciclo.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 36</span><div class="stmt">
+            <p>
+              Um grafo <span class="m"><i>G</i> = (<i>V</i>,<i>E</i>)</span> é <b>vértice-transitivo</b> se para quaisquer
+              <span class="m"><i>u</i>, <i>v</i> ∈ <i>V</i></span> existe um automorfismo
+              <span class="m"><i>f</i></span> de <span class="m"><i>G</i></span> com
+              <span class="m"><i>f</i>(<i>v</i>) = <i>u</i></span>.
+              Analogamente, <span class="m"><i>G</i></span> é <b>aresta-transitivo</b> se para quaisquer arestas
+              <span class="m">{<i>x</i>,<i>y</i>}, {<i>z</i>,<i>w</i>} ∈ <i>E</i></span> existe um automorfismo
+              <span class="m"><i>f</i></span> tal que
+              <span class="m">{<i>f</i>(<i>x</i>), <i>f</i>(<i>y</i>)} = {<i>z</i>,<i>w</i>}</span>.
+            </p>
+            <p>
+              Dê um exemplo de grafo vértice-transitivo. Dê um exemplo de grafo aresta-transitivo.
+              Dê um exemplo de grafo aresta-transitivo mas não vértice-transitivo.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h36" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a36" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h36"><div class="plab">Dica</div>
+            <p>
+              Completos e ciclos resolvem as duas primeiras pedidas de uma vez. Para a terceira, você precisa de um
+              grafo cujas arestas sejam todas “do mesmo tipo”, mas cujos vértices não sejam — portanto os graus não
+              podem ser todos iguais. Pense numa estrela.
+            </p>
+          </div>
+          <div class="panel answer" id="a36"><div class="plab">Resolução</div>
+            <p class="kicker">Vértice-transitivo</p>
+            <p>
+              O ciclo <span class="m"><i>C</i><sub><i>n</i></sub></span>, <span class="m"><i>n</i> ≥ 3</span>.
+              Rotule os vértices <span class="m">0, 1, …, <i>n</i>−1</span> na ordem do ciclo.
+              A rotação <span class="m"><i>r</i><sub><i>k</i></sub>(<i>i</i>) = <i>i</i> + <i>k</i> (mod <i>n</i>)</span>
+              é um automorfismo (preserva os pares de consecutivos), e
+              <span class="m"><i>r</i><sub><i>u</i>−<i>v</i></sub>(<i>v</i>) = <i>u</i></span>.
+              O completo <span class="m"><i>K</i><sup><i>n</i></sup></span> e o Petersen da Figura 1 também servem.
+            </p>
+            <p class="kicker">Aresta-transitivo</p>
+            <p>
+              O mesmo <span class="m"><i>C</i><sub><i>n</i></sub></span>: dadas
+              <span class="m">{<i>i</i>, <i>i</i>+1}</span> e <span class="m">{<i>j</i>, <i>j</i>+1}</span>,
+              a rotação <span class="m"><i>r</i><sub><i>j</i>−<i>i</i></sub></span> leva uma aresta na outra.
+              De novo <span class="m"><i>K</i><sup><i>n</i></sup></span> e Petersen servem.
+            </p>
+            <p class="kicker">Aresta-transitivo e não vértice-transitivo</p>
+            <p>
+              A estrela <span class="m"><i>K</i><sub>1,3</sub></span> (um centro <span class="m"><i>c</i></span> e
+              três folhas <span class="m"><i>a</i>, <i>b</i>, <i>d</i></span>).
+              Toda aresta é do tipo <span class="m">{<i>c</i>, folha}</span>. Qualquer permutação das folhas,
+              estendida por <span class="m"><i>f</i>(<i>c</i>) = <i>c</i></span>, é automorfismo, e com ela levamos
+              qualquer aresta em qualquer outra. Logo o grafo é aresta-transitivo.
+            </p>
+            <p>
+              Não é vértice-transitivo: <span class="m"><i>d</i>(<i>c</i>) = 3</span> e
+              <span class="m"><i>d</i>(<i>a</i>) = 1</span>, e todo automorfismo preserva grau. Não existe
+              <span class="m"><i>f</i></span> com <span class="m"><i>f</i>(<i>a</i>) = <i>c</i></span>.
+              O mesmo vale para <span class="m"><i>K</i><sub>1,<i>n</i></sub></span> com
+              <span class="m"><i>n</i> ≥ 2</span>, e para todo
+              <span class="m"><i>K</i><sub><i>p</i>,<i>q</i></sub></span> com <span class="m"><i>p</i> ≠ <i>q</i></span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 5 ============================ -->
+      <section class="chapter" id="s5">
+        <h2><span class="num">§5</span> Outras noções de grafos</h2>
+        <p class="sub-lead">Objetivo do bloco: escrever com precisão as quatro variantes que o modelo simples não cobre — pesos, orientação, digrafo e arestas múltiplas — e transportar isomorfismo e o Teorema 1 para esse terreno.</p>
+
+        <p>
+          Um mapa rodoviário “quase” é um grafo: cidade = vértice, rodovia = aresta. Falta o comprimento da estrada.
+          Uma malha urbana “quase” é um grafo: esquina = vértice, quarteirão = aresta. Falta o sentido da rua.
+          Em ambos os casos o objeto que queremos não cabe na definição do capítulo 1. As quatro variantes abaixo
+          cobrem essas peculiaridades sem jogar fora o grafo que já conhecemos: cada uma traz um
+          <b>grafo subjacente</b>, obtido ao esquecer o extra (peso, seta, cópia).
+        </p>
+
+        <h3 id="s5-pesos">5.1 Grafo com pesos nas arestas</h3>
+        <div class="box def">
+          <div class="h">Definição · grafo com pesos</div>
+          <p>
+            Um <b>grafo com pesos nas arestas</b> é uma tripla <span class="m">(<i>V</i>, <i>E</i>, ρ)</span> em que
+            <span class="m">(<i>V</i>, <i>E</i>)</span> é um grafo e
+            <span class="m">ρ : <i>E</i> → <i>R</i></span> é uma função com contradomínio
+            <span class="m"><i>R</i> ⊆ ℝ</span>. O conjunto <span class="m"><i>R</i></span> depende do problema:
+            distâncias pedem <span class="m"><i>R</i> = ℝ<sub>+</sub></span> (reais não-negativos); capacidades,
+            custos ou atrasos podem usar outros subconjuntos. O grafo
+            <span class="m">(<i>V</i>, <i>E</i>)</span> é o <b>grafo subjacente</b>.
+          </p>
+        </div>
+        <figure>
+          <svg class="dg" viewBox="0 0 420 180" role="img" aria-label="Grafo com pesos: quatro cidades A B C D e cinco estradas com comprimentos 4, 7, 2, 6 e 3">
+            <line class="e" x1="70" y1="50" x2="220" y2="50"/>
+            <line class="e" x1="220" y1="50" x2="350" y2="50"/>
+            <line class="e" x1="70" y1="50" x2="70" y2="140"/>
+            <line class="e" x1="70" y1="140" x2="220" y2="140"/>
+            <line class="e" x1="220" y1="50" x2="220" y2="140"/>
+            <circle class="peso-bg" cx="145" cy="50" r="11"/>
+            <text class="peso" x="145" y="54">4</text>
+            <circle class="peso-bg" cx="285" cy="50" r="11"/>
+            <text class="peso" x="285" y="54">7</text>
+            <circle class="peso-bg" cx="70" cy="95" r="11"/>
+            <text class="peso" x="70" y="99">2</text>
+            <circle class="peso-bg" cx="145" cy="140" r="11"/>
+            <text class="peso" x="145" y="144">6</text>
+            <circle class="peso-bg" cx="220" cy="95" r="11"/>
+            <text class="peso" x="220" y="99">3</text>
+            <g class="v"><circle cx="70" cy="50" r="16"/><text x="70" y="50">A</text></g>
+            <g class="v"><circle cx="220" cy="50" r="16"/><text x="220" y="50">B</text></g>
+            <g class="v"><circle cx="350" cy="50" r="16"/><text x="350" y="50">C</text></g>
+            <g class="v"><circle cx="70" cy="140" r="16"/><text x="70" y="140">D</text></g>
+            <g class="v"><circle cx="220" cy="140" r="16"/><text x="220" y="140">E</text></g>
+          </svg>
+          <figcaption>
+            <b>Figura 7.</b> Um grafo com pesos: o subjacente é o grafo das cinco arestas; ρ atribui comprimentos.
+            Caminho <span class="m"><i>A</i>–<i>B</i>–<i>E</i></span> custa <span class="m">4+3 = 7</span>;
+            <span class="m"><i>A</i>–<i>D</i>–<i>E</i></span> custa <span class="m">2+6 = 8</span>.
+            A definição de grafo simples não vê essa diferença.
+          </figcaption>
+        </figure>
+
+        <h3 id="s5-orient">5.2 Grafo orientado</h3>
+        <div class="box def">
+          <div class="h">Definição · grafo orientado</div>
+          <p>
+            Um <b>grafo orientado</b> é um par <span class="m">(<i>V</i>, <i>A</i>)</span> em que
+            <span class="m"><i>A</i> ⊆ <i>V</i> × <i>V</i></span> é um conjunto de <b>pares ordenados</b>
+            (arcos) satisfazendo:
+          </p>
+          <ul>
+            <li>não há laços: <span class="m">(<i>v</i>,<i>v</i>) ∉ <i>A</i></span> para todo <span class="m"><i>v</i></span>;</li>
+            <li>há no máximo um sentido entre cada par: se <span class="m">(<i>u</i>,<i>v</i>) ∈ <i>A</i></span>, então <span class="m">(<i>v</i>,<i>u</i>) ∉ <i>A</i></span>.</li>
+          </ul>
+          <p>
+            Equivalentemente: escolhemos, para cada aresta do grafo subjacente, exatamente um dos dois sentidos.
+            Removendo as setas — trocando cada <span class="m">(<i>u</i>,<i>v</i>)</span> pelo par não-ordenado
+            <span class="m">{<i>u</i>,<i>v</i>}</span> — obtemos o <b>grafo subjacente</b>.
+          </p>
+        </div>
+        <p>
+          Graus se desdobram. O <b>grau de saída</b> e o <b>grau de entrada</b> de
+          <span class="m"><i>v</i></span> são
+        </p>
+        <div class="eq"><div class="body">
+          <i>d</i><sup>+</sup>(<i>v</i>) = |{ <i>u</i> : (<i>v</i>,<i>u</i>) ∈ <i>A</i> }|,&nbsp;&nbsp;
+          <i>d</i><sup>−</sup>(<i>v</i>) = |{ <i>u</i> : (<i>u</i>,<i>v</i>) ∈ <i>A</i> }|.
+        </div></div>
+        <p>
+          Cada arco contribui 1 para exatamente um <span class="m"><i>d</i><sup>+</sup></span> e 1 para exatamente um
+          <span class="m"><i>d</i><sup>−</sup></span>. Essa é a versão do Teorema 1 que o exercício 39 pede.
+        </p>
+
+        <h3 id="s5-digrafo">5.3 Digrafo</h3>
+        <div class="box def">
+          <div class="h">Definição · grafo dirigido (digrafo)</div>
+          <p>
+            Um <b>grafo dirigido</b>, ou <b>digrafo</b>, é um par <span class="m">(<i>V</i>, <i>A</i>)</span> com
+          </p>
+          <div class="eq"><div class="body">
+            <i>A</i> ⊆ <i>V</i> × <i>V</i> \ {(<i>v</i>,<i>v</i>) : <i>v</i> ∈ <i>V</i>}.
+          </div></div>
+          <p>
+            Laços continuam proibidos. A diferença para o grafo orientado: <span class="m">(<i>u</i>,<i>v</i>)</span> e
+            <span class="m">(<i>v</i>,<i>u</i>)</span> <b>podem coexistir</b> — mão e contramão na mesma rua.
+          </p>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · orientado ≠ dirigido</div>
+          <p>
+            Os nomes se trocam de livro para livro. Nestas notas a convenção é a do original:
+            <b>orientado</b> = no máximo um sentido por par; <b>dirigido / digrafo</b> = os dois sentidos permitidos.
+            Graus de entrada e de saída se definem do mesmo jeito nos dois. Isomorfismo, no caso orientado, tem de
+            preservar a <i>seta</i>, não só o par subjacente (exercício 38).
+          </p>
+        </div>
+
+        <h3 id="s5-multi">5.4 Multigrafo</h3>
+        <p>
+          No grafo simples, cada par de vértices é aresta ou não é: o conjunto
+          <span class="m"><i>E</i> ⊆ <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span></span>
+          não admite repetição. Um mapa com duas rodovias distintas entre as mesmas cidades precisa de
+          <b>arestas paralelas</b>. A definição informal do original é: um conjunto de vértices no qual podemos ter
+          mais de uma aresta incidente ao mesmo par. Removendo as cópias, sobra o grafo subjacente.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · multigrafo</div>
+          <p>
+            Um <b>multigrafo</b> (sem laços) é uma tripla <span class="m">(<i>V</i>, <i>E</i>, ψ)</span> em que
+            <span class="m"><i>V</i></span> é o conjunto de vértices, <span class="m"><i>E</i></span> é um conjunto
+            de rótulos de arestas, e
+          </p>
+          <div class="eq"><div class="body">
+            ψ : <i>E</i> → { {<i>u</i>,<i>v</i>} : <i>u</i>,<i>v</i> ∈ <i>V</i>, <i>u</i> ≠ <i>v</i> }
+          </div></div>
+          <p>
+            atribui a cada aresta seus extremos. Duas arestas <span class="m"><i>e</i>, <i>e</i>′</span> são
+            <b>paralelas</b> quando <span class="m">ψ(<i>e</i>) = ψ(<i>e</i>′)</span>.
+            O <b>grafo subjacente</b> é
+            <span class="m">(<i>V</i>, {ψ(<i>e</i>) : <i>e</i> ∈ <i>E</i>})</span> — as paralelas colapsam numa só.
+          </p>
+        </div>
+        <p>
+          Formulação equivalente, útil para contar: uma função de multiplicidade
+          <span class="m">μ : <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span> → ℕ</span>,
+          em que <span class="m">μ({<i>u</i>,<i>v</i>})</span> é o número de arestas entre
+          <span class="m"><i>u</i></span> e <span class="m"><i>v</i></span>.
+          O exercício 37 pede que você escreva <i>uma</i> definição formal; qualquer uma das duas serve, desde que
+          deixe explícito o que é vértice, o que é aresta e quando duas arestas são a mesma.
+        </p>
+
+        <figure>
+          <svg class="dg" viewBox="0 0 560 220" role="img" aria-label="Quatro painéis: grafo orientado, multigrafo com arestas paralelas, digrafo com os dois sentidos, e o grafo subjacente do digrafo">
+            <defs>
+              <marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+
+            <text class="lbl" x="70" y="20">(a) orientado</text>
+            <line class="arw" x1="48" y1="68" x2="28" y2="128"/>
+            <line class="arw" x1="92" y1="68" x2="112" y2="128"/>
+            <line class="arw" x1="38" y1="155" x2="102" y2="155"/>
+            <g class="v"><circle cx="70" cy="55" r="15"/><text x="70" y="55">1</text></g>
+            <g class="v"><circle cx="25" cy="155" r="15"/><text x="25" y="155">2</text></g>
+            <g class="v"><circle cx="115" cy="155" r="15"/><text x="115" y="155">3</text></g>
+
+            <text class="lbl" x="210" y="20">(b) multigrafo</text>
+            <line class="e" x1="188" y1="68" x2="168" y2="128"/>
+            <line class="e" x1="178" y1="148" x2="242" y2="148"/>
+            <line class="e" x1="178" y1="162" x2="242" y2="162"/>
+            <g class="v"><circle cx="210" cy="55" r="15"/><text x="210" y="55">1</text></g>
+            <g class="v"><circle cx="165" cy="155" r="15"/><text x="165" y="155">2</text></g>
+            <g class="v"><circle cx="255" cy="155" r="15"/><text x="255" y="155">3</text></g>
+
+            <text class="lbl" x="350" y="20">(c) dirigido</text>
+            <line class="arw" x1="328" y1="68" x2="308" y2="128"/>
+            <line class="arw" x1="318" y1="148" x2="382" y2="148"/>
+            <line class="arw" x1="382" y1="162" x2="318" y2="162"/>
+            <g class="v"><circle cx="350" cy="55" r="15"/><text x="350" y="55">1</text></g>
+            <g class="v"><circle cx="305" cy="155" r="15"/><text x="305" y="155">2</text></g>
+            <g class="v"><circle cx="395" cy="155" r="15"/><text x="395" y="155">3</text></g>
+
+            <text class="lbl" x="490" y="20">(d) subjacente</text>
+            <line class="e" x1="468" y1="68" x2="448" y2="128"/>
+            <line class="e" x1="458" y1="155" x2="522" y2="155"/>
+            <g class="v"><circle cx="490" cy="55" r="15"/><text x="490" y="55">1</text></g>
+            <g class="v"><circle cx="445" cy="155" r="15"/><text x="445" y="155">2</text></g>
+            <g class="v"><circle cx="535" cy="155" r="15"/><text x="535" y="155">3</text></g>
+          </svg>
+          <figcaption>
+            <b>Figura 8.</b> As quatro fotos do original (Figura 7), reconstruídas.
+            (a) Grafo orientado: um sentido por par.
+            (b) Multigrafo: duas arestas entre 2 e 3.
+            (c) Digrafo: os dois sentidos entre 2 e 3.
+            (d) Grafo subjacente de (c): as setas esquecidas, as paralelas colapsadas.
+          </figcaption>
+        </figure>
+
+        <h3 id="s5-resumo">5.5 Resumo do bloco</h3>
+        <div class="box def">
+          <div class="h">O essencial em cinco linhas</div>
+          <ul>
+            <li><b>Com pesos:</b> <span class="m">(<i>V</i>,<i>E</i>,ρ)</span>, <span class="m">ρ : <i>E</i> → <i>R</i> ⊆ ℝ</span>. O subjacente esquece ρ.</li>
+            <li><b>Orientado:</b> arcos sem laço e sem os dois sentidos no mesmo par.</li>
+            <li><b>Digrafo:</b> <span class="m"><i>A</i> ⊆ <i>V</i>×<i>V</i> \ {(<i>v</i>,<i>v</i>)}</span> — os dois sentidos podem coexistir.</li>
+            <li><b>Multigrafo:</b> <span class="m">(<i>V</i>,<i>E</i>,ψ)</span> com ψ levando cada aresta-rótulo ao par de extremos; paralelas = mesmo ψ.</li>
+            <li>Isomorfismo orientado preserva a seta. O Teorema 1 vira <span class="m">∑ <i>d</i><sup>+</sup> = ∑ <i>d</i><sup>−</sup> = |<i>A</i>|</span>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================ EXERCÍCIOS 37–39 ============================ -->
+      <section class="chapter" id="ex2">
+        <div class="ex-head">
+          <h3>Exercícios 37 a 39</h3>
+          <button class="toggle" type="button" data-scope="#ex2" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: formalizar multigrafo, transportar isomorfismo para grafos orientados e reescrever o Teorema 1 com graus de entrada e de saída.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 37</span><div class="stmt">
+            <p>Dê uma definição formal para multigrafo.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a37" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a37"><div class="plab">Resolução</div>
+            <p>
+              Um <b>multigrafo sem laços</b> é uma tripla <span class="m"><i>M</i> = (<i>V</i>, <i>E</i>, ψ)</span> em que
+            </p>
+            <ul>
+              <li><span class="m"><i>V</i></span> é um conjunto finito (os <b>vértices</b>);</li>
+              <li><span class="m"><i>E</i></span> é um conjunto finito (os <b>rótulos das arestas</b>);</li>
+              <li>
+                <span class="m">ψ : <i>E</i> → {{<i>u</i>,<i>v</i>} : <i>u</i>,<i>v</i> ∈ <i>V</i>, <i>u</i> ≠ <i>v</i>}</span>
+                é a <b>função de incidência</b>, que associa a cada aresta o par de extremos.
+              </li>
+            </ul>
+            <p>
+              Duas arestas <span class="m"><i>e</i>, <i>e</i>′ ∈ <i>E</i></span> são <b>paralelas</b> quando
+              <span class="m">ψ(<i>e</i>) = ψ(<i>e</i>′)</span> e <span class="m"><i>e</i> ≠ <i>e</i>′</span>.
+              O <b>grau</b> de <span class="m"><i>v</i></span> é
+              <span class="m"><i>d</i>(<i>v</i>) = |{<i>e</i> ∈ <i>E</i> : <i>v</i> ∈ ψ(<i>e</i>)}|</span>
+              — cada aresta paralela conta. O Teorema 1 continua válido:
+              <span class="m">∑<i>d</i>(<i>v</i>) = 2|<i>E</i>|</span>, porque cada elemento de
+              <span class="m"><i>E</i></span> tem dois extremos.
+            </p>
+            <p>
+              O <b>grafo subjacente</b> é
+              <span class="m">(<i>V</i>, {ψ(<i>e</i>) : <i>e</i> ∈ <i>E</i>})</span>.
+              Se <span class="m">ψ</span> é injetora, não há paralelas e recuperamos um grafo simples.
+            </p>
+            <p>
+              Formulação equivalente: um par <span class="m">(<i>V</i>, μ)</span> com
+              <span class="m">μ : <span class="binom"><span class="p">(</span><span class="s"><span><i>V</i></span><span>2</span></span><span class="p">)</span></span> → ℕ</span>
+              a multiplicidade de cada par. As duas são intercambiáveis: dada ψ, ponha
+              <span class="m">μ({<i>u</i>,<i>v</i>}) = |ψ<sup>−1</sup>({<i>u</i>,<i>v</i>})|</span>;
+              dada μ, tome um conjunto <span class="m"><i>E</i></span> com
+              <span class="m">μ({<i>u</i>,<i>v</i>})</span> elementos para cada par e defina ψ de acordo.
+            </p>
+            <p>
+              Não incluímos laços, alinhados à convenção destas notas (grafos e digrafos do original também os
+              excluem). Se o enunciado quisesse laços, o contradomínio de ψ passaria a admitir
+              <span class="m">{<i>v</i>}</span> e cada laço contribuiria 2 no grau.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 38</span><div class="stmt">
+            <p>Defina isomorfismo para grafos orientados.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a38" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a38"><div class="plab">Resolução</div>
+            <p>
+              Sejam <span class="m"><i>G</i> = (<i>V</i>, <i>A</i>)</span> e
+              <span class="m"><i>H</i> = (<i>W</i>, <i>B</i>)</span> grafos orientados.
+              Um <b>isomorfismo</b> de <span class="m"><i>G</i></span> em <span class="m"><i>H</i></span> é uma
+              bijeção <span class="m"><i>f</i> : <i>V</i> → <i>W</i></span> tal que, para todos
+              <span class="m"><i>u</i>, <i>v</i> ∈ <i>V</i></span>,
+            </p>
+            <div class="eq"><div class="body">
+              (<i>u</i>, <i>v</i>) ∈ <i>A</i> &nbsp;⟺&nbsp; (<i>f</i>(<i>u</i>), <i>f</i>(<i>v</i>)) ∈ <i>B</i>.
+            </div></div>
+            <p>
+              A seta é parte do dado: <span class="m">(<i>u</i>,<i>v</i>)</span> e
+              <span class="m">(<i>v</i>,<i>u</i>)</span> são objetos distintos, e
+              <span class="m"><i>f</i></span> não pode inverter um arco. Em particular, se
+              <span class="m"><i>G</i></span> e <span class="m"><i>H</i></span> têm o mesmo grafo subjacente mas
+              orientações diferentes, em geral <span class="m"><i>G</i> ≄ <i>H</i></span> como grafos orientados
+              (um caminho dirigido <span class="m">1 → 2 → 3</span> não é isomorfo a
+              <span class="m">1 → 2 ← 3</span>: no primeiro há um vértice com
+              <span class="m"><i>d</i><sup>+</sup> = 2</span>, no segundo não).
+            </p>
+            <p>
+              A mesma fórmula define isomorfismo de digrafos: só muda o universo de
+              <span class="m"><i>A</i></span> e <span class="m"><i>B</i></span>, que agora podem conter os dois
+              sentidos. <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 39</span><div class="stmt">
+            <p>Formule uma versão do teorema 1 para grafos orientados.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a39" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a39"><div class="plab">Resolução</div>
+            <p>
+              O Teorema 1 do capítulo 1 diz
+              <span class="m">∑<i>d</i>(<i>u</i>) = 2|<i>E</i>(<i>G</i>)|</span>.
+              Em um grafo orientado o grau se parte em saída e entrada. A versão natural é a seguinte.
+            </p>
+            <div class="box thm">
+              <div class="h">Teorema 1, versão orientada</div>
+              <p>
+                Seja <span class="m"><i>G</i> = (<i>V</i>, <i>A</i>)</span> um grafo orientado. Então
+              </p>
+              <div class="eq"><div class="body">
+                <span class="sum"><span class="o">∑</span><span class="l"><i>v</i> ∈ <i>V</i></span></span> <i>d</i><sup>+</sup>(<i>v</i>)
+                &nbsp;=&nbsp;
+                <span class="sum"><span class="o">∑</span><span class="l"><i>v</i> ∈ <i>V</i></span></span> <i>d</i><sup>−</sup>(<i>v</i>)
+                &nbsp;=&nbsp;
+                |<i>A</i>|.
+              </div></div>
+            </div>
+            <p>
+              <b>Demonstração (contagem dupla).</b>
+              Conte os pares <span class="m">(<i>v</i>, <i>a</i>)</span> com
+              <span class="m"><i>a</i> = (<i>v</i>, <i>u</i>) ∈ <i>A</i></span> — isto é, vértice de origem do arco.
+              Agrupando por vértice há <span class="m"><i>d</i><sup>+</sup>(<i>v</i>)</span> tais pares para cada
+              <span class="m"><i>v</i></span>; agrupando por arco há exatamente um origem por arco. Logo
+              <span class="m">∑ <i>d</i><sup>+</sup> = |<i>A</i>|</span>.
+              O mesmo argumento com o extremo de chegada dá
+              <span class="m">∑ <i>d</i><sup>−</sup> = |<i>A</i>|</span>.
+              <span class="qed">□</span>
+            </p>
+            <p>
+              Somando as duas igualdades recuperamos o Teorema 1 no grafo subjacente:
+              <span class="m">∑ (<i>d</i><sup>+</sup>(<i>v</i>) + <i>d</i><sup>−</sup>(<i>v</i>)) = 2|<i>A</i>|</span>,
+              e <span class="m"><i>d</i><sup>+</sup>(<i>v</i>) + <i>d</i><sup>−</sup>(<i>v</i>)</span> é o grau de
+              <span class="m"><i>v</i></span> no subjacente (em grafo orientado não há arco duplo, então cada aresta
+              subjacente contribui exatamente 1 para a soma dos dois graus dirigidos).
+            </p>
+            <p>
+              O enunciado e a prova valem palavra por palavra para digrafos: a definição de
+              <span class="m"><i>d</i><sup>±</sup></span> não usa a proibição dos dois sentidos.
+              O que muda no digrafo é a relação com o subjacente — um par
+              <span class="m">{<i>u</i>,<i>v</i>}</span> com os dois arcos contribui 2 para
+              <span class="m"><i>d</i><sup>+</sup>(<i>u</i>) + <i>d</i><sup>−</sup>(<i>u</i>)</span> e só 1 para o
+              grau do subjacente simples.
+            </p>
+            <p>
+              Conferência na Figura 8(a): arcos <span class="m">(1,2), (1,3), (2,3)</span>,
+              logo <span class="m">|<i>A</i>| = 3</span>.
+              Graus de saída: <span class="m"><i>d</i><sup>+</sup>(1)=2</span>,
+              <span class="m"><i>d</i><sup>+</sup>(2)=1</span>,
+              <span class="m"><i>d</i><sup>+</sup>(3)=0</span>, soma 3.
+              Graus de entrada: <span class="m">0 + 1 + 2 = 3</span> ✔
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="02-subgrafos-cliques-bipartidos.html"><span class="dir">Capítulo anterior</span><span class="ttl">2. Subgrafos, cliques, conjuntos independentes e cortes</span></a>
+        <a class="next" href="04-representacao-computacional.html"><span class="dir">Próximo capítulo</span><span class="ttl">4. Representação computacional</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática das seções “Isomorfismo” e “Outras noções de grafos”
+          das notas de Teoria dos Grafos (CI065 / BC1429) do Prof. Jair Donadelli. Enunciados dos 9 exercícios
+          preservados; explicações, diagramas e resoluções foram escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>
+ 

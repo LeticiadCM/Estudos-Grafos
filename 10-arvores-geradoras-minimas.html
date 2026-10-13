@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10. Árvores geradoras mínimas — Teoria dos Grafos</title>
+<meta name="description" content="Custo de um subgrafo, árvores geradoras mínimas, arestas boas e a propriedade do corte, Kruskal com union-find e Prim, com 15 exercícios resolvidos.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo 10 · Custo mínimo</span>
+    <h1>Árvores geradoras mínimas</h1>
+    <p class="lead">
+      Um grafo conexo com pesos nas arestas tem, em geral, muitas árvores geradoras. Ao terminar, você saberá o que
+      significa o <b>custo</b> de um subgrafo, reconhecer uma <b>árvore geradora mínima</b> (AGM), decidir se uma
+      aresta é <b>boa</b> olhando um corte, e executar — e justificar — os algoritmos de <b>Kruskal</b> (com
+      union-find) e de <b>Prim</b> (crescendo um conjunto de vértices).
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> custo de um subgrafo · AGM · aresta boa · propriedade do corte · Kruskal · union-find · Teorema 19 · Prim</span>
+      <span><b>Exercícios:</b> 15 com resolução (104 a 118)</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#como-usar">Como usar</a>
+        <a href="#s14">14. AGM em grafos com peso</a>
+        <a class="sub" href="#s14-custo">Custo de um subgrafo</a>
+        <a class="sub" href="#s14-agm">O que é uma AGM</a>
+        <a class="sub" href="#s14-exemplo">Um exemplo conferido</a>
+        <a class="sub" href="#s14-corte">Arestas boas e o corte</a>
+        <a class="sub" href="#s14-receita">Receita: atacar 104–111</a>
+        <a href="#ex14">Exercícios 104 a 111</a>
+        <a href="#s15">15. Algoritmo de Kruskal</a>
+        <a class="sub" href="#s15-guloso">A ideia gulosa</a>
+        <a class="sub" href="#s15-uf">Union-find: make, find, union</a>
+        <a class="sub" href="#s15-teo19">Teorema 19</a>
+        <a class="sub" href="#s15-cplx">Complexidade O(|E| log |E|)</a>
+        <a href="#ex15">Exercícios 112 a 116</a>
+        <a href="#s16">16. Algoritmo de Prim</a>
+        <a class="sub" href="#s16-ideia">Crescer U a partir de um vértice</a>
+        <a class="sub" href="#s16-algo">Prim(G) e o invariante</a>
+        <a href="#ex16">Exercícios 117 e 118</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <section class="chapter" id="como-usar">
+        <div class="box tip">
+          <div class="h">Como aproveitar este material</div>
+          <ol>
+            <li><b>Leia a teoria do bloco</b> — ela contém exatamente o que os exercícios seguintes exigem, nada além.</li>
+            <li><b>Tente o exercício sem abrir nada.</b> Se travar, use o botão <i>Dica</i> (quando existir) antes da resposta.</li>
+            <li><b>Só então abra <i>Mostrar resposta</i></b> e compare o seu raciocínio com o argumento apresentado.</li>
+          </ol>
+          <p>As respostas ficam ocultas por padrão. O botão no topo da página abre ou fecha todas de uma vez, e a impressão da página já sai com tudo aberto.</p>
+        </div>
+      </section>
+
+      <!-- ============================ §14 ============================ -->
+      <section class="chapter" id="s14">
+        <h2><span class="num">§14</span> Árvores geradoras de custo mínimo</h2>
+        <p class="sub-lead">Objetivo do bloco: definir custo e AGM, e decidir quais arestas entram em alguma (ou em toda) AGM olhando um único corte.</p>
+
+        <h3 id="s14-custo">14.1 Custo de um subgrafo</h3>
+        <p>
+          Até aqui, uma árvore geradora era só um recorte conexo e acíclico que guarda todos os vértices. Agora cada
+          aresta tem um <b>preço</b>, e a pergunta muda: entre todas as árvores geradoras, qual é a mais barata?
+        </p>
+        <div class="box def">
+          <div class="h">Definição · grafo com peso e custo</div>
+          <p>
+            Um <b>grafo com peso nas arestas</b> é um terno <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>, ρ)</span>,
+            onde <span class="m">(<i>V</i>, <i>E</i>)</span> é um grafo conexo e
+            <span class="m">ρ: <i>E</i> → ℝ</span> atribui a cada aresta um número real, o <b>peso</b> (ou custo) dessa aresta.
+            O <b>custo</b> de um subgrafo <span class="m"><i>H</i> ⊆ <i>G</i></span> é a soma dos pesos das arestas de
+            <span class="m"><i>H</i></span>:
+          </p>
+          <div class="eq"><div class="body">
+            <i>c</i>(<i>H</i>) =
+            <span class="sum"><span class="o">∑</span><span class="l"><i>e</i> ∈ <i>E</i>(<i>H</i>)</span></span>
+            ρ(<i>e</i>).
+          </div></div>
+        </div>
+        <p>
+          A soma só enxerga arestas. Vértices isolados não alteram o custo. Pesos podem ser negativos: nada no que segue
+          exige <span class="m">ρ ≥ 0</span>, salvo quando o enunciado pedir isso explicitamente (é o caso do exercício 111
+          e da primeira metade do 113).
+        </p>
+
+        <h3 id="s14-agm">14.2 O que é uma AGM</h3>
+        <p>
+          Como <span class="m"><i>G</i></span> é conexo, ele tem pelo menos uma árvore geradora. Cada uma delas é um
+          subgrafo gerador conexo com exatamente <span class="m">|<i>V</i>| − 1</span> arestas. O objeto que queremos é
+          a mais barata entre elas.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · árvore geradora mínima</div>
+          <p>
+            Uma <b>árvore geradora mínima</b> (AGM) de <span class="m"><i>G</i></span> é uma árvore geradora
+            <span class="m"><i>T</i></span> de <span class="m"><i>G</i></span> cujo custo é o menor possível:
+          </p>
+          <div class="eq"><div class="body">
+            <i>c</i>(<i>T</i>) = min{ <i>c</i>(<i>T</i>′) : <i>T</i>′ é árvore geradora de <i>G</i> }.
+          </div></div>
+          <p>
+            Equivalentemente, procuramos <span class="m"><i>S</i> ⊆ <i>E</i>(<i>G</i>)</span> tal que
+            <span class="m">(<i>V</i>, <i>S</i>)</span> é uma árvore geradora e
+            <span class="m"><i>c</i>(<i>G</i>[<i>S</i>])</span> é mínimo. Pode haver várias AGMs; o que é único, quando os
+            pesos são todos distintos, é o <i>custo</i> mínimo — e, nesse caso, a própria árvore.
+          </p>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · AGM não é caminho mínimo</div>
+          <p>
+            A AGM minimiza a <b>soma global</b> das arestas escolhidas. Ela não promete que o único caminho na árvore
+            entre dois vértices seja um caminho de peso mínimo no grafo original. O exercício 111 pede exatamente
+            esse contraexemplo. Dijkstra resolve outro problema.
+          </p>
+        </div>
+
+        <h3 id="s14-exemplo">14.3 Um exemplo conferido</h3>
+        <p>
+          O grafo abaixo será o exemplo de trabalho do capítulo. Há 6 vértices e 10 arestas. Qualquer árvore geradora
+          usa 5 arestas. As arestas azuis formam uma AGM de custo 15.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 500 270" role="img" aria-label="Grafo conexo com seis vértices e pesos nas arestas; as cinco arestas da árvore geradora mínima aparecem em azul grosso">
+            <line class="e faint" x1="70" y1="45" x2="280" y2="35"/>
+            <line class="e tree" x1="70" y1="45" x2="170" y2="115"/>
+            <line class="e faint" x1="70" y1="45" x2="70" y2="215"/>
+            <line class="e tree" x1="280" y1="35" x2="170" y2="115"/>
+            <line class="e tree" x1="280" y1="35" x2="410" y2="115"/>
+            <line class="e faint" x1="170" y1="115" x2="70" y2="215"/>
+            <line class="e faint" x1="170" y1="115" x2="410" y2="115"/>
+            <line class="e tree" x1="170" y1="115" x2="260" y2="215"/>
+            <line class="e tree" x1="70" y1="215" x2="260" y2="215"/>
+            <line class="e faint" x1="410" y1="115" x2="260" y2="215"/>
+            <circle class="peso-bg" cx="175" cy="28" r="11"/>
+            <text class="peso" x="175" y="32">6</text>
+            <circle class="peso-bg" cx="108" cy="70" r="11"/>
+            <text class="peso" x="108" y="74">1</text>
+            <circle class="peso-bg" cx="48" cy="130" r="11"/>
+            <text class="peso" x="48" y="134">5</text>
+            <circle class="peso-bg" cx="238" cy="62" r="11"/>
+            <text class="peso" x="238" y="66">5</text>
+            <circle class="peso-bg" cx="352" cy="62" r="11"/>
+            <text class="peso" x="352" y="66">3</text>
+            <circle class="peso-bg" cx="108" cy="175" r="11"/>
+            <text class="peso" x="108" y="179">5</text>
+            <circle class="peso-bg" cx="290" cy="102" r="11"/>
+            <text class="peso" x="290" y="106">6</text>
+            <circle class="peso-bg" cx="228" cy="155" r="11"/>
+            <text class="peso" x="228" y="159">4</text>
+            <circle class="peso-bg" cx="165" cy="202" r="11"/>
+            <text class="peso" x="165" y="206">2</text>
+            <circle class="peso-bg" cx="348" cy="175" r="11"/>
+            <text class="peso" x="348" y="179">6</text>
+            <g class="v"><circle cx="70" cy="45" r="16"/><text x="70" y="45">1</text></g>
+            <g class="v"><circle cx="280" cy="35" r="16"/><text x="280" y="35">2</text></g>
+            <g class="v"><circle cx="170" cy="115" r="16"/><text x="170" y="115">3</text></g>
+            <g class="v"><circle cx="70" cy="215" r="16"/><text x="70" y="215">4</text></g>
+            <g class="v"><circle cx="410" cy="115" r="16"/><text x="410" y="115">5</text></g>
+            <g class="v"><circle cx="260" cy="215" r="16"/><text x="260" y="215">6</text></g>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--brand)"></i>aresta da AGM</span>
+            <span><i class="ln" style="background:var(--edge);opacity:.5"></i>aresta fora da AGM</span>
+          </div>
+          <figcaption>
+            <b>Figura 1.</b> Exemplo construído para esta versão. A AGM é
+            <span class="m">{ {1,3}, {4,6}, {2,5}, {3,6}, {2,3} }</span>,
+            com custo <span class="m">1 + 2 + 3 + 4 + 5 = 15</span>.
+            Outra árvore geradora, trocando <span class="m">{2,3}</span> por <span class="m">{1,2}</span>,
+            custa <span class="m">16</span> — já não é mínima.
+          </figcaption>
+        </figure>
+        <p>
+          Conferência rápida: as cinco arestas mais baratas do grafo são
+          <span class="m">1, 2, 3, 4, 5</span> (esta última empatada em três arestas de peso 5).
+          As quatro primeiras não formam circuito; entre as de peso 5, só
+          <span class="m">{2,3}</span> liga componentes distintas. É exatamente o que Kruskal faria na §15.
+        </p>
+
+        <h3 id="s14-corte">14.4 Arestas boas e a propriedade do corte</h3>
+        <p>
+          Kruskal e Prim não “adivinham” a AGM de uma vez: eles constroem um conjunto
+          <span class="m"><i>S</i></span> de arestas, uma por vez, e em cada passo só acrescentam uma aresta que
+          <b>ainda pode</b> pertencer a alguma AGM. Essas arestas têm nome.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · aresta boa para <span class="m"><i>S</i></span></div>
+          <p>
+            Seja <span class="m"><i>S</i> ⊆ <i>E</i>(<i>G</i>)</span>. Uma aresta
+            <span class="m"><i>f</i> ∈ <i>E</i>(<i>G</i>) \ <i>S</i></span> é <b>boa para <span class="m"><i>S</i></span></b>
+            quando <span class="m"><i>S</i> ∪ {<i>f</i>}</span> está contido no conjunto de arestas de
+            <b>alguma</b> AGM de <span class="m"><i>G</i></span>.
+          </p>
+        </div>
+        <p>
+          O esqueleto comum dos dois algoritmos é o procedimento abaixo. A correção — “se sempre existir aresta boa,
+          o conjunto final é uma AGM” — é o exercício 107. Que de fato sempre existe aresta boa é o exercício 108,
+          e a prova cabe numa observação só: olhe um corte que ainda não foi atravessado por <span class="m"><i>S</i></span>
+          e pegue a aresta mais barata desse corte.
+        </p>
+        <div class="algo">
+          <div class="nome">AGM(G)</div>
+<pre><span class="cm">// invariante: S ⊆ E(T) para alguma AGM T de G</span>
+S ← ∅
+<span class="kw">enquanto</span> (V, S) não é uma árvore geradora <span class="kw">faça</span>
+    descubra uma aresta f boa para S em E(G) \ S
+    insira f em S
+<span class="kw">devolva</span> S</pre>
+        </div>
+        <p>
+          O teste “<span class="m">(<i>V</i>, <i>S</i>)</span> é árvore geradora” equivale a:
+          <span class="m">|<i>S</i>| = |<i>V</i>| − 1</span> e <span class="m">(<i>V</i>, <i>S</i>)</span> é acíclico
+          (ou, equivalentemente, conexo). Como só inserimos arestas boas, <span class="m"><i>S</i></span> permanece
+          acíclico o tempo todo: é sempre uma floresta geradora.
+        </p>
+        <div class="box tip">
+          <div class="h">Intuição · o corte entrega a aresta boa</div>
+          <p>
+            Recorde o corte do capítulo 2: para <span class="m">∅ ≠ <i>U</i> ⊂ <i>V</i></span>,
+            <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span> é o conjunto das arestas com
+            um extremo em <span class="m"><i>U</i></span> e o outro em
+            <span class="m"><span class="ovl"><i>U</i></span> = <i>V</i> \ <i>U</i></span>.
+            Toda árvore geradora atravessa esse corte pelo menos uma vez. Se
+            <span class="m"><i>e</i></span> é uma aresta de custo mínimo no corte, trocar qualquer outra aresta do
+            corte por <span class="m"><i>e</i></span> não encarece a árvore. Por isso
+            <span class="m"><i>e</i></span> pode ser escolhida.
+          </p>
+        </div>
+        <figure>
+          <svg class="dg" viewBox="0 0 520 240" role="img" aria-label="Corte definido por U igual a 1, 3 e 6: as arestas do corte estão tracejadas em vermelho e a mais barata, de peso 2, está em azul">
+            <line class="e tree" x1="90" y1="50" x2="180" y2="120"/>
+            <line class="e tree" x1="180" y1="120" x2="90" y2="190"/>
+            <line class="e faint" x1="370" y1="50" x2="460" y2="120"/>
+            <line class="e faint" x1="370" y1="190" x2="460" y2="120"/>
+            <line class="e cut" x1="90" y1="50" x2="370" y2="50"/>
+            <line class="e cut" x1="180" y1="120" x2="370" y2="50"/>
+            <line class="e tree" x1="90" y1="190" x2="370" y2="190"/>
+            <line class="e cut" x1="180" y1="120" x2="370" y2="190"/>
+            <circle class="peso-bg" cx="230" cy="38" r="11"/>
+            <text class="peso" x="230" y="42">6</text>
+            <circle class="peso-bg" cx="290" cy="72" r="11"/>
+            <text class="peso" x="290" y="76">5</text>
+            <circle class="peso-bg" cx="230" cy="178" r="11"/>
+            <text class="peso" x="230" y="182">2</text>
+            <circle class="peso-bg" cx="290" cy="168" r="11"/>
+            <text class="peso" x="290" y="172">5</text>
+            <text class="lbl" x="120" y="18">U = {1, 3, 6}</text>
+            <text class="lbl" x="415" y="18">V \ U</text>
+            <g class="v"><circle cx="90" cy="50" r="16"/><text x="90" y="50">1</text></g>
+            <g class="v"><circle cx="180" cy="120" r="16"/><text x="180" y="120">3</text></g>
+            <g class="v"><circle cx="90" cy="190" r="16"/><text x="90" y="190">6</text></g>
+            <g class="v open"><circle cx="370" cy="50" r="16"/><text x="370" y="50">2</text></g>
+            <g class="v open"><circle cx="370" cy="190" r="16"/><text x="370" y="190">4</text></g>
+            <g class="v open"><circle cx="460" cy="120" r="16"/><text x="460" y="120">5</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--node)"></i>vértice em <span class="m"><i>U</i></span></span>
+            <span><i style="background:var(--card);border:2px solid var(--edge);border-radius:50%;width:9px;height:9px"></i>vértice em <span class="m"><span class="ovl"><i>U</i></span></span></span>
+            <span><i class="ln" style="background:var(--c2)"></i>outras arestas do corte</span>
+            <span><i class="ln" style="background:var(--brand)"></i>aresta mais barata do corte (peso 2)</span>
+          </div>
+          <figcaption>
+            <b>Figura 2.</b> Recorte da Figura 1 com <span class="m"><i>U</i> = {1,3,6}</span> — a situação de Prim
+            depois de escolher <span class="m">{1,3}</span> e <span class="m">{3,6}</span>. O corte ainda não contém
+            arestas de <span class="m"><i>S</i></span>. A aresta de peso 2 é a mais barata do corte; pelo exercício 108,
+            ela é boa para <span class="m"><i>S</i></span>.
+          </figcaption>
+        </figure>
+        <p>
+          Dois corolários que os exercícios 104–106 pedem para escrever com todas as letras, e que já cabem nesta
+          linguagem:
+        </p>
+        <ul>
+          <li>Uma aresta de peso <b>mínimo no grafo inteiro</b> é a mais barata do corte que isola um de seus extremos
+            (ou de vários cortes). Logo pertence a alguma AGM (ex. 104).</li>
+          <li>Uma aresta de peso <b>máximo num circuito</b> pode ser apagada sem encarecer a AGM: ela nunca é a única
+            opção barata de um corte (ex. 105).</li>
+          <li>Se o corte tem uma <b>única</b> aresta de custo mínimo, essa aresta pertence a <b>toda</b> AGM
+            (ex. 106, com a ressalva dos empates).</li>
+        </ul>
+
+        <h3 id="s14-receita">14.5 Receita: como atacar os exercícios 104 a 111</h3>
+        <div class="box rec">
+          <div class="h">Receita · aresta boa, corte e troca em circuito</div>
+          <ol>
+            <li><b>Para colocar uma aresta numa AGM.</b> Exiba um corte do qual ela é (uma) aresta de custo mínimo, e
+              invoque a propriedade do corte (ex. 108). Em particular, a aresta mais barata do grafo entra em alguma AGM.</li>
+            <li><b>Para tirar uma aresta de uma AGM.</b> Se <span class="m"><i>e</i></span> está num circuito e é máxima
+              nele, troque-a por outra aresta do circuito: o custo não aumenta e a conexidade permanece.</li>
+            <li><b>Para comparar duas árvores geradoras <span class="m"><i>T</i></span> e <span class="m"><i>T</i>′</span>.</b>
+              Se <span class="m"><i>e</i> ∈ <i>E</i>(<i>T</i>) \ <i>E</i>(<i>T</i>′)</span>, então
+              <span class="m"><i>T</i>′ + <i>e</i></span> tem um único circuito, e nesse circuito há uma aresta
+              <span class="m"><i>f</i> ∉ <i>E</i>(<i>T</i>)</span>. A árvore
+              <span class="m"><i>T</i>′ − <i>f</i> + <i>e</i></span> tem uma aresta a mais em comum com
+              <span class="m"><i>T</i></span>. Essa é a troca-padrão da §15.</li>
+            <li><b>Para decidir se uma árvore geradora já é mínima.</b> Use a caracterização do exercício 109:
+              para toda aresta fora da árvore, nenhuma aresta do circuito criado pode custar mais do que ela.</li>
+            <li><b>Empates.</b> Se várias arestas compartilham o custo mínimo de um corte, a propriedade garante que
+              <i>alguma</i> delas entra em alguma AGM — não que uma aresta específica entre em todas. Unicidade da AGM
+              pede unicidade da aresta mínima em <i>todo</i> corte (ex. 110).</li>
+          </ol>
+        </div>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Símbolo</th><th>Significado</th><th>Na Figura 1</th></tr></thead>
+          <tbody>
+            <tr><td><span class="m">ρ(<i>e</i>)</span></td><td>peso da aresta <span class="m"><i>e</i></span></td><td><span class="m">ρ({1,3}) = 1</span></td></tr>
+            <tr><td><span class="m"><i>c</i>(<i>H</i>)</span></td><td>soma dos pesos das arestas de <span class="m"><i>H</i></span></td><td>AGM custa 15</td></tr>
+            <tr><td><span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span></td><td>corte definido por <span class="m"><i>U</i></span></td><td>Figura 2, com <span class="m"><i>U</i> = {1,3,6}</span></td></tr>
+            <tr><td>aresta boa para <span class="m"><i>S</i></span></td><td><span class="m"><i>S</i> ∪ {<i>f</i>}</span> cabe em alguma AGM</td><td><span class="m">{4,6}</span> é boa para <span class="m">{ {1,3}, {3,6} }</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="box def">
+          <div class="h">Resumo do bloco</div>
+          <ul>
+            <li><span class="m"><i>c</i>(<i>H</i>)</span> é a soma dos pesos das arestas de <span class="m"><i>H</i></span>.</li>
+            <li>Uma AGM é uma árvore geradora de custo mínimo. Pode não ser única.</li>
+            <li>O algoritmo genérico só insere arestas boas; o corte que ainda não foi atravessado por
+              <span class="m"><i>S</i></span> entrega uma aresta boa (ex. 107 e 108).</li>
+            <li>Kruskal e Prim são duas maneiras concretas de escolher essa aresta boa.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex14">
+        <div class="ex-head">
+          <h3>Exercícios 104 a 111</h3>
+          <button class="toggle" type="button" data-scope="#ex14" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: existência de AGM contendo (ou evitando) uma aresta dada, propriedade do corte, algoritmo genérico das arestas boas, caracterização por circuitos, unicidade e a distinção entre AGM e caminho mínimo.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 104</span><div class="stmt">
+            <p>Mostre que se <span class="m"><i>e</i></span> é uma aresta de peso mínimo em <span class="m"><i>G</i></span> então <span class="m"><i>e</i></span> pertence a alguma árvore geradora mínima.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h104" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a104" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h104"><div class="plab">Dica</div>
+            <p>Pegue uma AGM qualquer. Se ela já contém <span class="m"><i>e</i></span>, pronto. Se não, <span class="m"><i>T</i> + <i>e</i></span> tem um circuito: troque <span class="m"><i>e</i></span> por outra aresta desse circuito e compare os custos.</p>
+          </div>
+          <div class="panel answer" id="a104"><div class="plab">Resolução</div>
+            <p>Seja <span class="m"><i>e</i></span> uma aresta de peso mínimo em <span class="m"><i>G</i></span>, e seja <span class="m"><i>T</i></span> uma AGM de <span class="m"><i>G</i></span>.</p>
+            <p><b>Caso 1.</b> <span class="m"><i>e</i> ∈ <i>E</i>(<i>T</i>)</span>. Nada a fazer: <span class="m"><i>T</i></span> já é uma AGM contendo <span class="m"><i>e</i></span>.</p>
+            <p><b>Caso 2.</b> <span class="m"><i>e</i> ∉ <i>E</i>(<i>T</i>)</span>. Então <span class="m"><i>T</i> + <i>e</i></span> contém um único circuito <span class="m"><i>C</i></span>. Seja <span class="m"><i>f</i></span> uma aresta de <span class="m"><i>C</i></span> distinta de <span class="m"><i>e</i></span>. A troca <span class="m"><i>T</i>′ = <i>T</i> − <i>f</i> + <i>e</i></span> é uma árvore geradora (sai uma aresta do circuito, entra <span class="m"><i>e</i></span>), e</p>
+            <div class="eq"><div class="body"><i>c</i>(<i>T</i>′) = <i>c</i>(<i>T</i>) − ρ(<i>f</i>) + ρ(<i>e</i>) ≤ <i>c</i>(<i>T</i>),</div></div>
+            <p>porque <span class="m">ρ(<i>e</i>) ≤ ρ(<i>f</i>)</span> por minimalidade de <span class="m"><i>e</i></span> no grafo inteiro. Como <span class="m"><i>T</i></span> já era mínima, <span class="m"><i>T</i>′</span> também é, e contém <span class="m"><i>e</i></span>.</p>
+            <p>Em ambos os casos existe AGM contendo <span class="m"><i>e</i></span>. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 105</span><div class="stmt">
+            <p>Mostre que se <span class="m"><i>e</i></span> é uma aresta de peso máximo em <span class="m"><i>G</i></span> e pertence a um circuito de <span class="m"><i>G</i></span> então existe uma árvore geradora mínima de <span class="m">(<i>V</i>(<i>G</i>), <i>E</i>(<i>G</i>) \ {<i>e</i>})</span> que também é uma árvore geradora mínima de <span class="m"><i>G</i></span>. Mostre que o mesmo vale para toda aresta de peso máximo de todo circuito de <span class="m"><i>G</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h105" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a105" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h105"><div class="plab">Dica</div>
+            <p>A primeira afirmação é o caso especial em que <span class="m"><i>e</i></span> é máxima no grafo inteiro. A segunda relaxa para “máxima no circuito”. Nos dois, a troca é a mesma: se a AGM usa <span class="m"><i>e</i></span>, o corte de <span class="m"><i>T</i> − <i>e</i></span> é atravessado por outra aresta do circuito.</p>
+          </div>
+          <div class="panel answer" id="a105"><div class="plab">Resolução</div>
+            <p class="kicker">Parte 1 · <span class="m"><i>e</i></span> de peso máximo em <span class="m"><i>G</i></span>, e em algum circuito</p>
+            <p>Como <span class="m"><i>e</i></span> pertence a um circuito, <span class="m"><i>G</i> − <i>e</i></span> permanece conexo, logo tem árvore geradora. Seja <span class="m"><i>T</i></span> uma AGM de <span class="m"><i>G</i></span>.</p>
+            <p>Se <span class="m"><i>e</i> ∉ <i>E</i>(<i>T</i>)</span>, então <span class="m"><i>T</i></span> já é árvore geradora de <span class="m"><i>G</i> − <i>e</i></span>. Qualquer árvore geradora de <span class="m"><i>G</i> − <i>e</i></span> é árvore geradora de <span class="m"><i>G</i></span>, portanto custa pelo menos <span class="m"><i>c</i>(<i>T</i>)</span>. Logo <span class="m"><i>T</i></span> é AGM dos dois grafos.</p>
+            <p>Se <span class="m"><i>e</i> ∈ <i>E</i>(<i>T</i>)</span>, então <span class="m"><i>T</i> − <i>e</i></span> tem duas componentes; seja <span class="m"><i>U</i></span> o conjunto de vértices de uma delas. O circuito que contém <span class="m"><i>e</i></span> devolve a <span class="m"><span class="ovl"><i>U</i></span></span> por alguma aresta <span class="m"><i>f</i> ≠ <i>e</i></span>, necessariamente em <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span>. Como <span class="m"><i>e</i></span> tem peso máximo em <span class="m"><i>G</i></span>, <span class="m">ρ(<i>f</i>) ≤ ρ(<i>e</i>)</span>. A árvore <span class="m"><i>T</i>′ = <i>T</i> − <i>e</i> + <i>f</i></span> satisfaz <span class="m"><i>c</i>(<i>T</i>′) ≤ <i>c</i>(<i>T</i>)</span>, logo é AGM de <span class="m"><i>G</i></span>, e não usa <span class="m"><i>e</i></span>: é AGM de <span class="m"><i>G</i> − <i>e</i></span> também.</p>
+            <p class="kicker">Parte 2 · <span class="m"><i>e</i></span> máxima em algum circuito <span class="m"><i>C</i></span></p>
+            <p>O mesmo argumento vale com a hipótese mais fraca <span class="m">ρ(<i>e</i>) ≥ ρ(<i>g</i>)</span> para toda aresta <span class="m"><i>g</i></span> de <span class="m"><i>C</i></span>. A aresta <span class="m"><i>f</i></span> que atravessa o corte de <span class="m"><i>T</i> − <i>e</i></span> pode ser tomada em <span class="m"><i>C</i></span>, e daí <span class="m">ρ(<i>f</i>) ≤ ρ(<i>e</i>)</span>. A troca não encarece. <span style="font-weight:700">□</span></p>
+            <div class="box tip" style="margin-bottom:0">
+              <div class="h">Leitura</div>
+              <p>Arestas máximas de circuitos são dispensáveis para a AGM: o “gargalo” de um ciclo nunca é obrigatório. Kruskal recusa exatamente essas arestas — as que fecham circuito com outras já tão baratas quanto elas, ou mais.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 106</span><div class="stmt">
+            <p>Mostre que para qualquer <span class="m"><i>U</i> ⊂ <i>V</i>(<i>G</i>)</span> não-vazio, a aresta de menor custo em <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span> tem que pertencer a toda árvore geradora mínima de <span class="m"><i>G</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h106" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a106" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h106"><div class="plab">Dica</div>
+            <p>Toda árvore geradora atravessa o corte. Se a AGM atravessa com uma aresta estritamente mais cara, troque. Cuidado com empates: o enunciado fala em “a” aresta de menor custo.</p>
+          </div>
+          <div class="panel answer" id="a106"><div class="plab">Resolução</div>
+            <p>Fixe <span class="m">∅ ≠ <i>U</i> ⊂ <i>V</i>(<i>G</i>)</span> (o complemento <span class="m"><span class="ovl"><i>U</i></span></span> também é não-vazio, senão o corte é vazio). Como <span class="m"><i>G</i></span> é conexo, o corte <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span> é não-vazio. Seja <span class="m"><i>e</i></span> uma aresta de custo mínimo nesse corte, e seja <span class="m"><i>T</i></span> uma AGM.</p>
+            <p>A árvore <span class="m"><i>T</i></span> tem pelo menos uma aresta no corte — senão os dois lados não se comunicam. Seja <span class="m"><i>f</i></span> uma aresta de <span class="m"><i>T</i></span> no corte. Se <span class="m"><i>f</i> = <i>e</i></span>, pronto. Se <span class="m"><i>f</i> ≠ <i>e</i></span>, então <span class="m"><i>T</i> + <i>e</i></span> tem um circuito que usa <span class="m"><i>e</i></span> e pelo menos uma outra aresta do corte, necessariamente uma aresta <span class="m"><i>f</i>′</span> de <span class="m"><i>T</i></span>. A troca <span class="m"><i>T</i> − <i>f</i>′ + <i>e</i></span> tem custo</p>
+            <div class="eq"><div class="body"><i>c</i>(<i>T</i>) − ρ(<i>f</i>′) + ρ(<i>e</i>) ≤ <i>c</i>(<i>T</i>),</div></div>
+            <p>pois <span class="m">ρ(<i>e</i>) ≤ ρ(<i>f</i>′)</span>. Como <span class="m"><i>T</i></span> é mínima, a desigualdade é igualdade, e <span class="m">ρ(<i>e</i>) = ρ(<i>f</i>′)</span>.</p>
+            <p><b>Onde o enunciado precisa de leitura.</b> Se <span class="m"><i>e</i></span> é a <b>única</b> aresta de custo mínimo no corte, então não pode ser <span class="m">ρ(<i>f</i>′) = ρ(<i>e</i>)</span> com <span class="m"><i>f</i>′ ≠ <i>e</i></span>: a desigualdade seria estrita e <span class="m"><i>T</i></span> não seria AGM. Logo <span class="m"><i>e</i> ∈ <i>E</i>(<i>T</i>)</span> para toda AGM. Se há empate no corte, a conclusão correta é mais fraca: toda AGM contém <b>alguma</b> aresta de custo mínimo do corte, mas não necessariamente uma aresta prescrita. Contraexemplo de empate: o ciclo <span class="m"><i>C</i><sub>4</sub></span> com todas as arestas de peso 1; cada corte que isola um vértice tem duas arestas mínimas, e nenhuma delas está em toda AGM. É assim que lemos o enunciado. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 107</span><div class="stmt">
+            <p>Considere a seguinte estratégia para computar uma árvore geradora de custo mínimo: dado um grafo conexo <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>, ρ)</span>, mantemos um conjunto <span class="m"><i>S</i></span> (inicialmente vazio) de arestas e a cada passo escolhemos em <span class="m"><i>E</i> \ <i>S</i></span> uma aresta boa para <span class="m"><i>S</i></span>, onde <b>aresta boa para <span class="m"><i>S</i></span></b> significa que <span class="m"><i>S</i> ∪ {{<i>u</i>,<i>v</i>}}</span> está contido no conjunto de arestas de alguma árvore geradora mínima de <span class="m"><i>G</i></span>. O objetivo é mostrar que no final as arestas de <span class="m"><i>S</i></span> induzem uma árvore geradora mínima de <span class="m"><i>G</i></span>.</p>
+            <div class="algo">
+              <div class="nome">AGM(G)</div>
+<pre>S ← ∅
+<span class="kw">enquanto</span> G[S] não é uma árvore geradora <span class="kw">faça</span>
+    descubra uma aresta f boa para S em E(G) \ S
+    insira f em S
+<span class="kw">devolva</span> S</pre>
+            </div>
+            <p>Suponha que sempre existe pelo menos uma aresta boa para ser escolhida em cada iteração do <span class="m">enquanto</span>. Prove que para qualquer <span class="m"><i>G</i></span> conexo, <span class="m">AGM(<i>G</i>)</span> constrói uma árvore geradora mínima de <span class="m"><i>G</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h107" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a107" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h107"><div class="plab">Dica</div>
+            <p>Use o invariante sugerido no original: antes de cada iteração, <span class="m"><i>S</i></span> é subconjunto das arestas de alguma AGM. O laço termina porque cada inserção aumenta <span class="m">|<i>S</i>|</span> e uma árvore geradora tem exatamente <span class="m">|<i>V</i>| − 1</span> arestas.</p>
+          </div>
+          <div class="panel answer" id="a107"><div class="plab">Resolução</div>
+            <p>Leia <span class="m"><i>G</i>[<i>S</i>]</span> no algoritmo como o subgrafo gerador <span class="m">(<i>V</i>, <i>S</i>)</span> — é o que o teste “é árvore geradora” exige. (O subgrafo induzido só pelas arestas de <span class="m"><i>S</i></span> omitiria isolados e não seria gerador.)</p>
+            <p><b>Invariante.</b> Antes de cada teste do laço, existe uma AGM <span class="m"><i>T</i></span> de <span class="m"><i>G</i></span> com <span class="m"><i>S</i> ⊆ <i>E</i>(<i>T</i>)</span>.</p>
+            <p><b>Inicialização.</b> <span class="m"><i>S</i> = ∅</span> está contido em qualquer AGM. Como <span class="m"><i>G</i></span> é conexo, existe pelo menos uma árvore geradora e, entre as finitas, pelo menos uma de custo mínimo.</p>
+            <p><b>Manutenção.</b> Se o laço executa o corpo, o invariante vale e, por hipótese, existe aresta <span class="m"><i>f</i></span> boa para <span class="m"><i>S</i></span>. Por definição de aresta boa, <span class="m"><i>S</i> ∪ {<i>f</i>}</span> cabe em alguma AGM. Após a inserção, o invariante vale de novo.</p>
+            <p><b>Término.</b> Cada iteração acrescenta uma aresta. Aresta boa não fecha circuito: se <span class="m"><i>S</i> ∪ {<i>f</i>} ⊆ <i>E</i>(<i>T</i>)</span> e <span class="m"><i>T</i></span> é árvore, o conjunto permanece acíclico. Logo <span class="m">|<i>S</i>|</span> cresce de 0 até no máximo <span class="m">|<i>V</i>| − 1</span>. O laço para, e na parada <span class="m">(<i>V</i>, <i>S</i>)</span> é uma árvore geradora.</p>
+            <p><b>Correção.</b> Na parada o invariante ainda vale: <span class="m"><i>S</i> ⊆ <i>E</i>(<i>T</i>)</span> para alguma AGM <span class="m"><i>T</i></span>. Mas <span class="m">|<i>S</i>| = |<i>E</i>(<i>T</i>)| = |<i>V</i>| − 1</span>, portanto <span class="m"><i>S</i> = <i>E</i>(<i>T</i>)</span>. O algoritmo devolve uma AGM. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 108</span><div class="stmt">
+            <p>Agora o objetivo é provar a hipótese assumida no exercício acima: sempre há uma aresta boa para ser escolhida. Prove que se <span class="m"><i>T</i></span> é uma árvore geradora mínima de <span class="m"><i>G</i></span> e <span class="m"><i>S</i> ⊂ <i>E</i>(<i>T</i>)</span> então, para todo <span class="m"><i>U</i> ⊂ <i>V</i>(<i>G</i>)</span> tal que o corte <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span> não contém arestas de <span class="m"><i>S</i></span>, vale o seguinte: uma aresta <span class="m">{<i>u</i>,<i>v</i>}</span> de custo mínimo no corte <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span> é boa para <span class="m"><i>S</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h108" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a108" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h108"><div class="plab">Dica</div>
+            <p>Dados <span class="m"><i>G</i></span>, <span class="m"><i>S</i></span>, <span class="m"><i>T</i></span> como no enunciado, tome <span class="m"><i>U</i></span> e <span class="m"><i>e</i></span> mínima no corte. Dois casos: <span class="m"><i>e</i> ∈ <i>E</i>(<i>T</i>)</span> e <span class="m"><i>e</i> ∉ <i>E</i>(<i>T</i>)</span>. No segundo, o circuito de <span class="m"><i>T</i> + <i>e</i></span> devolve uma aresta <span class="m"><i>f</i></span> do corte que está em <span class="m"><i>T</i></span> e fora de <span class="m"><i>S</i></span>.</p>
+          </div>
+          <div class="panel answer" id="a108"><div class="plab">Resolução</div>
+            <p>Seja <span class="m"><i>T</i></span> uma AGM com <span class="m"><i>S</i> ⊂ <i>E</i>(<i>T</i>)</span>, e seja <span class="m"><i>U</i> ⊂ <i>V</i></span> tal que <span class="m"><i>S</i> ∩ <i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>) = ∅</span>. (Tal <span class="m"><i>U</i></span> existe enquanto <span class="m"><i>S</i></span> não gera: tome uma componente da floresta <span class="m">(<i>V</i>, <i>S</i>)</span>.) Seja <span class="m"><i>e</i></span> uma aresta de custo mínimo no corte. Queremos uma AGM contendo <span class="m"><i>S</i> ∪ {<i>e</i>}</span>.</p>
+            <p><b>Caso 1 · <span class="m"><i>e</i> ∈ <i>E</i>(<i>T</i>)</span>.</b> Então <span class="m"><i>S</i> ∪ {<i>e</i>} ⊆ <i>E</i>(<i>T</i>)</span> e <span class="m"><i>T</i></span> já é AGM. Logo <span class="m"><i>e</i></span> é boa para <span class="m"><i>S</i></span>.</p>
+            <p><b>Caso 2 · <span class="m"><i>e</i> ∉ <i>E</i>(<i>T</i>)</span>.</b> O grafo <span class="m"><i>T</i> + <i>e</i></span> tem um único circuito <span class="m"><i>C</i></span>. Como <span class="m"><i>e</i></span> tem um extremo em <span class="m"><i>U</i></span> e o outro em <span class="m"><span class="ovl"><i>U</i></span></span>, o circuito precisa voltar ao lado de origem: existe aresta <span class="m"><i>f</i> ∈ <i>C</i> \ {<i>e</i>}</span> que também está no corte. Essa <span class="m"><i>f</i></span> pertence a <span class="m"><i>T</i></span> (as demais arestas de <span class="m"><i>C</i></span> estão em <span class="m"><i>T</i></span>) e <b>não</b> pertence a <span class="m"><i>S</i></span> (o corte não contém arestas de <span class="m"><i>S</i></span>). Considere</p>
+            <div class="eq"><div class="body"><i>T</i>′ = <i>T</i> − <i>f</i> + <i>e</i>.</div></div>
+            <p>É árvore geradora, e <span class="m"><i>c</i>(<i>T</i>′) = <i>c</i>(<i>T</i>) − ρ(<i>f</i>) + ρ(<i>e</i>) ≤ <i>c</i>(<i>T</i>)</span> porque <span class="m"><i>e</i></span> é mínima no corte e <span class="m"><i>f</i></span> também está no corte. Logo <span class="m"><i>T</i>′</span> é AGM. Além disso <span class="m"><i>S</i> ⊆ <i>E</i>(<i>T</i>) \ {<i>f</i>}</span> (pois <span class="m"><i>f</i> ∉ <i>S</i></span>), portanto <span class="m"><i>S</i> ∪ {<i>e</i>} ⊆ <i>E</i>(<i>T</i>′)</span>. De novo <span class="m"><i>e</i></span> é boa para <span class="m"><i>S</i></span>.</p>
+            <p>Nos dois casos a aresta mínima do corte é boa. Enquanto <span class="m">(<i>V</i>, <i>S</i>)</span> não for árvore geradora, existe componente própria e portanto um corte sem arestas de <span class="m"><i>S</i></span>: sempre há aresta boa. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 109</span><div class="stmt">
+            <p>Seja <span class="m"><i>T</i> ⊂ <i>G</i></span> uma árvore geradora de um grafo <span class="m"><i>G</i></span> com peso nas arestas. Mostre que <span class="m"><i>T</i></span> é uma árvore geradora mínima se e somente se para toda <span class="m"><i>e</i> ∈ <i>E</i>(<i>G</i>) \ <i>E</i>(<i>T</i>)</span>, o único circuito <span class="m"><i>C</i></span> de <span class="m"><i>T</i> + <i>e</i></span> é tal que todas as arestas de <span class="m"><i>C</i></span> custam não mais que <span class="m">ρ(<i>e</i>)</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h109" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a109" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h109"><div class="plab">Dica</div>
+            <p>Ida: se alguma aresta do circuito custa mais que <span class="m"><i>e</i></span>, a troca barateia. Volta: entre as AGMs, escolha uma com o maior número de arestas em comum com <span class="m"><i>T</i></span> e faça a troca-padrão.</p>
+          </div>
+          <div class="panel answer" id="a109"><div class="plab">Resolução</div>
+            <p class="kicker">Ida (⇒)</p>
+            <p>Suponha que <span class="m"><i>T</i></span> é AGM e tome <span class="m"><i>e</i> ∉ <i>E</i>(<i>T</i>)</span>. Seja <span class="m"><i>C</i></span> o único circuito de <span class="m"><i>T</i> + <i>e</i></span>. Se existisse <span class="m"><i>f</i> ∈ <i>C</i></span> com <span class="m">ρ(<i>f</i>) > ρ(<i>e</i>)</span>, então <span class="m"><i>T</i> − <i>f</i> + <i>e</i></span> seria árvore geradora de custo estritamente menor, contradizendo a minimalidade de <span class="m"><i>T</i></span>. Logo toda aresta de <span class="m"><i>C</i></span> custa no máximo <span class="m">ρ(<i>e</i>)</span>.</p>
+            <p class="kicker">Volta (⇐)</p>
+            <p>Suponha que <span class="m"><i>T</i></span> satisfaz a condição dos circuitos, mas que não é AGM. Entre todas as AGMs, escolha <span class="m"><i>T</i>*</span> com o maior número possível de arestas em comum com <span class="m"><i>T</i></span>. Como os custos diferem, <span class="m"><i>E</i>(<i>T</i>) ≠ <i>E</i>(<i>T</i>*)</span>; tome <span class="m"><i>e</i> ∈ <i>E</i>(<i>T</i>*) \ <i>E</i>(<i>T</i>)</span>. O circuito <span class="m"><i>C</i></span> de <span class="m"><i>T</i> + <i>e</i></span> tem, pela hipótese, <span class="m">ρ(<i>f</i>) ≤ ρ(<i>e</i>)</span> para toda aresta de <span class="m"><i>C</i></span>. Esse circuito não está contido em <span class="m"><i>T</i>*</span>, logo possui uma aresta <span class="m"><i>f</i> ∈ <i>E</i>(<i>T</i>) \ <i>E</i>(<i>T</i>*)</span>. A árvore</p>
+            <div class="eq"><div class="body"><i>T</i>′ = <i>T</i>* − <i>e</i> + <i>f</i></div></div>
+            <p>satisfaz <span class="m"><i>c</i>(<i>T</i>′) = <i>c</i>(<i>T</i>*) − ρ(<i>e</i>) + ρ(<i>f</i>) ≤ <i>c</i>(<i>T</i>*)</span>, portanto é AGM. Mas <span class="m"><i>T</i>′</span> tem uma aresta a mais em comum com <span class="m"><i>T</i></span> do que <span class="m"><i>T</i>*</span> (saiu <span class="m"><i>e</i></span>, que não estava em <span class="m"><i>T</i></span>; entrou <span class="m"><i>f</i></span>, que está em <span class="m"><i>T</i></span>), contradizendo a escolha de <span class="m"><i>T</i>*</span>.</p>
+            <p>Logo <span class="m"><i>T</i></span> é AGM. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 110</span><div class="stmt">
+            <p>Mostre que se para todo corte em <span class="m"><i>G</i></span> existe uma única aresta de custo mínimo no corte, então a árvore geradora de custo mínimo é única. A recíproca dessa afirmação vale? Justifique.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h110" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a110" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h110"><div class="plab">Dica</div>
+            <p>Se houvesse duas AGMs, a troca-padrão produziria duas arestas de mesmo peso num mesmo corte. Para a recíproca, procure um triângulo com dois lados iguais e a base bem mais cara.</p>
+          </div>
+          <div class="panel answer" id="a110"><div class="plab">Resolução</div>
+            <p class="kicker">Unicidade da aresta mínima em todo corte ⇒ AGM única</p>
+            <p>Suponha, por absurdo, que <span class="m"><i>T</i><sub>1</sub></span> e <span class="m"><i>T</i><sub>2</sub></span> são AGMs distintas. Tome <span class="m"><i>e</i> ∈ <i>E</i>(<i>T</i><sub>1</sub>) \ <i>E</i>(<i>T</i><sub>2</sub>)</span>. Então <span class="m"><i>T</i><sub>2</sub> + <i>e</i></span> tem um circuito; nesse circuito há uma aresta <span class="m"><i>f</i> ∈ <i>E</i>(<i>T</i><sub>2</sub>) \ <i>E</i>(<i>T</i><sub>1</sub>)</span>. Seja <span class="m"><i>U</i></span> uma componente de <span class="m"><i>T</i><sub>1</sub> − <i>e</i></span>: tanto <span class="m"><i>e</i></span> quanto <span class="m"><i>f</i></span> pertencem ao corte <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span> (<span class="m"><i>f</i></span> precisa atravessar o corte para fechar o circuito com <span class="m"><i>e</i></span>).</p>
+            <p>As árvores <span class="m"><i>T</i><sub>1</sub> − <i>e</i> + <i>f</i></span> e <span class="m"><i>T</i><sub>2</sub> − <i>f</i> + <i>e</i></span> são geradoras. Como <span class="m"><i>T</i><sub>1</sub></span> e <span class="m"><i>T</i><sub>2</sub></span> são mínimas,</p>
+            <div class="eq"><div class="body">ρ(<i>f</i>) ≥ ρ(<i>e</i>) &nbsp;&nbsp;e&nbsp;&nbsp; ρ(<i>e</i>) ≥ ρ(<i>f</i>),</div></div>
+            <p>logo <span class="m">ρ(<i>e</i>) = ρ(<i>f</i>)</span>. O corte tem duas arestas distintas de custo mínimo, contradizendo a hipótese. Portanto a AGM é única.</p>
+            <p class="kicker">A recíproca não vale</p>
+            <p>Tome o triângulo com vértices <span class="m"><i>a</i>, <i>b</i>, <i>c</i></span> e pesos <span class="m">ρ(<i>ab</i>) = 1</span>, <span class="m">ρ(<i>ac</i>) = 1</span>, <span class="m">ρ(<i>bc</i>) = 100</span>. A única AGM é <span class="m">{<i>ab</i>, <i>ac</i>}</span>, de custo 2: qualquer árvore que use <span class="m"><i>bc</i></span> custa pelo menos 101. Mas o corte definido por <span class="m"><i>U</i> = {<i>a</i>}</span> tem duas arestas de custo mínimo 1. Logo AGM única não implica aresta mínima única em todo corte. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 111</span><div class="stmt">
+            <p>Seja <span class="m"><i>G</i></span> um grafo conexo com pesos positivos nas arestas. Para todo <span class="m"><i>T</i></span> árvore geradora mínima e todo caminho <span class="m"><i>P</i></span> em <span class="m"><i>T</i></span>, <span class="m"><i>P</i></span> é um caminho mínimo em <span class="m"><i>G</i></span>?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h111" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a111" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h111"><div class="plab">Dica</div>
+            <p>Não. Um triângulo com dois lados baratos e a base só um pouco mais cara já separa “soma global mínima” de “distância entre os extremos”.</p>
+          </div>
+          <div class="panel answer" id="a111"><div class="plab">Resolução</div>
+            <p>Não. Contraexemplo: o triângulo com pesos 2, 2 e 3.</p>
+            <figure>
+              <svg class="dg" viewBox="0 0 360 200" role="img" aria-label="Triângulo com vértices a, b e c; arestas ab e bc de peso 2 em azul e aresta ac de peso 3">
+                <line class="e tree" x1="70" y1="160" x2="180" y2="40"/>
+                <line class="e tree" x1="180" y1="40" x2="290" y2="160"/>
+                <line class="e" x1="70" y1="160" x2="290" y2="160"/>
+                <circle class="peso-bg" cx="115" cy="90" r="11"/>
+                <text class="peso" x="115" y="94">2</text>
+                <circle class="peso-bg" cx="245" cy="90" r="11"/>
+                <text class="peso" x="245" y="94">2</text>
+                <circle class="peso-bg" cx="180" cy="160" r="11"/>
+                <text class="peso" x="180" y="164">3</text>
+                <g class="v"><circle cx="70" cy="160" r="16"/><text x="70" y="160">a</text></g>
+                <g class="v"><circle cx="180" cy="40" r="16"/><text x="180" y="40">b</text></g>
+                <g class="v"><circle cx="290" cy="160" r="16"/><text x="290" y="160">c</text></g>
+              </svg>
+              <div class="legend">
+                <span><i class="ln" style="background:var(--brand)"></i>AGM, custo 4</span>
+              </div>
+              <figcaption><b>Figura 3.</b> Contraexemplo do exercício 111, construído para esta versão. Pesos positivos, como pede o enunciado.</figcaption>
+            </figure>
+            <p>A única AGM é o caminho <span class="m"><i>a</i><i>b</i><i>c</i></span>, de custo <span class="m">2 + 2 = 4</span> (a árvore que usa a base custa pelo menos 5). O único caminho em <span class="m"><i>T</i></span> de <span class="m"><i>a</i></span> a <span class="m"><i>c</i></span> tem peso 4, mas em <span class="m"><i>G</i></span> a aresta <span class="m"><i>ac</i></span> é um caminho de peso 3. Logo um caminho da AGM não precisa ser caminho mínimo no grafo. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ============================ §15 ============================ -->
+      <section class="chapter" id="s15">
+        <h2><span class="num">§15</span> Algoritmo de Kruskal</h2>
+        <p class="sub-lead">Objetivo do bloco: escrever Kruskal com union-find, provar que devolve uma AGM (Teorema 19) e contar <span class="cplx"><i>O</i>(|<i>E</i>| log |<i>E</i>|)</span>.</p>
+
+        <h3 id="s15-guloso">15.1 A ideia gulosa</h3>
+        <p>
+          Kruskal percorre as arestas da mais barata para a mais cara e aceita uma aresta precisamente quando ela
+          <b>não fecha circuito</b> com as já escolhidas. Em outras palavras: a cada passo, a aresta candidata é a
+          mais barata que ainda liga duas componentes da floresta corrente — logo é mínima no corte entre essas
+          duas componentes, e o exercício 108 garante que ela é boa.
+        </p>
+        <div class="algo">
+          <div class="nome">Kruskal(G) — versão ingênua</div>
+<pre>S ← ∅
+F ← fila das arestas em ordem não-decrescente de peso
+<span class="kw">para cada</span> e ∈ F <span class="kw">faça</span>
+    <span class="kw">se</span> S ∪ {e} não induz circuito <span class="kw">então</span>
+        insira e em S
+<span class="kw">devolva</span> S</pre>
+        </div>
+        <p>
+          O laço termina depois de examinar todas as arestas. Como <span class="m"><i>G</i></span> é conexo, as
+          <span class="m">|<i>V</i>| − 1</span> arestas aceitas formam uma árvore geradora; o Teorema 19 diz que ela
+          é mínima. A implementação ingênua do teste de circuito é cara; a estrutura certa é a de conjuntos disjuntos.
+        </p>
+
+        <h3 id="s15-uf">15.2 Union-find: make, find, union</h3>
+        <p>
+          Enquanto <span class="m"><i>S</i></span> cresce, ele é uma <b>subfloresta</b> de <span class="m"><i>G</i></span>:
+          uma família de conjuntos disjuntos de vértices (as componentes). O teste da linha “não induz circuito”
+          pergunta se os dois extremos da aresta estão em componentes <b>distintas</b>. Se estão, aceitamos a aresta
+          e <b>unimos</b> as duas componentes.
+        </p>
+        <div class="box def">
+          <div class="h">Estrutura de união-e-busca (union-find)</div>
+          <p>
+            Uma estrutura para conjuntos disjuntos mantém uma família de subconjuntos disjuntos de um universo, elege
+            um <b>representante</b> em cada subconjunto, e oferece três operações:
+          </p>
+          <ul>
+            <li><b>make(<span class="m"><i>x</i></span>)</b> — cria o conjunto unitário <span class="m">{<i>x</i>}</span>;</li>
+            <li><b>find(<span class="m"><i>x</i></span>)</b> — devolve o representante do conjunto que contém <span class="m"><i>x</i></span>;</li>
+            <li><b>union(<span class="m"><i>x</i></span>, <span class="m"><i>y</i></span>)</b> — une os conjuntos que contêm <span class="m"><i>x</i></span> e <span class="m"><i>y</i></span>.</li>
+          </ul>
+        </div>
+        <div class="algo">
+          <div class="nome">Kruskal(G) — com union-find</div>
+<pre><span class="cm">// S começa vazio; as componentes são os vértices isolados</span>
+F ← fila das arestas em ordem não-decrescente de peso
+S ← ∅
+<span class="kw">para cada</span> v ∈ V(G) <span class="kw">faça</span> make(v)
+<span class="kw">para cada</span> {u, v} ∈ F <span class="kw">faça</span>
+    <span class="kw">se</span> find(u) ≠ find(v) <span class="kw">então</span>
+        insira {u, v} em S
+        union(u, v)
+<span class="kw">devolva</span> S</pre>
+        </div>
+        <p>
+          Invariante do laço: os conjuntos do union-find são exatamente as componentes de
+          <span class="m">(<i>V</i>, <i>S</i>)</span>. Por isso <span class="m">find(<i>u</i>) = find(<i>v</i>)</span>
+          se e só se acrescentar <span class="m">{<i>u</i>,<i>v</i>}</span> fecha um circuito. O algoritmo termina
+          porque a fila é finita; devolve uma árvore geradora porque <span class="m"><i>G</i></span> é conexo
+          (as <span class="m">|<i>V</i>| − 1</span> uniões ligam tudo).
+        </p>
+        <p>
+          Na Figura 1, a fila começa <span class="m">{1,3}</span> (peso 1), <span class="m">{4,6}</span> (2),
+          <span class="m">{2,5}</span> (3), <span class="m">{3,6}</span> (4), depois as três arestas de peso 5.
+          As quatro primeiras são aceitas. Entre as de peso 5, <span class="m">{1,4}</span> e
+          <span class="m">{3,4}</span> fecham circuito na componente <span class="m">{1,3,4,6}</span>;
+          <span class="m">{2,3}</span> une <span class="m">{2,5}</span> ao resto e encerra a árvore. Custo 15, como na figura.
+        </p>
+
+        <h3 id="s15-teo19">15.3 Teorema 19</h3>
+        <div class="box thm">
+          <div class="h">Teorema 19</div>
+          <p>O conjunto <span class="m"><i>S</i></span> devolvido pelo algoritmo de Kruskal induz uma árvore geradora mínima de <span class="m"><i>G</i></span>.</p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Seja <span class="m"><i>S</i> = (<i>e</i><sub>1</sub>, <i>e</i><sub>2</sub>, …, <i>e</i><sub><i>n</i>−1</sub>)</span>
+              a sequência em que as arestas foram inseridas, com <span class="m"><i>n</i> = |<i>V</i>|</span>.
+              Entre as AGMs de <span class="m"><i>G</i></span>, escolha <span class="m"><i>T</i></span> com o maior
+              número possível de arestas em comum com <span class="m"><i>S</i></span>. Vamos mostrar que
+              <span class="m"><i>E</i>(<i>T</i>) = <i>S</i></span>.
+            </p>
+            <p>
+              Se <span class="m"><i>E</i>(<i>T</i>) ≠ <i>S</i></span>, tome
+              <span class="m"><i>m</i> = min{ <i>j</i> : <i>e</i><sub><i>j</i></sub> ∉ <i>E</i>(<i>T</i>) }</span>.
+              Por definição, <span class="m"><i>T</i> + <i>e</i><sub><i>m</i></sub></span> contém um circuito; nesse
+              circuito existe uma aresta <span class="m"><i>f</i></span> que não está em <span class="m"><i>S</i></span>.
+            </p>
+            <p>
+              O conjunto <span class="m"><i>S</i> ∪ {<i>f</i>}</span> induz um circuito que <b>não</b> pode usar só
+              arestas de <span class="m">{<i>e</i><sub>1</sub>, …, <i>e</i><sub><i>m</i>−1</sub>}</span>: essas
+              <span class="m"><i>m</i> − 1</span> arestas também pertencem a <span class="m"><i>T</i></span>
+              (por minimalidade de <span class="m"><i>m</i></span>), e <span class="m"><i>T</i></span> é acíclico.
+              Portanto, quando Kruskal examinou <span class="m"><i>f</i></span>, o conjunto então escolhido ainda
+              não fechava circuito com <span class="m"><i>f</i></span> por meio apenas das arestas anteriores a
+              <span class="m"><i>e</i><sub><i>m</i></sub></span>. Como <span class="m"><i>f</i></span> não foi
+              escolhida e as arestas são consideradas em ordem não-decrescente,
+              <span class="m">ρ(<i>f</i>) ≥ ρ(<i>e</i><sub><i>m</i></sub>)</span>.
+            </p>
+            <p>
+              Logo <span class="m"><i>c</i>(<i>T</i> − <i>f</i> + <i>e</i><sub><i>m</i></sub>) ≤ <i>c</i>(<i>T</i>)</span>.
+              Como <span class="m"><i>T</i></span> é de custo mínimo, a árvore
+              <span class="m"><i>T</i> − <i>f</i> + <i>e</i><sub><i>m</i></sub></span> também é, e tem mais arestas em
+              comum com <span class="m"><i>S</i></span> do que <span class="m"><i>T</i></span> — contradizendo a
+              escolha de <span class="m"><i>T</i></span>. Portanto <span class="m"><i>E</i>(<i>T</i>) = <i>S</i></span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+        <div class="box tip">
+          <div class="h">Outra leitura, via exercícios 107–108</div>
+          <p>
+            Kruskal é o algoritmo genérico da §14 com uma regra concreta: a aresta boa da vez é a mais barata que
+            não fecha circuito. O corte entre as duas componentes dos extremos é um corte sem arestas de
+            <span class="m"><i>S</i></span>, e a candidata é mínima nesse corte. O Teorema 19 é o caso particular
+            do exercício 107.
+          </p>
+        </div>
+
+        <h3 id="s15-cplx">15.4 Complexidade</h3>
+        <p>
+          A ordenação das arestas custa <span class="cplx"><i>O</i>(|<i>E</i>| log |<i>E</i>|)</span>. O restante é
+          union-find. Dentre as representações clássicas, a floresta com <b>união por rank</b> e <b>compressão de
+          caminhos</b> tem o desempenho do Teorema 20:
+        </p>
+        <div class="box thm">
+          <div class="h">Teorema 20</div>
+          <p>
+            O tempo gasto com <span class="m"><i>m</i></span> operações num universo com
+            <span class="m"><i>n</i></span> elementos é
+            <span class="cplx"><i>O</i>((<i>m</i> + <i>n</i>) lg<sup>∗</sup>(<i>n</i>))</span>.
+          </p>
+        </div>
+        <p>
+          Denotamos por <span class="m">lg<sup>∗</sup>(<i>n</i>)</span> o número de vezes que é preciso iterar
+          <span class="m">lg</span> até o valor ficar menor ou igual a 1. Por exemplo
+          <span class="m">lg<sup>∗</sup>(2<sup>16</sup>) = 4</span>, porque
+          <span class="m">lg 65536 = 16</span>, <span class="m">lg 16 = 4</span>,
+          <span class="m">lg 4 = 2</span> e <span class="m">lg 2 = 1</span>. Na prática,
+          <span class="m">lg<sup>∗</sup>(<i>n</i>) ≤ 5</span> para todo <span class="m"><i>n</i></span> que caiba na memória.
+        </p>
+        <p>
+          Kruskal faz menos que <span class="m">2(|<i>E</i>| + |<i>V</i>|)</span> operações
+          <span class="m">make</span>, <span class="m">find</span> e <span class="m">union</span>. Pelo Teorema 20,
+          isso custa <span class="cplx"><i>O</i>((|<i>E</i>| + |<i>V</i>|) lg<sup>∗</sup>|<i>V</i>|)</span>,
+          que some à ordenação e resulta
+        </p>
+        <div class="eq"><div class="body">
+          <i>O</i>(|<i>E</i>| log |<i>E</i>|).
+        </div></div>
+        <p>
+          A ordenação é o termo dominante: <span class="m">lg<sup>∗</sup></span> cresce tão devagar que o union-find
+          é, para todos os efeitos, linear. Se os pesos já vêm ordenados, ou se são inteiros pequenos (ex. 115),
+          o gargalo muda.
+        </p>
+        <div class="box warn">
+          <div class="h">Atenção · Kruskal não escolhe “a” AGM</div>
+          <p>
+            Quando há empates de peso, a ordem entre arestas de mesmo custo decide <i>qual</i> AGM sai. Toda AGM é
+            Kruskal para alguma ordenação (ex. 112). Se os pesos são todos distintos, a AGM é única (corolário do ex. 110:
+            cada corte tem no máximo uma aresta de cada peso, logo a mínima é única).
+          </p>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex15">
+        <div class="ex-head">
+          <h3>Exercícios 112 a 116</h3>
+          <button class="toggle" type="button" data-scope="#ex15" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: Kruskal devolve qualquer AGM dada uma ordenação adequada, subgrafos conexos de peso mínimo, implementação por heap, pesos inteiros pequenos e a AGM que minimiza a aresta mais cara.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 112</span><div class="stmt">
+            <p>Mostre que para toda árvore geradora mínima <span class="m"><i>T</i> ⊂ <i>G</i></span> existe uma ordenação nas arestas de <span class="m"><i>G</i></span> tal que <span class="m"><i>T</i></span> é a árvore devolvida pelo algoritmo de Kruskal.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h112" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a112" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h112"><div class="plab">Dica</div>
+            <p>Ordene por peso não-decrescente e, em caso de empate, coloque as arestas de <span class="m"><i>T</i></span> antes das outras. Use o exercício 109 para garantir que as arestas fora de <span class="m"><i>T</i></span> fecham circuito com arestas já aceitas.</p>
+          </div>
+          <div class="panel answer" id="a112"><div class="plab">Resolução</div>
+            <p>Fixe uma AGM <span class="m"><i>T</i></span>. Ordene <span class="m"><i>E</i>(<i>G</i>)</span> em ordem não-decrescente de peso e, entre arestas de mesmo peso, coloque primeiro as que pertencem a <span class="m"><i>T</i></span>. Rode Kruskal nessa ordem. Afirmamos que o conjunto aceito é exatamente <span class="m"><i>E</i>(<i>T</i>)</span>.</p>
+            <p><b>Invariante.</b> Toda aresta já aceita pertence a <span class="m"><i>T</i></span>.</p>
+            <p>Quando Kruskal considera <span class="m"><i>e</i> ∈ <i>E</i>(<i>T</i>)</span>: as arestas já aceitas formam um subconjunto de <span class="m"><i>T</i></span>, que é acíclico, logo <span class="m"><i>e</i></span> não fecha circuito e é aceita.</p>
+            <p>Quando Kruskal considera <span class="m"><i>e</i> ∉ <i>E</i>(<i>T</i>)</span>: o circuito <span class="m"><i>C</i></span> de <span class="m"><i>T</i> + <i>e</i></span> tem, pelo exercício 109, <span class="m">ρ(<i>f</i>) ≤ ρ(<i>e</i>)</span> para toda aresta <span class="m"><i>f</i></span> de <span class="m"><i>C</i></span>. As demais arestas de <span class="m"><i>C</i></span> estão em <span class="m"><i>T</i></span>. Se <span class="m">ρ(<i>f</i>) &lt; ρ(<i>e</i>)</span>, então <span class="m"><i>f</i></span> já foi considerada e, pelo invariante, aceita. Se <span class="m">ρ(<i>f</i>) = ρ(<i>e</i>)</span>, então <span class="m"><i>f</i> ∈ <i>T</i></span> aparece antes de <span class="m"><i>e</i></span> na nossa ordenação, e também já foi aceita. Logo todas as outras arestas de <span class="m"><i>C</i></span> já estão em <span class="m"><i>S</i></span>: Kruskal recusa <span class="m"><i>e</i></span>.</p>
+            <p>No fim, as <span class="m"><i>n</i> − 1</span> arestas de <span class="m"><i>T</i></span> foram aceitas e nenhuma outra. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 113</span><div class="stmt">
+            <p>Suponha que todos os pesos das arestas de <span class="m"><i>G</i></span> são positivos. Mostre que qualquer subconjunto de arestas que induz um subgrafo conexo e tem peso total mínimo é uma árvore. Dê um exemplo com pesos não-positivos onde a conclusão não vale.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a113" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a113"><div class="plab">Resolução</div>
+            <p class="kicker">Pesos positivos ⇒ o subgrafo conexo de custo mínimo é árvore</p>
+            <p>Seja <span class="m"><i>H</i></span> um subgrafo gerador conexo de custo mínimo. (O enunciado fala em “subgrafo conexo”; para o mínimo global fazer sentido frente à AGM, lemos <i>gerador</i> — senão um único vértice, com custo 0, ganharia sempre.) Se <span class="m"><i>H</i></span> não é árvore, contém um circuito. Remova uma aresta <span class="m"><i>e</i></span> desse circuito: o grafo permanece conexo e gerador, e o custo cai <span class="m">ρ(<i>e</i>) > 0</span>. Contradição. Logo <span class="m"><i>H</i></span> é árvore — e, sendo de custo mínimo entre os conexos geradores, é AGM.</p>
+            <p class="kicker">Contraexemplo com pesos não-positivos</p>
+            <p>Tome o triângulo com as três arestas de peso 0. Qualquer árvore geradora custa 0, e o próprio triângulo — conexo, gerador, com circuito — também custa 0. O subgrafo conexo de peso total mínimo não é necessariamente árvore. (O mesmo vale com uma árvore de pesos quaisquer mais uma aresta extra de peso 0 que não a barateie nem a encareça.)</p>
+            <p>O enunciado não deixa explícito se o subgrafo precisa ser gerador; a afirmação só vale nesse caso, e é assim que resolvemos acima. Um subgrafo conexo não gerador de custo mínimo, com pesos positivos, seria um único vértice. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 114</span><div class="stmt">
+            <p>Escreva uma versão do algoritmo de Kruskal que, ao invés de ordenar as arestas por custo, usa uma fila de prioridades (heap, por exemplo) onde a maior prioridade é da aresta fora de <span class="m"><i>S</i></span> de menor custo. Determine a complexidade dessa implementação. Essa versão do algoritmo é mais eficiente?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a114" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a114"><div class="plab">Resolução</div>
+            <div class="algo">
+              <div class="nome">Kruskal-Heap(G)</div>
+<pre>S ← ∅
+<span class="kw">para cada</span> v ∈ V(G) <span class="kw">faça</span> make(v)
+Q ← heap mínimo com todas as arestas, chave = peso
+<span class="kw">enquanto</span> Q não está vazia e |S| &lt; |V| − 1 <span class="kw">faça</span>
+    {u, v} ← extract-min(Q)
+    <span class="kw">se</span> find(u) ≠ find(v) <span class="kw">então</span>
+        insira {u, v} em S
+        union(u, v)
+<span class="kw">devolva</span> S</pre>
+            </div>
+            <p>Montar o heap custa <span class="cplx"><i>O</i>(|<i>E</i>|)</span>. Cada <span class="m">extract-min</span> custa <span class="cplx"><i>O</i>(log |<i>E</i>|)</span>, e no pior caso extraímos Θ(<span class="m">|<i>E</i>|</span>) arestas — por exemplo duas cliques ligadas por uma ponte cara: todas as arestas internas, mais baratas, são extraídas e recusadas antes da ponte. Union-find permanece essencialmente linear. Total:</p>
+            <div class="eq"><div class="body"><i>O</i>(|<i>E</i>| log |<i>E</i>|).</div></div>
+            <p>É o mesmo pior caso da versão que ordena. <b>Não é assintoticamente mais eficiente.</b> Em instâncias amigáveis (a árvore se completa depois de poucas extrações) ganhamos o fato de o heap ser construído em tempo linear e de pararmos ao aceitar <span class="m"><i>n</i> − 1</span> arestas; no pior caso isso não ajuda. Ordenar de uma vez costuma ter constante menor do que <span class="m">|<i>E</i>|</span> extrações. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 115</span><div class="stmt">
+            <p>Suponha que os pesos das arestas são inteiros de 1 até <span class="m">|<i>V</i>|</span>. Quão rápido você consegue fazer o algoritmo de Kruskal? E se os pesos das arestas são inteiros de 1 até uma constante <span class="m"><i>m</i></span>?</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a115" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a115"><div class="plab">Resolução</div>
+            <p>O gargalo clássico é a ordenação em <span class="cplx"><i>O</i>(|<i>E</i>| log |<i>E</i>|)</span>. Com pesos inteiros num intervalo pequeno, ordenamos em tempo linear no número de arestas.</p>
+            <p class="kicker">Pesos em <span class="m">{1, 2, …, |<i>V</i>|}</span></p>
+            <p>Counting sort (ou radix sort) ordena <span class="m">|<i>E</i>|</span> chaves no intervalo <span class="m">{1, …, <i>n</i>}</span> em tempo <span class="cplx"><i>O</i>(|<i>E</i>| + |<i>V</i>|)</span>. Como <span class="m"><i>G</i></span> é conexo, <span class="m">|<i>E</i>| ≥ |<i>V</i>| − 1</span>, e isso é <span class="cplx"><i>O</i>(|<i>E</i>|)</span>. O union-find acrescenta <span class="cplx"><i>O</i>(|<i>E</i>| lg<sup>∗</sup>|<i>V</i>|)</span>. Kruskal fica</p>
+            <div class="eq"><div class="body"><i>O</i>(|<i>E</i>| lg<sup>∗</sup>|<i>V</i>|),</div></div>
+            <p>essencialmente linear nas arestas.</p>
+            <p class="kicker">Pesos em <span class="m">{1, 2, …, <i>m</i>}</span> com <span class="m"><i>m</i></span> constante</p>
+            <p>Counting sort custa <span class="cplx"><i>O</i>(|<i>E</i>| + <i>m</i>) = <i>O</i>(|<i>E</i>|)</span>. O total é de novo <span class="cplx"><i>O</i>(|<i>E</i>| lg<sup>∗</sup>|<i>V</i>|)</span>, agora com a ordenação estritamente linear e constante ainda menor. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 116</span><div class="stmt">
+            <p>Escreva um algoritmo que constrói uma árvore geradora mínima cuja aresta de maior peso tem peso mínimo dentre todas as árvores geradoras do grafo.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h116" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a116" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h116"><div class="plab">Dica</div>
+            <p>Essa é a árvore geradora de gargalo mínimo. Toda AGM (no sentido da soma) já é uma árvore de gargalo mínimo: olhe o corte definido pela aresta mais cara da AGM.</p>
+          </div>
+          <div class="panel answer" id="a116"><div class="plab">Resolução</div>
+            <p>O objeto pedido é uma árvore geradora <span class="m"><i>T</i></span> que minimiza <span class="m">max{ ρ(<i>e</i>) : <i>e</i> ∈ <i>E</i>(<i>T</i>) }</span> — às vezes chamada de árvore geradora de gargalo mínimo. Toda AGM (de custo, a da soma) resolve o problema.</p>
+            <p><b>Justificativa.</b> Seja <span class="m"><i>T</i></span> uma AGM e <span class="m"><i>e</i></span> uma aresta de peso máximo em <span class="m"><i>T</i></span>. O corte definido por uma componente de <span class="m"><i>T</i> − <i>e</i></span> tem <span class="m"><i>e</i></span> como aresta de custo mínimo: senão a troca do exercício 108 baratearia <span class="m"><i>T</i></span>. Toda árvore geradora atravessa esse corte, portanto possui alguma aresta de peso pelo menos <span class="m">ρ(<i>e</i>)</span>. Nenhuma árvore geradora tem gargalo estritamente menor que o de <span class="m"><i>T</i></span>.</p>
+            <div class="algo">
+              <div class="nome">AGM-Gargalo(G)</div>
+<pre><span class="cm">// qualquer AGM serve; Kruskal é uma implementação</span>
+<span class="kw">devolva</span> Kruskal(G)</pre>
+            </div>
+            <p>Complexidade: a de Kruskal, <span class="cplx"><i>O</i>(|<i>E</i>| log |<i>E</i>|)</span>. Prim também serve. Uma leitura equivalente: a última aresta aceita por Kruskal é um gargalo mínimo — depois dela o grafo das arestas já consideradas fica conexo pela primeira vez. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ============================ §16 ============================ -->
+      <section class="chapter" id="s16">
+        <h2><span class="num">§16</span> Algoritmo de Prim</h2>
+        <p class="sub-lead">Objetivo do bloco: crescer um conjunto <span class="m"><i>U</i></span> a partir de um vértice, sempre atravessando o corte com a aresta mais barata; a correção fica para o exercício 117 e a complexidade, para o 118.</p>
+
+        <h3 id="s16-ideia">16.1 Crescer <span class="m"><i>U</i></span> a partir de um vértice</h3>
+        <p>
+          Kruskal constrói uma floresta que vai coalescendo. Prim constrói <b>uma</b> árvore, sempre conexa, a partir
+          de um vértice arbitrário. O conjunto <span class="m"><i>U</i></span> dos vértices já alcançados começa unitário
+          e engole um vértice por vez: o extremo, fora de <span class="m"><i>U</i></span>, da aresta mais barata do
+          corte <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span>.
+        </p>
+        <p>
+          Na Figura 2 isso é literal: <span class="m"><i>U</i> = {1,3,6}</span> e a próxima aresta é a de peso 2.
+          A árvore azul dentro de <span class="m"><i>U</i></span> nunca se desconecta.
+        </p>
+        <div class="box warn">
+          <div class="h">Atenção · quem entra em <span class="m"><i>U</i></span></div>
+          <p>
+            Entra o vértice que está <b>fora</b> de <span class="m"><i>U</i></span> — o outro extremo da aresta mínima
+            do corte. (O texto extraído do original escreve “vértice de <span class="m"><i>U</i></span>”; o extremo
+            que falta é o de <span class="m"><span class="ovl"><i>U</i></span></span>.)
+          </p>
+        </div>
+
+        <h3 id="s16-algo">16.2 Prim(G) e o invariante</h3>
+        <div class="algo">
+          <div class="nome">Prim(G)</div>
+<pre><span class="cm">// G conexo; v é um vértice arbitrário</span>
+escolha v ∈ V(G)
+U ← {v}
+S ← ∅
+<span class="kw">enquanto</span> U ≠ V(G) <span class="kw">faça</span>
+    seja {u, w} uma aresta de peso mínimo em E(U, Ū), com u ∈ U
+    insira {u, w} em S
+    insira w em U
+<span class="kw">devolva</span> S</pre>
+        </div>
+        <p>
+          <b>Invariante.</b> No início de cada iteração, <span class="m">(<i>U</i>, <i>S</i>)</span> é uma árvore, e
+          <span class="m"><i>S</i></span> está contido em alguma AGM de <span class="m"><i>G</i></span>. Isso é a
+          especialização do invariante do exercício 107 ao corte
+          <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span>, que por construção não contém
+          arestas de <span class="m"><i>S</i></span> (todas as arestas de <span class="m"><i>S</i></span> têm os dois
+          extremos em <span class="m"><i>U</i></span>). A aresta mínima do corte é boa pelo exercício 108.
+          A prova completa é o exercício 117.
+        </p>
+        <p>
+          <b>Término.</b> Cada iteração acrescenta um vértice a <span class="m"><i>U</i></span>. Como
+          <span class="m"><i>G</i></span> é conexo, o corte é não-vazio enquanto
+          <span class="m"><i>U</i> ≠ <i>V</i></span>. Depois de <span class="m">|<i>V</i>| − 1</span> iterações,
+          <span class="m"><i>U</i> = <i>V</i></span> e <span class="m">|<i>S</i>| = |<i>V</i>| − 1</span>.
+        </p>
+        <p>
+          <b>Complexidade ingênua.</b> Se, a cada rodada, percorremos todas as arestas para achar a mínima do corte,
+          gastamos <span class="cplx"><i>O</i>(|<i>V</i>| · |<i>E</i>|)</span>. A implementação esperta é a de Dijkstra:
+          cada vértice fora de <span class="m"><i>U</i></span> guarda a aresta mais barata que o liga a
+          <span class="m"><i>U</i></span>, e essas chaves vivem num heap. O exercício 118 pede
+          <span class="cplx"><i>O</i>(|<i>E</i>| log |<i>V</i>|)</span>.
+        </p>
+        <p>
+          Na Figura 1, partindo do vértice 1, Prim escolhe nesta ordem
+          <span class="m">{1,3}</span> (peso 1), <span class="m">{3,6}</span> (4),
+          <span class="m">{4,6}</span> (2), <span class="m">{2,3}</span> (5),
+          <span class="m">{2,5}</span> (3) — a mesma AGM, outra ordem de inserção.
+        </p>
+        <div class="box rec">
+          <div class="h">Receita · Kruskal ou Prim?</div>
+          <ol>
+            <li><b>Mesma correção, gulosos diferentes.</b> Os dois são instâncias do algoritmo genérico da §14. Kruskal
+              escolhe a aresta boa globalmente mais barata que não fecha circuito; Prim escolhe a aresta boa do corte
+              da árvore corrente.</li>
+            <li><b>Implementação.</b> Kruskal: ordene arestas + union-find,
+              <span class="cplx"><i>O</i>(|<i>E</i>| log |<i>E</i>|)</span>. Prim: heap de vértices como em Dijkstra,
+              <span class="cplx"><i>O</i>(|<i>E</i>| log |<i>V</i>|)</span>.</li>
+            <li><b>Na prova.</b> Para Kruskal, Teorema 19 (já escrito). Para Prim, reproduza o invariante do ex. 107
+              no corte de <span class="m"><i>U</i></span> (ex. 117).</li>
+          </ol>
+        </div>
+        <div class="box def">
+          <div class="h">Resumo do bloco</div>
+          <ul>
+            <li>Prim parte de <span class="m"><i>U</i> = {<i>v</i>}</span> e absorve, a cada passo, o extremo em
+              <span class="m"><span class="ovl"><i>U</i></span></span> da aresta mínima do corte.</li>
+            <li>O conjunto <span class="m"><i>S</i></span> das arestas escolhidas é sempre uma árvore em
+              <span class="m"><i>U</i></span>, e permanece subconjunto de alguma AGM.</li>
+            <li>Com heap, o tempo é o de Dijkstra: <span class="cplx"><i>O</i>(|<i>E</i>| log |<i>V</i>|)</span>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex16">
+        <div class="ex-head">
+          <h3>Exercícios 117 e 118</h3>
+          <button class="toggle" type="button" data-scope="#ex16" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: correção de Prim pelo invariante das arestas boas, e complexidade no estilo de Dijkstra.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 117</span><div class="stmt">
+            <p>Prove que o algoritmo de Prim está correto.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h117" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a117" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h117"><div class="plab">Dica</div>
+            <p>Prim é o algoritmo genérico do exercício 107, com a aresta boa fornecida pelo exercício 108 no corte <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span>. Escreva o invariante em termos de <span class="m"><i>U</i></span> e <span class="m"><i>S</i></span>.</p>
+          </div>
+          <div class="panel answer" id="a117"><div class="plab">Resolução</div>
+            <p>Seja <span class="m"><i>G</i></span> conexo. Prim devolve um conjunto <span class="m"><i>S</i></span> de arestas. Mostramos que <span class="m">(<i>V</i>, <i>S</i>)</span> é uma AGM.</p>
+            <p><b>Invariante.</b> No início de cada iteração do <span class="m">enquanto</span>:</p>
+            <ol>
+              <li><span class="m">(<i>U</i>, <i>S</i>)</span> é uma árvore (em particular, <span class="m">|<i>S</i>| = |<i>U</i>| − 1</span>);</li>
+              <li>existe uma AGM <span class="m"><i>T</i></span> de <span class="m"><i>G</i></span> com <span class="m"><i>S</i> ⊆ <i>E</i>(<i>T</i>)</span>.</li>
+            </ol>
+            <p><b>Inicialização.</b> <span class="m"><i>U</i> = {<i>v</i>}</span>, <span class="m"><i>S</i> = ∅</span>: uma árvore trivial, e o vazio cabe em qualquer AGM.</p>
+            <p><b>Manutenção.</b> Enquanto <span class="m"><i>U</i> ≠ <i>V</i></span>, o corte <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span> é não-vazio (<span class="m"><i>G</i></span> conexo) e não contém arestas de <span class="m"><i>S</i></span> (os dois extremos de cada aresta de <span class="m"><i>S</i></span> estão em <span class="m"><i>U</i></span>). Pelo exercício 108, uma aresta <span class="m">{<i>u</i>,<i>w</i>}</span> de custo mínimo nesse corte, com <span class="m"><i>w</i> ∉ <i>U</i></span>, é boa para <span class="m"><i>S</i></span>: existe AGM contendo <span class="m"><i>S</i> ∪ {<i>u</i>,<i>w</i>}</span>. Inserir a aresta em <span class="m"><i>S</i></span> e o vértice <span class="m"><i>w</i></span> em <span class="m"><i>U</i></span> preserva (1) — acrescentamos uma folha — e preserva (2).</p>
+            <p><b>Término.</b> Cada iteração aumenta <span class="m">|<i>U</i>|</span> em 1, logo há exatamente <span class="m">|<i>V</i>| − 1</span> iterações. Na parada, <span class="m"><i>U</i> = <i>V</i></span> e, por (1), <span class="m">(<i>V</i>, <i>S</i>)</span> é árvore geradora. Por (2), essa árvore está contida em alguma AGM e tem o mesmo número de arestas: é ela mesma uma AGM.</p>
+            <p>(Equivalentemente: Prim instancia <span class="m">AGM(<i>G</i>)</span> do exercício 107, e a hipótese da existência de aresta boa em cada passo é o exercício 108 aplicado ao corte de <span class="m"><i>U</i></span>.) <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 118</span><div class="stmt">
+            <p>Com base na análise do algoritmo de Dijkstra, mostre que Prim tem complexidade <span class="m"><i>O</i>(|<i>E</i>| log |<i>V</i>|)</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a118" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a118"><div class="plab">Resolução</div>
+            <p>A implementação ingênua — varrer o corte a cada rodada — não dá o bound pedido. A implementação no estilo de Dijkstra é a seguinte.</p>
+            <p>Para cada vértice <span class="m"><i>w</i> ∉ <i>U</i></span> mantenha a chave</p>
+            <div class="eq"><div class="body">
+              chave(<i>w</i>) = min{ ρ({<i>u</i>,<i>w</i>}) : <i>u</i> ∈ <i>U</i>, {<i>u</i>,<i>w</i>} ∈ <i>E</i> },
+            </div></div>
+            <p>ou <span class="m">∞</span> se não houver aresta para <span class="m"><i>U</i></span>. Guarde também o vizinho em <span class="m"><i>U</i></span> que realiza o mínimo (o predecessor). As chaves dos vértices fora de <span class="m"><i>U</i></span> ficam num <b>heap mínimo</b>.</p>
+            <p>Cada iteração faz <span class="m">extract-min</span> e obtém o próximo <span class="m"><i>w</i></span> a entrar em <span class="m"><i>U</i></span> — exatamente o extremo da aresta mínima do corte. Depois, para cada vizinho <span class="m"><i>x</i></span> de <span class="m"><i>w</i></span> ainda fora de <span class="m"><i>U</i></span>, se <span class="m">ρ({<i>w</i>,<i>x</i>}) &lt; chave(<i>x</i>)</span> então atualiza a chave (<span class="m">decrease-key</span>).</p>
+            <p>Contagem, idêntica à de Dijkstra com heap binário:</p>
+            <ul>
+              <li><span class="m">|<i>V</i>|</span> operações <span class="m">extract-min</span>, cada uma <span class="cplx"><i>O</i>(log |<i>V</i>|)</span>;</li>
+              <li>no máximo <span class="m">|<i>E</i>|</span> operações <span class="m">decrease-key</span> (uma por aresta, quando o extremo recém-inserido tenta melhorar a chave do outro), cada uma <span class="cplx"><i>O</i>(log |<i>V</i>|)</span>.</li>
+            </ul>
+            <p>Total <span class="cplx"><i>O</i>(|<i>E</i>| log |<i>V</i>|)</span>. (Inicializar as chaves em <span class="m">∞</span> e a de <span class="m"><i>v</i></span> em 0, e montar o heap, custa <span class="cplx"><i>O</i>(|<i>V</i>|)</span>.)</p>
+            <p>A analogia com Dijkstra é literal: as “distâncias” são pesos de uma única aresta até a fronteira de <span class="m"><i>U</i></span>, não somas ao longo de um caminho. A estrutura de dados e a contagem não mudam. <span style="font-weight:700">□</span></p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="09-arvores-e-florestas.html"><span class="dir">Capítulo anterior</span><span class="ttl">9. Árvores e florestas</span></a>
+        <a class="next" href="11-emparelhamento-e-cobertura.html"><span class="dir">Próximo capítulo</span><span class="ttl">11. Emparelhamento e cobertura</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática das seções “Árvores geradoras de custo mínimo em grafos com peso nas arestas”,
+          “Algoritmo de Kruskal para árvore geradora mínima” e “Algoritmo de Prim para árvore geradora mínima” das notas de
+          Teoria dos Grafos (CI065 / BC1429) do Prof. Jair Donadelli. Enunciados dos exercícios preservados;
+          explicações, diagramas e resoluções foram escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>

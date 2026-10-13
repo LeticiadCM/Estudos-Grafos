@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7. Caminhos mínimos — Teoria dos Grafos</title>
+<meta name="description" content="Caminhos mínimos em grafos com pesos: desigualdade triangular, Dijkstra com invariantes e complexidade, e os algoritmos de Bellman–Ford e Floyd–Warshall nos exercícios 73 a 85.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo 7 · Pesos nas arestas</span>
+    <h1>Caminhos mínimos</h1>
+    <p class="lead">
+      Até aqui o comprimento de um caminho era o número de arestas. Com pesos, comprimento passa a ser uma soma,
+      e “o menor caminho” deixa de ser óbvio no desenho. Ao terminar, você saberá usar a desigualdade triangular
+      ponderada, justificar por que todo subcaminho de um caminho mínimo é mínimo, e executar Dijkstra com as
+      invariantes que o tornam correto — sabendo o custo <span class="m"><span class="cplx"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span></span>
+      versus heap e por que peso negativo quebra o algoritmo. Bellman–Ford e Floyd–Warshall entram nos enunciados
+      dos exercícios 80 e 82; a análise fica na resposta.
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> terna <span class="m">(<i>V</i>,<i>E</i>,ρ)</span> · comprimento como soma · desigualdade triangular (27) · Dijkstra · invariantes · heap · pesos negativos</span>
+      <span><b>Exercícios:</b> 13 com resolução (73 a 85)</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#como-usar">Como usar</a>
+        <a href="#s10">10. Caminhos mínimos com pesos</a>
+        <a class="sub" href="#s10-def">A terna (V, E, ρ)</a>
+        <a class="sub" href="#s10-comp">Comprimento e distância</a>
+        <a class="sub" href="#s10-ex">Exemplo: caminho de peso 10</a>
+        <a class="sub" href="#s10-lista">Lista de adjacências</a>
+        <a class="sub" href="#s10-tri">Triângulo ponderado e subcaminhos</a>
+        <a href="#ex1">Exercícios 73 a 75</a>
+        <a href="#s11">11. Algoritmo de Dijkstra</a>
+        <a class="sub" href="#s11-inicie">Inicie e Relaxação</a>
+        <a class="sub" href="#s11-algo">Dijkstra(G, s)</a>
+        <a class="sub" href="#s11-trace">Execução passo a passo</a>
+        <a class="sub" href="#s11-corr">Invariantes e o Teorema 14</a>
+        <a class="sub" href="#s11-cplx">Complexidade: vetor vs heap</a>
+        <a class="sub" href="#s11-neg">Pesos negativos</a>
+        <a href="#ex2">Exercícios 76 a 85</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <section class="chapter" id="como-usar">
+        <div class="box tip">
+          <div class="h">Como aproveitar este material</div>
+          <ol>
+            <li><b>Leia a teoria do bloco</b> — ela contém exatamente o que os exercícios seguintes exigem, nada além.</li>
+            <li><b>Tente o exercício sem abrir nada.</b> Se travar, use o botão <i>Dica</i> (quando existir) antes da resposta.</li>
+            <li><b>Só então abra <i>Mostrar resposta</i></b> e compare o seu raciocínio com o argumento apresentado.</li>
+          </ol>
+          <p>As respostas ficam ocultas por padrão. O botão no topo da página abre ou fecha todas de uma vez, e a impressão da página já sai com tudo aberto.</p>
+        </div>
+        <p>
+          Este capítulo continua do <a href="06-caminhos-e-circuitos.html">capítulo 6</a>: caminho, comprimento sem pesos e
+          <span class="m">dist<sub><i>G</i></sub>(<i>u</i>,<i>v</i>)</span> já estão definidos. Aqui a aresta ganha um número, e a
+          distância passa a ser o infimo das <i>somas</i>. Grafos não alcançáveis continuam a distância
+          <span class="m">∞</span>, com as regras <span class="m"><i>n</i> &lt; ∞</span> e
+          <span class="m"><i>n</i> + ∞ = ∞</span> para todo <span class="m"><i>n</i> ∈ ℕ</span>.
+        </p>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 10 ============================ -->
+      <section class="chapter" id="s10">
+        <h2><span class="num">§10</span> Caminhos mínimos em grafos com pesos nas arestas</h2>
+        <p class="sub-lead">Objetivo do bloco: tratar um grafo como uma terna com pesos não negativos, medir comprimento pela soma, e usar duas propriedades que sustentam Dijkstra — o triângulo ponderado e o fato de que subcaminho de mínimo é mínimo.</p>
+
+        <h3 id="s10-def">10.1 A terna (V, E, ρ)</h3>
+        <p>
+          Um grafo “sem pesos” trata toda aresta como tendo o mesmo custo 1. Isso modela número de escalas, mas não
+          quilometragem, tempo nem tarifa. A correção é pequena: cada aresta recebe um número.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · grafo com pesos</div>
+          <p>
+            Um <b>grafo com pesos nas arestas</b> é uma terna <span class="m">(<i>V</i>, <i>E</i>, ρ)</span> em que
+            <span class="m">(<i>V</i>, <i>E</i>)</span> é um grafo e
+            <span class="m">ρ: <i>E</i> → ℝ<sub>+</sub></span> atribui a cada aresta um <b>peso</b> (também chamado de
+            comprimento da aresta). Escrevemos <span class="m">ρ(<i>u</i>,<i>v</i>)</span> ou
+            <span class="m">ρ({<i>u</i>,<i>v</i>})</span> para o peso da aresta que liga
+            <span class="m"><i>u</i></span> a <span class="m"><i>v</i></span>.
+          </p>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · o que ℝ<sub>+</sub> está dizendo</div>
+          <p>
+            As provas deste capítulo usam <b>pesos não negativos</b>: <span class="m">ρ(<i>e</i>) ≥ 0</span> para toda aresta.
+            Zero é permitido (aresta “de graça”); negativo não. O original escreve <span class="m">ℝ<sub>+</sub></span>;
+            lemos <span class="m">[0, ∞)</span>, que é a hipótese da correção de Dijkstra. Peso negativo é o tema do
+            aviso na <a href="#s11-neg">§11</a> e do exercício 76.
+          </p>
+        </div>
+
+        <h3 id="s10-comp">10.2 Comprimento de um caminho e distância</h3>
+        <p>
+          O comprimento deixa de ser “quantas arestas” e passa a ser “quanto essas arestas somam”. Um caminho com
+          muitas arestas baratas pode ganhar de um caminho com uma única aresta cara — exatamente o contrário da
+          intuição do capítulo 6.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · comprimento, distância, caminho mínimo</div>
+          <p>
+            O <b>comprimento</b> do caminho <span class="m"><i>P</i> = <i>x</i><sub>0</sub>, <i>x</i><sub>1</sub>, …, <i>x</i><sub><i>k</i></sub></span>
+            em <span class="m">(<i>V</i>, <i>E</i>, ρ)</span> é a soma dos pesos de suas arestas:
+          </p>
+          <div class="eq"><div class="body">
+            <i>c</i>(<i>P</i>) =
+            <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=0</span></span><sup><i>k</i>−1</sup>
+            ρ(<i>x</i><sub><i>i</i></sub>, <i>x</i><sub><i>i</i>+1</sub>).
+          </div></div>
+          <p>
+            A <b>distância</b> entre <span class="m"><i>u</i></span> e <span class="m"><i>v</i></span> é o comprimento do
+            menor caminho que os liga,
+          </p>
+          <div class="eq"><div class="body">
+            dist(<i>u</i>,<i>v</i>) = min { <i>c</i>(<i>P</i>) : <i>P</i> é um caminho que liga <i>u</i> a <i>v</i> },
+          </div></div>
+          <p>
+            quando existe algum caminho; caso contrário, <span class="m">dist(<i>u</i>,<i>v</i>) = ∞</span>. Um caminho
+            que liga <span class="m"><i>u</i></span> a <span class="m"><i>v</i></span> com
+            <span class="m"><i>c</i>(<i>P</i>) = dist(<i>u</i>,<i>v</i>) &lt; ∞</span> é um <b>caminho mínimo</b>.
+          </p>
+        </div>
+        <div class="box tip">
+          <div class="h">Por que a definição é uma soma, e não um máximo ou um produto</div>
+          <p>
+            Tempo, distância física e custo se acumulam ao longo do trajeto: cada aresta usada <i>adiciona</i> o seu
+            peso. Se o modelo for outro — probabilidade de não falhar, capacidade de um cano — a operação muda, e o
+            algoritmo também (exercício 78). Enquanto o enunciado falar em caminho mínimo com pesos nas arestas, a
+            operação é a soma.
+          </p>
+        </div>
+
+        <h3 id="s10-ex">10.3 Um grafo com pesos e o caminho mínimo destacado</h3>
+        <p>
+          O diagrama original (figura 16 das notas) não pôde ser extraído. O grafo abaixo é um exemplo <b>construído
+          para esta versão</b>, com os mesmos vértices da narrativa original e a mesma tese numérica: a distância
+          entre <span class="m"><i>a</i></span> e <span class="m"><i>e</i></span> é 10, e um caminho mínimo é
+          <span class="m"><i>a</i>, <i>c</i>, <i>b</i>, <i>d</i>, <i>f</i>, <i>e</i></span>.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 540 230" role="img" aria-label="Grafo com pesos nas arestas. O caminho mínimo a-c-b-d-f-e de comprimento 10 está destacado como árvore.">
+            <defs><marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker></defs>
+            <line class="e faint" x1="50" y1="120" x2="280" y2="46"/>
+            <line class="e faint" x1="150" y1="46" x2="280" y2="170"/>
+            <line class="e faint" x1="280" y1="46" x2="410" y2="120"/>
+            <line class="e faint" x1="280" y1="170" x2="500" y2="190"/>
+            <line class="e tree" x1="50" y1="120" x2="150" y2="46"/>
+            <line class="e tree" x1="150" y1="46" x2="280" y2="46"/>
+            <line class="e tree" x1="280" y1="46" x2="280" y2="170"/>
+            <line class="e tree" x1="280" y1="170" x2="410" y2="120"/>
+            <line class="e tree" x1="410" y1="120" x2="500" y2="190"/>
+            <circle class="peso-bg" cx="92" cy="76" r="11"/>
+            <text class="peso" x="92" y="80">2</text>
+            <circle class="peso-bg" cx="215" cy="38" r="11"/>
+            <text class="peso" x="215" y="42">1</text>
+            <circle class="peso-bg" cx="294" cy="108" r="11"/>
+            <text class="peso" x="294" y="112">3</text>
+            <circle class="peso-bg" cx="352" cy="138" r="11"/>
+            <text class="peso" x="352" y="142">2</text>
+            <circle class="peso-bg" cx="462" cy="148" r="11"/>
+            <text class="peso" x="462" y="152">2</text>
+            <circle class="peso-bg" cx="158" cy="78" r="11"/>
+            <text class="peso" x="158" y="82">5</text>
+            <circle class="peso-bg" cx="206" cy="116" r="11"/>
+            <text class="peso" x="206" y="120">5</text>
+            <circle class="peso-bg" cx="352" cy="76" r="11"/>
+            <text class="peso" x="352" y="80">6</text>
+            <circle class="peso-bg" cx="398" cy="188" r="11"/>
+            <text class="peso" x="398" y="192">5</text>
+            <g class="v hl"><circle cx="50" cy="120" r="16"/><text x="50" y="120">a</text></g>
+            <g class="v"><circle cx="150" cy="46" r="16"/><text x="150" y="46">c</text></g>
+            <g class="v"><circle cx="280" cy="46" r="16"/><text x="280" y="46">b</text></g>
+            <g class="v"><circle cx="280" cy="170" r="16"/><text x="280" y="170">d</text></g>
+            <g class="v"><circle cx="410" cy="120" r="16"/><text x="410" y="120">f</text></g>
+            <g class="v hl2"><circle cx="500" cy="190" r="16"/><text x="500" y="190">e</text></g>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--brand)"></i>árvore de caminhos mínimos a partir de a</span>
+            <span><i class="ln" style="background:var(--edge);opacity:.45"></i>aresta fora da árvore</span>
+          </div>
+          <figcaption><b>Figura 1.</b> Exemplo construído para esta versão. O caminho <span class="m"><i>a</i>,<i>c</i>,<i>b</i>,<i>d</i>,<i>f</i>,<i>e</i></span> tem comprimento <span class="m">2+1+3+2+2 = 10</span> e é mínimo: cada desvio (por exemplo <span class="m"><i>a</i>,<i>c</i>,<i>d</i>,<i>f</i>,<i>e</i></span> com 11, ou <span class="m"><i>a</i>,<i>b</i>,<i>d</i>,<i>e</i></span> com 13) soma mais. As arestas azuis são a árvore de caminhos mínimos enraizada em <span class="m"><i>a</i></span>.</figcaption>
+        </figure>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Caminho <span class="m"><i>a</i> ↝ <i>e</i></span></th><th>Soma</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><span class="m"><i>a</i>,<i>c</i>,<i>b</i>,<i>d</i>,<i>f</i>,<i>e</i></span></td><td>2+1+3+2+2 = 10</td><td>mínimo ✔</td></tr>
+            <tr><td><span class="m"><i>a</i>,<i>c</i>,<i>d</i>,<i>f</i>,<i>e</i></span></td><td>2+5+2+2 = 11</td><td></td></tr>
+            <tr><td><span class="m"><i>a</i>,<i>c</i>,<i>b</i>,<i>f</i>,<i>e</i></span></td><td>2+1+6+2 = 11</td><td></td></tr>
+            <tr><td><span class="m"><i>a</i>,<i>c</i>,<i>b</i>,<i>d</i>,<i>e</i></span></td><td>2+1+3+5 = 11</td><td></td></tr>
+            <tr><td><span class="m"><i>a</i>,<i>b</i>,<i>d</i>,<i>f</i>,<i>e</i></span></td><td>5+3+2+2 = 12</td><td></td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>Conferência: o caminho azul soma 10, e os quatro desvios naturais somam 11, 11, 11 e 12. Nenhum empate no mínimo ✔</p>
+
+        <h3 id="s10-lista">10.4 Como o grafo entra no algoritmo</h3>
+        <p>
+          Daqui em diante o grafo é dado por <b>lista de adjacências</b>: a lista de
+          <span class="m"><i>v</i></span> contém cada vizinho <span class="m"><i>u</i></span> juntamente com o peso
+          <span class="m">ρ(<i>v</i>,<i>u</i>)</span>. Percorrer <span class="m"><i>N</i>(<i>v</i>)</span> custa tempo
+          proporcional ao grau, e percorrer todas as listas custa <span class="m"><span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span></span>.
+        </p>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Vértice</th><th>Lista de adjacências (vizinho, peso)</th></tr></thead>
+          <tbody>
+            <tr><td><i>a</i></td><td>(<i>c</i>, 2), (<i>b</i>, 5)</td></tr>
+            <tr><td><i>c</i></td><td>(<i>a</i>, 2), (<i>b</i>, 1), (<i>d</i>, 5)</td></tr>
+            <tr><td><i>b</i></td><td>(<i>c</i>, 1), (<i>a</i>, 5), (<i>d</i>, 3), (<i>f</i>, 6)</td></tr>
+            <tr><td><i>d</i></td><td>(<i>b</i>, 3), (<i>c</i>, 5), (<i>f</i>, 2), (<i>e</i>, 5)</td></tr>
+            <tr><td><i>f</i></td><td>(<i>d</i>, 2), (<i>b</i>, 6), (<i>e</i>, 2)</td></tr>
+            <tr><td><i>e</i></td><td>(<i>f</i>, 2), (<i>d</i>, 5)</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Cada aresta aparece em duas listas, com o mesmo peso: o grafo é não dirigido. Conferência:
+          <span class="m">∑ <i>d</i>(<i>v</i>) = 2+3+4+4+3+2 = 18 = 2·9 = 2|<i>E</i>|</span> ✔
+        </p>
+
+        <h3 id="s10-tri">10.5 Duas propriedades que o algoritmo vai usar</h3>
+        <p>
+          Dijkstra não “inventa” caminhos. Ele mantém, para cada vértice, o comprimento de algum caminho já visto, e
+          só aceita uma atualização quando encontra um caminho estritamente melhor. As duas afirmações abaixo
+          garantem que isso converge para a distância verdadeira — desde que os pesos sejam ≥ 0.
+        </p>
+        <div class="box thm">
+          <div class="h">Desigualdade triangular ponderada · equação (27)</div>
+          <p>
+            Seja <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>, ρ)</span> e <span class="m"><i>s</i> ∈ <i>V</i></span>.
+            Para toda aresta <span class="m">{<i>v</i>, <i>u</i>} ∈ <i>E</i></span>,
+          </p>
+          <div class="eq"><div class="body">
+            dist(<i>s</i>, <i>u</i>) ≤ dist(<i>s</i>, <i>v</i>) + ρ(<i>v</i>, <i>u</i>).
+          </div><div class="tag">(27)</div></div>
+          <p>
+            Em palavras: desviar por uma aresta extra nunca é mais barato do que ir direto pelo caminho mínimo.
+            O exercício 73 pede a prova; o algoritmo usa (27) o tempo todo, na linha da Relaxação.
+          </p>
+        </div>
+        <div class="box thm">
+          <div class="h">Subcaminho de um caminho mínimo é mínimo</div>
+          <p>
+            Se <span class="m"><i>v</i><sub>1</sub>, <i>v</i><sub>2</sub>, …, <i>v</i><sub><i>k</i></sub></span> é um
+            caminho mínimo, então para quaisquer <span class="m">1 ≤ <i>i</i> &lt; <i>j</i> ≤ <i>k</i></span> o pedaço
+            <span class="m"><i>v</i><sub><i>i</i></sub>, …, <i>v</i><sub><i>j</i></sub></span> é um caminho mínimo entre
+            seus extremos. Sem isso, Dijkstra não poderia “congelar” um vértice e relaxar só os vizinhos. A prova é
+            o exercício 74.
+          </p>
+        </div>
+        <div class="box rec">
+          <div class="h">Receita: atacar um exercício de caminho mínimo</div>
+          <ol>
+            <li><b>Confirme o sinal dos pesos.</b> Se todos são ≥ 0, Dijkstra vale. Se algum é negativo, Dijkstra
+              pode falhar mesmo sem circuito negativo (exercício 76); aí o instrumento é Bellman–Ford.</li>
+            <li><b>Escreva a soma.</b> Comprimento é <span class="m">∑ ρ</span>, não o número de arestas. Um
+              contraexemplo típico é um atalho de uma aresta cara versus um desvio de várias arestas baratas.</li>
+            <li><b>Use (27) e o subcaminho.</b> Quase toda prova de correção neste capítulo é: “se a afirmação
+              falhasse, concatenar ou substituir um pedaço produziria um caminho mais curto, contradizendo a
+              minimalidade”.</li>
+            <li><b>Cuidado com a estratégia gulosa errada.</b> “Visitar o não-visitado mais próximo de algum já
+              visitado” é Prim (árvore geradora mínima), não Dijkstra. O exercício 75 pede um contraexemplo.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex1">
+        <div class="ex-head">
+          <h3>Exercícios 73 a 75</h3>
+          <button class="toggle" type="button" data-scope="#ex1" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: desigualdade triangular com pesos, subcaminho de caminho mínimo, e a diferença entre a estratégia de Prim e a de Dijkstra.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 73</span><div class="stmt">
+            <p>
+              Seja <span class="m"><i>G</i></span> um grafo com peso nas arestas e <span class="m"><i>s</i></span> um
+              vértice de <span class="m"><i>G</i></span>. Prove a seguinte variante da desigualdade triangular: para
+              todo <span class="m">{<i>v</i>, <i>u</i>} ∈ <i>E</i>(<i>G</i>)</span>,
+            </p>
+            <div class="eq"><div class="body">
+              dist(<i>s</i>, <i>u</i>) ≤ dist(<i>s</i>, <i>v</i>) + ρ(<i>v</i>, <i>u</i>).
+            </div><div class="tag">(27)</div></div>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a73" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a73"><div class="plab">Resolução</div>
+            <p>
+              Se <span class="m">dist(<i>s</i>, <i>v</i>) = ∞</span>, o lado direito é
+              <span class="m">∞</span> e a desigualdade vale. Daqui em diante
+              <span class="m">dist(<i>s</i>, <i>v</i>) &lt; ∞</span>: existe um caminho mínimo
+              <span class="m"><i>P</i></span> de <span class="m"><i>s</i></span> a <span class="m"><i>v</i></span>,
+              com <span class="m"><i>c</i>(<i>P</i>) = dist(<i>s</i>, <i>v</i>)</span>.
+            </p>
+            <p>
+              Concatene a aresta <span class="m">{<i>v</i>, <i>u</i>}</span> a <span class="m"><i>P</i></span>. Há
+              dois casos.
+            </p>
+            <p>
+              <b>Caso 1.</b> <span class="m"><i>u</i></span> não aparece em <span class="m"><i>P</i></span>. Então
+              <span class="m"><i>P</i></span> seguido de <span class="m"><i>u</i></span> é um caminho de
+              <span class="m"><i>s</i></span> a <span class="m"><i>u</i></span> com comprimento
+              <span class="m">dist(<i>s</i>, <i>v</i>) + ρ(<i>v</i>, <i>u</i>)</span>. A distância é o mínimo sobre
+              todos os caminhos, logo
+              <span class="m">dist(<i>s</i>, <i>u</i>) ≤ dist(<i>s</i>, <i>v</i>) + ρ(<i>v</i>, <i>u</i>)</span>.
+            </p>
+            <p>
+              <b>Caso 2.</b> <span class="m"><i>u</i></span> já aparece em <span class="m"><i>P</i></span>. O prefixo
+              de <span class="m"><i>P</i></span> até essa ocorrência é um caminho de
+              <span class="m"><i>s</i></span> a <span class="m"><i>u</i></span>. Como os pesos são ≥ 0, o comprimento
+              desse prefixo é ≤ <span class="m"><i>c</i>(<i>P</i>)</span>, e portanto
+              <span class="m">dist(<i>s</i>, <i>u</i>) ≤ dist(<i>s</i>, <i>v</i>) ≤ dist(<i>s</i>, <i>v</i>) + ρ(<i>v</i>, <i>u</i>)</span>.
+            </p>
+            <p>
+              Nos dois casos vale (27). (Se <span class="m"><i>u</i></span> não é alcançável a partir de
+              <span class="m"><i>s</i></span>, o caso 1 seria impossível e o caso 2 também — então
+              <span class="m"><i>v</i></span> tampouco seria alcançável, e voltamos ao caso
+              <span class="m">∞</span>.) <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 74</span><div class="stmt">
+            <p>
+              Suponha que <span class="m"><i>v</i><sub>1</sub>, <i>v</i><sub>2</sub>, …, <i>v</i><sub><i>k</i></sub></span>
+              é um caminho mínimo num grafo <span class="m"><i>D</i></span>. Prove que
+              <span class="m"><i>v</i><sub><i>i</i></sub>, …, <i>v</i><sub><i>j</i></sub></span> é um caminho mínimo que
+              liga <span class="m"><i>v</i><sub><i>i</i></sub></span> e
+              <span class="m"><i>v</i><sub><i>j</i></sub></span> em <span class="m"><i>D</i></span> para quaisquer
+              <span class="m"><i>i</i></span>, <span class="m"><i>j</i></span> com
+              <span class="m">1 ≤ <i>i</i> &lt; <i>j</i> ≤ <i>k</i></span>.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h74" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a74" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h74"><div class="plab">Dica</div>
+            <p>
+              Prove por contradição: se o pedaço do meio não fosse mínimo, a substituição desse pedaço por um
+              caminho mais curto entre os mesmos extremos produziria um caminho de <span class="m"><i>v</i><sub>1</sub></span>
+              a <span class="m"><i>v</i><sub><i>k</i></sub></span> mais curto que o original. Cuidado para a
+              concatenação continuar sendo um caminho (vértices distintos); se não for, um atalho só deixa o
+              comprimento ainda menor, porque os pesos são ≥ 0.
+            </p>
+          </div>
+          <div class="panel answer" id="a74"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>P</i> = <i>v</i><sub>1</sub>, …, <i>v</i><sub><i>k</i></sub></span> um caminho
+              mínimo e fixe <span class="m"><i>i</i> &lt; <i>j</i></span>. Escreva
+              <span class="m"><i>P</i> = <i>A</i> · <i>M</i> · <i>B</i></span>, em que
+              <span class="m"><i>M</i> = <i>v</i><sub><i>i</i></sub>, …, <i>v</i><sub><i>j</i></sub></span> é o pedaço
+              do meio, <span class="m"><i>A</i></span> é o prefixo até <span class="m"><i>v</i><sub><i>i</i></sub></span>
+              e <span class="m"><i>B</i></span> é o sufixo a partir de <span class="m"><i>v</i><sub><i>j</i></sub></span>.
+              Então <span class="m"><i>c</i>(<i>P</i>) = <i>c</i>(<i>A</i>) + <i>c</i>(<i>M</i>) + <i>c</i>(<i>B</i>)</span>.
+            </p>
+            <p>
+              Suponha, por absurdo, que <span class="m"><i>M</i></span> não é mínimo: existe um caminho
+              <span class="m"><i>M</i>′</span> de <span class="m"><i>v</i><sub><i>i</i></sub></span> a
+              <span class="m"><i>v</i><sub><i>j</i></sub></span> com
+              <span class="m"><i>c</i>(<i>M</i>′) &lt; <i>c</i>(<i>M</i>)</span>. A concatenação
+              <span class="m"><i>A</i> · <i>M</i>′ · <i>B</i></span> é um passeio de
+              <span class="m"><i>v</i><sub>1</sub></span> a <span class="m"><i>v</i><sub><i>k</i></sub></span> de
+              comprimento <span class="m"><i>c</i>(<i>P</i>) − <i>c</i>(<i>M</i>) + <i>c</i>(<i>M</i>′) &lt; <i>c</i>(<i>P</i>)</span>.
+            </p>
+            <p>
+              Se esse passeio não for um caminho, ele repete vértice. Cortando o ciclo obtido, e usando
+              <span class="m">ρ ≥ 0</span>, o comprimento não aumenta. No fim resta um caminho de
+              <span class="m"><i>v</i><sub>1</sub></span> a <span class="m"><i>v</i><sub><i>k</i></sub></span>
+              estritamente mais curto que <span class="m"><i>P</i></span> — contradição com a minimalidade de
+              <span class="m"><i>P</i></span>.
+            </p>
+            <p>
+              Logo <span class="m"><i>M</i></span> é mínimo. O original chama o grafo de
+              <span class="m"><i>D</i></span> (notação frequente para dirigido); o argumento vale em grafos e em
+              dígrafos, desde que “caminho” signifique a noção correspondente (dirigido, no segundo caso). <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 75</span><div class="stmt">
+            <p>
+              Dados <span class="m">(<i>V</i>, <i>E</i>, ρ)</span> e <span class="m"><i>s</i> ∈ <i>V</i></span>,
+              considere o problema de determinar <span class="m">dist(<i>s</i>, <i>x</i>)</span> para todo
+              <span class="m"><i>x</i> ∈ <i>V</i></span> com a seguinte estratégia: declare
+              <span class="m"><i>s</i></span> visitado e, em cada passo, visite o vértice não visitado mais próximo
+              de um vértice já visitado. Construa um exemplo de grafo com peso nas arestas que mostre que essa
+              estratégia não funciona.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a75" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a75"><div class="plab">Resolução</div>
+            <p>
+              A estratégia descrita escolhe, a cada passo, o vértice <span class="m"><i>u</i> ∉ <i>S</i></span> que
+              minimiza <span class="m">min<sub><i>v</i> ∈ <i>S</i></sub> ρ(<i>v</i>, <i>u</i>)</span> — a aresta mais
+              barata que atravessa o corte <span class="m">(<i>S</i>, <span class="ovl"><i>S</i></span>)</span>. Isso
+              é o algoritmo de Prim, que constrói uma árvore geradora <i>de peso mínimo</i>, não uma árvore de
+              <i>caminhos</i> mínimos. Os dois objetos coincidem em alguns grafos e divergem em outros.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 420 180" role="img" aria-label="Contraexemplo: três vértices s, a, t. Arestas s-a peso 5, a-t peso 5, s-t peso 6.">
+                <line class="e tree" x1="60" y1="90" x2="200" y2="40"/>
+                <line class="e tree" x1="200" y1="40" x2="360" y2="90"/>
+                <line class="e faint" x1="60" y1="90" x2="360" y2="90"/>
+                <circle class="peso-bg" cx="124" cy="58" r="11"/>
+                <text class="peso" x="124" y="62">5</text>
+                <circle class="peso-bg" cx="286" cy="58" r="11"/>
+                <text class="peso" x="286" y="62">5</text>
+                <circle class="peso-bg" cx="210" cy="90" r="11"/>
+                <text class="peso" x="210" y="94">6</text>
+                <g class="v hl"><circle cx="60" cy="90" r="16"/><text x="60" y="90">s</text></g>
+                <g class="v"><circle cx="200" cy="40" r="16"/><text x="200" y="40">a</text></g>
+                <g class="v hl2"><circle cx="360" cy="90" r="16"/><text x="360" y="90">t</text></g>
+              </svg>
+              <div class="legend">
+                <span><i class="ln" style="background:var(--brand)"></i>o que a estratégia visita</span>
+                <span><i class="ln" style="background:var(--edge);opacity:.45"></i>o caminho mínimo s–t</span>
+              </div>
+              <figcaption><b>Figura 2.</b> Contraexemplo construído para esta versão. A estratégia de Prim, a partir de <span class="m"><i>s</i></span>, escolhe primeiro <span class="m"><i>a</i></span> (aresta 5) e depois liga <span class="m"><i>t</i></span> por <span class="m"><i>a</i></span> (aresta 5), reportando comprimento 10. O caminho mínimo é a aresta direta, de peso 6.</figcaption>
+            </figure>
+            <p>
+              Execução da estratégia, com <span class="m"><i>S</i> = {<i>s</i>}</span> no início:
+            </p>
+            <ol>
+              <li>Não visitados: <span class="m"><i>a</i></span> (distância 5 a <span class="m"><i>s</i></span>) e
+                <span class="m"><i>t</i></span> (distância 6 a <span class="m"><i>s</i></span>). Visita
+                <span class="m"><i>a</i></span>.</li>
+              <li>Resta <span class="m"><i>t</i></span>. A aresta mais barata que toca
+                <span class="m"><i>S</i> = {<i>s</i>, <i>a</i>}</span> é <span class="m">{<i>a</i>, <i>t</i>}</span>
+                de peso 5, menor que 6. Visita <span class="m"><i>t</i></span> “via <span class="m"><i>a</i></span>”.</li>
+            </ol>
+            <p>
+              O comprimento atribuído a <span class="m"><i>t</i></span> é <span class="m">5 + 5 = 10</span>. Mas
+              <span class="m">dist(<i>s</i>, <i>t</i>) = 6</span>, pela aresta direta. A estratégia falha.
+            </p>
+            <p>
+              Dijkstra faria outra escolha: o próximo vértice é o de menor <i>distância acumulada a
+              <span class="m"><i>s</i></span></i>, não o de menor aresta até o conjunto visitado. Depois de processar
+              <span class="m"><i>s</i></span>, teria <span class="m"><i>d</i>[<i>a</i>] = 5</span> e
+              <span class="m"><i>d</i>[<i>t</i>] = 6</span>, extrairia <span class="m"><i>a</i></span>, relaxaria
+              <span class="m"><i>t</i></span> para <span class="m">min(6, 5+5) = 6</span> e devolveria a resposta
+              certa. <b>□</b>
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 11 ============================ -->
+      <section class="chapter" id="s11">
+        <h2><span class="num">§11</span> Algoritmo de Dijkstra para caminhos mínimos</h2>
+        <p class="sub-lead">Objetivo do bloco: executar Dijkstra à mão, provar que ele devolve dist(s, v) para todo v, e calcular a complexidade nas duas implementações clássicas — vetor e heap.</p>
+
+        <h3 id="s11-inicie">11.1 As duas peças: Inicie e Relaxação</h3>
+        <p>
+          Fixe <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>, ρ)</span> com <span class="m">ρ ≥ 0</span> e uma origem
+          <span class="m"><i>s</i> ∈ <i>V</i></span>. O algoritmo mantém duas estruturas:
+        </p>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Símbolo</th><th>Significado, em qualquer ponto da execução</th></tr></thead>
+          <tbody>
+            <tr><td><i>S</i></td><td>Vértices <span class="m"><i>v</i></span> cuja distância <span class="m">dist(<i>s</i>, <i>v</i>)</span> <b>já está computada</b> (e não vai mais mudar).</td></tr>
+            <tr><td><i>d</i>[<i>v</i>]</td><td>
+              (a) se <span class="m"><i>v</i> ∈ <i>S</i></span>: vale <span class="m">dist(<i>s</i>, <i>v</i>)</span>;<br>
+              (b) se <span class="m"><i>v</i></span> ainda não foi alcançado: <span class="m">∞</span>;<br>
+              (c) se <span class="m"><i>v</i> ∈ <span class="ovl"><i>S</i></span></span> mas já foi relaxado: comprimento de <b>algum</b> caminho de <span class="m"><i>s</i></span> a <span class="m"><i>v</i></span> (uma cota superior).
+            </td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · o complemento de S</div>
+          <p>
+            No original, um trecho diz “escolhemos o vértice <span class="m"><i>u</i> ∈ <i>S</i></span> de menor
+            <span class="m"><i>d</i></span>” e, na mesma frase, chama <span class="m"><i>S</i></span> de conjunto dos
+            vértices <i>ainda sem</i> distância determinada. São o complemento um do outro. A convenção usada daqui
+            em diante é a da tabela: <span class="m"><i>S</i></span> = já determinado,
+            <span class="m"><span class="ovl"><i>S</i></span> = <i>V</i> \ <i>S</i></span> = ainda em aberto. O
+            próximo vértice é o de menor <span class="m"><i>d</i></span> em
+            <span class="m"><span class="ovl"><i>S</i></span></span>.
+          </p>
+        </div>
+
+        <div class="algo">
+          <div class="nome">Inicie(G, s)</div>
+<pre><span class="cm">// S = já determinado; d[v] = cota (ou distância, se v ∈ S)</span>
+S ← ∅
+<span class="kw">para cada</span> v ∈ V(G) <span class="kw">faça</span> d[v] ← ∞
+d[s] ← 0</pre>
+        </div>
+        <p>
+          No início, só a origem tem cota finita: ela está a distância 0 de si mesma. Todo o resto é
+          <span class="m">∞</span>, e <span class="m"><i>S</i></span> está vazio — ainda não “congelamos” ninguém,
+          nem a origem. A origem entra em <span class="m"><i>S</i></span> na primeira iteração do laço principal,
+          porque é o único vértice com <span class="m"><i>d</i> &lt; ∞</span>.
+        </p>
+
+        <div class="algo">
+          <div class="nome">Relaxação(u, t)</div>
+<pre><span class="kw">se</span> d[t] &gt; d[u] + ρ(u, t) <span class="kw">então</span>
+    d[t] ← d[u] + ρ(u, t)</pre>
+        </div>
+        <p>
+          A Relaxação pergunta: o caminho já conhecido até <span class="m"><i>u</i></span>, mais a aresta
+          <span class="m">{<i>u</i>, <i>t</i>}</span>, é melhor do que o que eu tinha para
+          <span class="m"><i>t</i></span>? Se sim, atualizo. A condição na linha 1 é sempre falsa para
+          <span class="m"><i>t</i> ∈ <i>S</i></span> — isso é parte da correção, e <b>usa</b>
+          <span class="m">ρ ≥ 0</span>. Com peso negativo, a condição pode voltar a ser verdadeira para um vértice
+          já congelado, e o algoritmo quebra.
+        </p>
+        <p>
+          Por (27), <span class="m">dist(<i>s</i>, <i>t</i>) ≤ dist(<i>s</i>, <i>u</i>) + ρ(<i>u</i>, <i>t</i>)</span>.
+          Quando <span class="m"><i>u</i> ∈ <i>S</i></span> já temos
+          <span class="m"><i>d</i>[<i>u</i>] = dist(<i>s</i>, <i>u</i>)</span>, então a Relaxação nunca desce abaixo
+          da distância verdadeira: ela só aperta uma cota superior.
+        </p>
+
+        <h3 id="s11-algo">11.2 O algoritmo</h3>
+        <div class="algo">
+          <div class="nome">Dijkstra(G, s)</div>
+<pre>Inicie(G, s)
+<span class="kw">enquanto</span> S ≠ V <span class="kw">faça</span>
+    u ← vértice de <span class="ovl">S</span> com d[ ] mínimo
+    insira u em S
+    <span class="kw">para cada</span> t ∈ N(u) <span class="kw">faça</span>
+        Relaxação(u, t)</pre>
+        </div>
+        <p>
+          A cada iteração congelamos o vértice ainda em aberto que parece mais perto de
+          <span class="m"><i>s</i></span>, e oferecemos essa distância recém-confirmada aos vizinhos. O laço termina
+          quando <span class="m"><i>S</i> = <i>V</i></span>: todo mundo foi congelado. Vértices inalcançáveis ficam
+          com <span class="m"><i>d</i> = ∞</span> o tempo todo e são congelados por último (qualquer empate entre
+          infinitos serve).
+        </p>
+        <p>
+          O que o algoritmo garante: no fim, <span class="m"><i>d</i>[<i>v</i>] = dist(<i>s</i>, <i>v</i>)</span> para
+          todo <span class="m"><i>v</i></span>. A prova é o Teorema 14 abaixo. Por que termina: cada iteração
+          insere um vértice em <span class="m"><i>S</i></span> e nunca o remove, então há exatamente
+          <span class="m">|<i>V</i>|</span> iterações. A complexidade depende de como se escolhe o mínimo — isso
+          fica na <a href="#s11-cplx">§11.5</a>.
+        </p>
+
+        <h3 id="s11-trace">11.3 Uma execução completa</h3>
+        <p>
+          O grafo da figura 1 é grande demais para uma tabela. O exemplo abaixo foi construído para ser seguido
+          à mão, linha por linha.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 420 210" role="img" aria-label="Grafo de quatro vértices s, a, b, t usado para rastrear Dijkstra. Árvore de caminhos mínimos em azul.">
+            <line class="e faint" x1="60" y1="105" x2="200" y2="170"/>
+            <line class="e faint" x1="200" y1="40" x2="350" y2="105"/>
+            <line class="e tree" x1="60" y1="105" x2="200" y2="40"/>
+            <line class="e tree" x1="200" y1="40" x2="200" y2="170"/>
+            <line class="e tree" x1="200" y1="170" x2="350" y2="105"/>
+            <circle class="peso-bg" cx="122" cy="64" r="11"/>
+            <text class="peso" x="122" y="68">2</text>
+            <circle class="peso-bg" cx="118" cy="148" r="11"/>
+            <text class="peso" x="118" y="152">5</text>
+            <circle class="peso-bg" cx="214" cy="105" r="11"/>
+            <text class="peso" x="214" y="109">1</text>
+            <circle class="peso-bg" cx="282" cy="64" r="11"/>
+            <text class="peso" x="282" y="68">3</text>
+            <circle class="peso-bg" cx="282" cy="148" r="11"/>
+            <text class="peso" x="282" y="152">1</text>
+            <g class="v hl"><circle cx="60" cy="105" r="16"/><text x="60" y="105">s</text></g>
+            <g class="v"><circle cx="200" cy="40" r="16"/><text x="200" y="40">a</text></g>
+            <g class="v"><circle cx="200" cy="170" r="16"/><text x="200" y="170">b</text></g>
+            <g class="v hl2"><circle cx="350" cy="105" r="16"/><text x="350" y="105">t</text></g>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--brand)"></i>árvore de caminhos mínimos a partir de s</span>
+            <span><i class="ln" style="background:var(--edge);opacity:.45"></i>aresta relaxada mas não usada</span>
+          </div>
+          <figcaption><b>Figura 3.</b> Exemplo construído para esta versão. Distâncias a partir de <span class="m"><i>s</i></span>: <span class="m"><i>a</i> ↦ 2</span>, <span class="m"><i>b</i> ↦ 3</span>, <span class="m"><i>t</i> ↦ 4</span>. O atalho <span class="m"><i>s</i>,<i>a</i>,<i>t</i></span> soma 5 e perde para <span class="m"><i>s</i>,<i>a</i>,<i>b</i>,<i>t</i></span>.</figcaption>
+        </figure>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Iteração</th><th><i>u</i> extraído</th><th><i>S</i> depois</th><th><i>d</i>[<i>s</i>]</th><th><i>d</i>[<i>a</i>]</th><th><i>d</i>[<i>b</i>]</th><th><i>d</i>[<i>t</i>]</th></tr></thead>
+          <tbody>
+            <tr><td>Inicie</td><td>—</td><td>∅</td><td>0</td><td>∞</td><td>∞</td><td>∞</td></tr>
+            <tr><td>1</td><td><i>s</i></td><td>{<i>s</i>}</td><td>0</td><td>2</td><td>5</td><td>∞</td></tr>
+            <tr><td>2</td><td><i>a</i></td><td>{<i>s</i>,<i>a</i>}</td><td>0</td><td>2</td><td>3</td><td>5</td></tr>
+            <tr><td>3</td><td><i>b</i></td><td>{<i>s</i>,<i>a</i>,<i>b</i>}</td><td>0</td><td>2</td><td>3</td><td>4</td></tr>
+            <tr><td>4</td><td><i>t</i></td><td><i>V</i></td><td>0</td><td>2</td><td>3</td><td>4</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Conferência da iteração 2: <span class="m"><i>u</i> = <i>a</i></span>,
+          <span class="m"><i>d</i>[<i>a</i>] = 2</span>. Relaxação em <span class="m"><i>b</i></span>:
+          <span class="m">5 &gt; 2+1</span>, atualiza para 3. Relaxação em <span class="m"><i>t</i></span>:
+          <span class="m">∞ &gt; 2+3</span>, atualiza para 5. Iteração 3: <span class="m"><i>b</i></span> vence
+          <span class="m"><i>t</i></span> porque 3 &lt; 5; a Relaxação em <span class="m"><i>t</i></span> faz
+          <span class="m">5 &gt; 3+1</span> e corrige para 4 ✔
+        </p>
+        <div class="box rec">
+          <div class="h">Receita: Dijkstra à mão</div>
+          <ol>
+            <li><b>Monte a tabela</b> com uma coluna por vértice e uma linha por extração.</li>
+            <li><b>Extraia</b> o vértice fora de <span class="m"><i>S</i></span> de menor
+              <span class="m"><i>d</i></span>. Empate: escolha qualquer; as distâncias finais não mudam.</li>
+            <li><b>Relaxe cada vizinho</b> que ainda não está em <span class="m"><i>S</i></span> (os que estão, a
+              condição falha). Anote o predecessor se quiser reconstruir o caminho (exercício 77).</li>
+            <li><b>Pare</b> quando <span class="m"><i>S</i> = <i>V</i></span>, ou — se só importa um destino
+              <span class="m"><i>t</i></span> — quando <span class="m"><i>t</i></span> entra em
+              <span class="m"><i>S</i></span>.</li>
+          </ol>
+        </div>
+
+        <h3 id="s11-corr">11.4 Correção: Proposições 12 e 13, Teorema 14</h3>
+        <p>
+          A tese é um <b>invariante de laço</b>: uma afirmação verdadeira antes de cada iteração do
+          <span class="m">enquanto</span>. Se o invariante vale no início, se cada iteração o preserva, e se no fim
+          <span class="m"><i>S</i> = <i>V</i></span>, então <span class="m"><i>d</i></span> está correto em todo o
+          grafo.
+        </p>
+
+        <div class="box thm">
+          <div class="h">Proposição 12</div>
+          <p>Em qualquer momento da execução de Dijkstra(<i>G</i>, <i>s</i>) valem:</p>
+          <p>
+            <b>(a)</b> <span class="m"><i>d</i>[<i>v</i>] ≥ dist(<i>s</i>, <i>v</i>)</span> para todo
+            <span class="m"><i>v</i> ∈ <i>V</i></span>, e uma vez que
+            <span class="m"><i>d</i>[<i>v</i>] = dist(<i>s</i>, <i>v</i>)</span> o valor de
+            <span class="m"><i>d</i>[<i>v</i>]</span> nunca mais muda.
+          </p>
+          <p>
+            <b>(b)</b> Se <span class="m">dist(<i>s</i>, <i>v</i>) = ∞</span>, então
+            <span class="m"><i>d</i>[<i>v</i>] = ∞</span> durante toda a execução.
+          </p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Para (a), suponha o contrário e seja <span class="m"><i>u</i></span> o
+              <i>primeiro</i> vértice para o qual ocorreu <span class="m"><i>d</i>[<i>u</i>] &lt; dist(<i>s</i>, <i>u</i>)</span>.
+              Essa queda veio de uma Relaxação(<i>v</i>, <i>u</i>), que fez
+            </p>
+            <div class="eq"><div class="body">
+              <i>d</i>[<i>u</i>] = <i>d</i>[<i>v</i>] + ρ({<i>u</i>, <i>v</i>}).
+            </div><div class="tag">(28)</div></div>
+            <p>
+              Como <span class="m"><i>u</i></span> foi a primeira violação,
+              <span class="m"><i>d</i>[<i>v</i>] ≥ dist(<i>s</i>, <i>v</i>)</span>. Logo
+            </p>
+            <div class="eq"><div class="body">
+              dist(<i>s</i>, <i>u</i>) &gt; <i>d</i>[<i>u</i>] = <i>d</i>[<i>v</i>] + ρ({<i>u</i>, <i>v</i>})
+              ≥ dist(<i>s</i>, <i>v</i>) + ρ({<i>u</i>, <i>v</i>}),
+            </div></div>
+            <p>
+              o que contradiz (27). Portanto a violação não existe: sempre
+              <span class="m"><i>d</i> ≥ dist</span>. Em particular, quando a igualdade vale, a Relaxação não
+              consegue diminuir <span class="m"><i>d</i></span> (o teste da linha 1 falha).
+            </p>
+            <p>
+              Para (b): por (a), <span class="m"><i>d</i>[<i>v</i>] ≥ dist(<i>s</i>, <i>v</i>) = ∞</span>, logo
+              <span class="m"><i>d</i>[<i>v</i>] = ∞</span>. <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="box thm">
+          <div class="h">Proposição 13</div>
+          <p>
+            Se <span class="m"><i>P</i> = <i>s</i>, <i>x</i><sub>1</sub>, …, <i>x</i><sub><i>k</i></sub>, <i>v</i></span>
+            é um caminho mínimo e <span class="m"><i>d</i>[<i>x</i><sub><i>k</i></sub>] = dist(<i>s</i>, <i>x</i><sub><i>k</i></sub>)</span>,
+            então após Relaxação(<i>x</i><sub><i>k</i></sub>, <i>v</i>) teremos
+            <span class="m"><i>d</i>[<i>v</i>] = dist(<i>s</i>, <i>v</i>)</span>.
+          </p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Após a Relaxação,
+              <span class="m"><i>d</i>[<i>v</i>] ≤ <i>d</i>[<i>x</i><sub><i>k</i></sub>] + ρ({<i>x</i><sub><i>k</i></sub>, <i>v</i>})
+              = dist(<i>s</i>, <i>x</i><sub><i>k</i></sub>) + ρ({<i>x</i><sub><i>k</i></sub>, <i>v</i>})</span>.
+              Pelo exercício 74, o prefixo até <span class="m"><i>x</i><sub><i>k</i></sub></span> é mínimo e a última
+              aresta completa um caminho mínimo até <span class="m"><i>v</i></span>, logo
+              <span class="m">dist(<i>s</i>, <i>x</i><sub><i>k</i></sub>) + ρ = dist(<i>s</i>, <i>v</i>)</span>.
+              Assim <span class="m"><i>d</i>[<i>v</i>] ≤ dist(<i>s</i>, <i>v</i>)</span>. A Proposição 12(a) dá a
+              outra desigualdade, e vale a igualdade. <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="box thm">
+          <div class="h">Teorema 14</div>
+          <p>
+            Antes de cada iteração do <span class="m">enquanto</span>,
+            <span class="m"><i>d</i>[<i>v</i>] = dist(<i>s</i>, <i>v</i>)</span> para todo
+            <span class="m"><i>v</i> ∈ <i>S</i></span>.
+          </p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> No início <span class="m"><i>S</i> = ∅</span> e a afirmação vale vacuamente.
+            </p>
+            <p>
+              Por contradição, seja <span class="m"><i>u</i></span> o primeiro vértice inserido em
+              <span class="m"><i>S</i></span> com <span class="m"><i>d</i>[<i>u</i>] ≠ dist(<i>s</i>, <i>u</i>)</span>.
+              Pela Proposição 12(b) existe um caminho mínimo <span class="m"><i>P</i></span> de
+              <span class="m"><i>s</i></span> a <span class="m"><i>u</i></span> (senão as duas quantidades seriam
+              <span class="m">∞</span>). Note que <span class="m"><i>u</i> ≠ <i>s</i></span>: a origem entra com
+              <span class="m"><i>d</i>[<i>s</i>] = 0 = dist(<i>s</i>, <i>s</i>)</span>.
+            </p>
+            <p>
+              Considere o instante imediatamente anterior à entrada de <span class="m"><i>u</i></span> em
+              <span class="m"><i>S</i></span>. Seja <span class="m">{<i>x</i>, <i>y</i>}</span> a primeira aresta de
+              <span class="m"><i>P</i></span>, no sentido de <span class="m"><i>s</i></span> para
+              <span class="m"><i>u</i></span>, com <span class="m"><i>x</i> ∈ <i>S</i></span> e
+              <span class="m"><i>y</i> ∉ <i>S</i></span>. (Tal aresta existe:
+              <span class="m"><i>s</i> ∈ <i>S</i></span> e <span class="m"><i>u</i> ∉ <i>S</i></span>;
+              <span class="m"><i>P</i></span> sai de <span class="m"><i>S</i></span> em algum ponto. Pode ocorrer
+              <span class="m"><i>x</i> = <i>s</i></span> e <span class="m"><i>y</i> = <i>u</i></span>, mas
+              <span class="m"><i>x</i> ≠ <i>u</i></span>.)
+            </p>
+            <p>
+              Quando <span class="m"><i>x</i></span> entrou em <span class="m"><i>S</i></span>, ocorreu
+              Relaxação(<i>x</i>, <i>y</i>), e a Proposição 13 dá
+              <span class="m"><i>d</i>[<i>y</i>] = dist(<i>s</i>, <i>y</i>)</span>. Como os pesos não são negativos
+              e <span class="m"><i>P</i></span> é mínimo,
+              <span class="m">dist(<i>s</i>, <i>y</i>) ≤ dist(<i>s</i>, <i>u</i>)</span>. Junto com a Proposição 12(a),
+            </p>
+            <div class="eq"><div class="body">
+              <i>d</i>[<i>y</i>] = dist(<i>s</i>, <i>y</i>) ≤ dist(<i>s</i>, <i>u</i>) ≤ <i>d</i>[<i>u</i>].
+            </div></div>
+            <p>
+              Mas <span class="m"><i>u</i></span> e <span class="m"><i>y</i></span> estão ambos em
+              <span class="m"><span class="ovl"><i>S</i></span></span>, e <span class="m"><i>u</i></span> foi escolhido
+              com <span class="m"><i>d</i></span> mínimo, logo
+              <span class="m"><i>d</i>[<i>u</i>] ≤ <i>d</i>[<i>y</i>]</span>. As duas desigualdades forçam
+              <span class="m"><i>d</i>[<i>u</i>] = dist(<i>s</i>, <i>u</i>)</span> — contradição.
+            </p>
+            <p>
+              Portanto o invariante vale em toda iteração. Antes da última,
+              <span class="m"><i>S</i></span> já contém todos os vértices que serão extraídos, e no fim
+              <span class="m"><i>S</i> = <i>V</i></span>: <span class="m"><i>d</i>[<i>v</i>]</span> está correto para
+              todo <span class="m"><i>v</i></span>. <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+        <div class="box tip">
+          <div class="h">Onde o argumento usa ρ ≥ 0</div>
+          <p>
+            Na frase <span class="m">dist(<i>s</i>, <i>y</i>) ≤ dist(<i>s</i>, <i>u</i>)</span>. O vértice
+            <span class="m"><i>y</i></span> aparece <i>antes</i> de <span class="m"><i>u</i></span> no caminho mínimo;
+            se alguma aresta posterior tivesse peso negativo, um prefixo poderia ser <i>mais caro</i> que o caminho
+            inteiro, e a comparação <span class="m"><i>d</i>[<i>y</i>] ≤ <i>d</i>[<i>u</i>]</span> cairia. Sem isso, o
+            mínimo extraído pode ser o vértice errado. É exatamente o que o exercício 76 explora.
+          </p>
+        </div>
+
+        <h3 id="s11-cplx">11.5 Complexidade: vetor versus heap</h3>
+        <p>
+          Inicie custa <span class="cplx"><i>O</i>(|<i>V</i>|)</span>. Cada Relaxação custa
+          <span class="cplx"><i>O</i>(1)</span>. O resto depende de como se realiza a linha
+          “vértice de <span class="m"><span class="ovl"><i>S</i></span></span> com
+          <span class="m"><i>d</i></span> mínimo”.
+        </p>
+        <p>
+          O laço externo executa uma vez para cada <span class="m"><i>u</i> ∈ <i>V</i></span>. Escreva
+          <span class="m"><i>T</i><sub>3</sub>(<i>u</i>)</span>,
+          <span class="m"><i>T</i><sub>4</sub>(<i>u</i>)</span> e
+          <span class="m"><i>T</i><sub>5,6</sub>(<i>u</i>)</span> para o tempo da escolha do mínimo, da inserção em
+          <span class="m"><i>S</i></span> e do laço sobre <span class="m"><i>N</i>(<i>u</i>)</span>, respectivamente.
+          O custo total do laço é
+        </p>
+        <div class="eq"><div class="body">
+          <span class="sum"><span class="o">∑</span><span class="l"><i>u</i> ∈ <i>V</i></span></span>
+          (<i>T</i><sub>3</sub>(<i>u</i>) + <i>T</i><sub>4</sub>(<i>u</i>) + <i>T</i><sub>5,6</sub>(<i>u</i>)).
+        </div></div>
+
+        <p><b>Implementação por vetor</b> (o mínimo é uma varredura de <span class="m"><span class="ovl"><i>S</i></span></span>).</p>
+        <p>
+          Na rodada em que <span class="m">|<i>S</i>| = <i>i</i></span> ainda há
+          <span class="m">|<i>V</i>| − <i>i</i></span> candidatos, e a busca custa
+          <span class="m">Θ(|<i>V</i>| − <i>i</i>)</span>. Somando,
+        </p>
+        <div class="eq"><div class="body">
+          <span class="sum"><span class="o">∑</span><span class="l"><i>u</i> ∈ <i>V</i></span></span> <i>T</i><sub>3</sub>(<i>u</i>)
+          =
+          <span class="sum"><span class="o">∑</span><span class="l"><i>i</i>=1</span></span><sup>|<i>V</i>|−1</sup>
+          (<i>i</i> − 1)
+          = <span class="cplx"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span>.
+        </div></div>
+        <p>
+          Inserir em <span class="m"><i>S</i></span> é <span class="cplx"><i>O</i>(1)</span> por vértice, total
+          <span class="cplx"><i>O</i>(|<i>V</i>|)</span>. O laço interno, somado sobre todos os
+          <span class="m"><i>u</i></span>, visita cada aresta um número constante de vezes:
+        </p>
+        <div class="eq"><div class="body">
+          <span class="sum"><span class="o">∑</span><span class="l"><i>u</i> ∈ <i>V</i></span></span> <i>T</i><sub>5,6</sub>(<i>u</i>)
+          =
+          <span class="sum"><span class="o">∑</span><span class="l"><i>u</i> ∈ <i>V</i></span></span>
+          <span class="sum"><span class="o">∑</span><span class="l"><i>t</i> ∈ <i>N</i>(<i>u</i>)</span></span>
+          <i>O</i>(1)
+          = <span class="cplx"><i>O</i>(|<i>E</i>|)</span>.
+        </div></div>
+        <p>
+          Juntando a inicialização:
+          <span class="cplx"><i>O</i>(|<i>V</i>|)</span> +
+          <span class="cplx"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span> +
+          <span class="cplx"><i>O</i>(|<i>E</i>|)</span> =
+          <span class="cplx"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span>,
+          pois <span class="m">|<i>E</i>| ≤ <span class="binom"><span class="p">(</span><span class="s"><span>|<i>V</i>|</span><span>2</span></span><span class="p">)</span></span></span>.
+        </p>
+
+        <p><b>Implementação por heap binária</b> (fila de prioridades com chave <span class="m"><i>d</i>[ ]</span>).</p>
+        <p>
+          Construir a fila em Inicie custa <span class="cplx"><i>O</i>(|<i>V</i>|)</span>. Extrair o mínimo
+          (com o “heapify”) custa <span class="cplx"><i>O</i>(log |<i>V</i>|)</span> por vértice. Inserir em
+          <span class="m"><i>S</i></span> continua <span class="cplx"><i>O</i>(1)</span>. Cada Relaxação que
+          melhora <span class="m"><i>d</i>[<i>t</i>]</span> exige um <i>decrease-key</i> de custo
+          <span class="cplx"><i>O</i>(log |<i>V</i>|)</span>, e há
+          <span class="cplx"><i>O</i>(|<i>E</i>|)</span> relaxações. Total:
+        </p>
+        <div class="eq"><div class="body">
+          <span class="sum"><span class="o">∑</span><span class="l"><i>u</i></span></span>
+          (<i>T</i><sub>3</sub> + <i>T</i><sub>4</sub> + <i>T</i><sub>5,6</sub>)
+          =
+          <span class="cplx"><i>O</i>((|<i>V</i>| + |<i>E</i>|) log |<i>V</i>|)</span>.
+        </div></div>
+        <div class="box rec">
+          <div class="h">Qual implementação usar</div>
+          <ul>
+            <li>Grafo denso, <span class="m">|<i>E</i>| = Θ(|<i>V</i>|<sup>2</sup>)</span>: o vetor
+              <span class="cplx"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span> é simples e da mesma ordem que o heap.</li>
+            <li>Grafo esparso, <span class="m">|<i>E</i>| = <i>O</i>(|<i>V</i>|)</span>: o heap
+              <span class="cplx"><i>O</i>(|<i>V</i>| log |<i>V</i>|)</span> ganha de
+              <span class="cplx"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span> por um fator quase linear.</li>
+            <li>Pesos inteiros em <span class="m">{0, 1, …, <i>m</i>}</span>: dá para fazer melhor —
+              <span class="cplx"><i>O</i>(<i>m</i>|<i>V</i>| + |<i>E</i>|)</span>, exercício 79.</li>
+          </ul>
+        </div>
+
+        <h3 id="s11-neg">11.6 O aviso que não pode ser pulado</h3>
+        <div class="box warn">
+          <div class="h">Atenção · pesos negativos quebram Dijkstra</div>
+          <p>
+            A extração do mínimo em <span class="m"><span class="ovl"><i>S</i></span></span> só é “a distância
+            verdadeira” porque nenhum caminho futuro, passando por um vértice ainda mais caro, pode melhorar o
+            valor — e isso exige <span class="m">ρ ≥ 0</span>. Um único arco negativo, mesmo em um grafo sem
+            circuito negativo, basta para finalizar um vértice cedo demais e nunca mais corrigir os sucessores.
+            O exercício 76 pede o contraexemplo.
+          </p>
+          <p>
+            Quando os pesos podem ser negativos, o instrumento certo é <b>Bellman–Ford</b> (exercício 80): relaxa
+            todas as arestas, <span class="m">|<i>V</i>| − 1</span> vezes, e detecta circuito negativo alcançável a
+            partir de <span class="m"><i>s</i></span>. Quando se quer a distância entre <i>todos</i> os pares, o
+            instrumento é <b>Floyd–Warshall</b> (exercício 82), por programação dinâmica. Os dois algoritmos
+            aparecem no enunciado desses exercícios, como o original faz; a análise pedida está na resposta.
+          </p>
+        </div>
+        <div class="box def">
+          <div class="h">Resumo do bloco em cinco linhas</div>
+          <ul>
+            <li>Comprimento = soma dos pesos; distância = infimo dessa soma (ou <span class="m">∞</span>).</li>
+            <li>Subcaminho de mínimo é mínimo, e vale o triângulo (27) — as duas alavancas da correção.</li>
+            <li>Dijkstra congela, a cada passo, o vértice em aberto de menor <span class="m"><i>d</i></span>, e relaxa os vizinhos.</li>
+            <li>Invariante (Teorema 14): em <span class="m"><i>S</i></span>, <span class="m"><i>d</i></span> já é a distância verdadeira.</li>
+            <li>Custo <span class="cplx"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span> com vetor,
+              <span class="cplx"><i>O</i>((|<i>V</i>| + |<i>E</i>|) log |<i>V</i>|)</span> com heap; peso negativo está fora da hipótese.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex2">
+        <div class="ex-head">
+          <h3>Exercícios 76 a 85</h3>
+          <button class="toggle" type="button" data-scope="#ex2" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: falha de Dijkstra com pesos negativos; reconstrução do caminho; variantes (produto, pesos inteiros); correção e complexidade de Bellman–Ford e Floyd–Warshall; fecho transitivo.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 76</span><div class="stmt">
+            <p>
+              Construa um grafo com pesos que podem ser negativos e no qual o algoritmo de Dijkstra devolve
+              resposta errada.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h76" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a76" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h76"><div class="plab">Dica</div>
+            <p>
+              O algoritmo finaliza um vértice cedo demais. Faça o caminho mínimo até
+              <span class="m"><i>v</i></span> passar por um vértice <span class="m"><i>a</i></span> que, no momento
+              da extração de um predecessor de <span class="m"><i>v</i></span>, ainda tem
+              <span class="m"><i>d</i>[<i>a</i>]</span> grande. Um arco negativo saindo de
+              <span class="m"><i>a</i></span> depois não consegue mais se propagar. Um dígrafo (mesmo sem circuito)
+              deixa o fenômeno visível; em grafo não dirigido, aresta negativa tende a criar circuito negativo de
+              comprimento 3, e a distância pode nem estar definida.
+            </p>
+          </div>
+          <div class="panel answer" id="a76"><div class="plab">Resolução</div>
+            <p>
+              O enunciado não exige grafo não dirigido. O contraexemplo clássico — e o que isola o fenômeno sem
+              contaminá-lo com circuito negativo — é um <b>dígrafo acíclico</b> com um arco negativo.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 480 200" role="img" aria-label="Dígrafo s para u peso 1, u para v peso 1, s para a peso 2, a para u peso −8.">
+                <line class="arw" x1="78" y1="50" x2="218" y2="50"/>
+                <line class="arw" x1="262" y1="50" x2="402" y2="50"/>
+                <line class="arw" x1="68" y1="118" x2="188" y2="162"/>
+                <line class="arw" x1="218" y1="150" x2="238" y2="72"/>
+                <circle class="peso-bg" cx="148" cy="42" r="11"/>
+                <text class="peso" x="148" y="46">1</text>
+                <circle class="peso-bg" cx="332" cy="42" r="11"/>
+                <text class="peso" x="332" y="46">1</text>
+                <circle class="peso-bg" cx="112" cy="156" r="11"/>
+                <text class="peso" x="112" y="160">2</text>
+                <circle class="peso-bg" cx="248" cy="118" r="11"/>
+                <text class="peso" x="248" y="122">−8</text>
+                <g class="v hl"><circle cx="60" cy="50" r="16"/><text x="60" y="50">s</text></g>
+                <g class="v"><circle cx="240" cy="50" r="16"/><text x="240" y="50">u</text></g>
+                <g class="v hl2"><circle cx="420" cy="50" r="16"/><text x="420" y="50">v</text></g>
+                <g class="v"><circle cx="200" cy="170" r="16"/><text x="200" y="170">a</text></g>
+              </svg>
+              <figcaption><b>Figura 4.</b> Contraexemplo construído para esta versão. Não há circuito. O caminho mínimo <span class="m"><i>s</i> → <i>a</i> → <i>u</i> → <i>v</i></span> tem comprimento <span class="m">2 − 8 + 1 = −5</span>, mas Dijkstra finaliza <span class="m"><i>u</i></span> com <span class="m"><i>d</i> = 1</span> e deixa <span class="m"><i>v</i></span> em 2.</figcaption>
+            </figure>
+            <p class="kicker">Execução de Dijkstra</p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th>Extraído</th><th><i>d</i>[<i>s</i>]</th><th><i>d</i>[<i>u</i>]</th><th><i>d</i>[<i>a</i>]</th><th><i>d</i>[<i>v</i>]</th></tr></thead>
+              <tbody>
+                <tr><td>Inicie</td><td>0</td><td>∞</td><td>∞</td><td>∞</td></tr>
+                <tr><td><i>s</i></td><td>0</td><td>1</td><td>2</td><td>∞</td></tr>
+                <tr><td><i>u</i> (porque 1 &lt; 2)</td><td>0</td><td>1</td><td>2</td><td>2</td></tr>
+                <tr><td><i>a</i></td><td>0</td><td>1*</td><td>2</td><td>2</td></tr>
+                <tr><td><i>v</i></td><td>0</td><td>1*</td><td>2</td><td>2</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              (*) Quando <span class="m"><i>a</i></span> é extraído, a Relaxação em
+              <span class="m"><i>u</i></span> encontra <span class="m">1 &gt; 2 + (−8) = −6</span>. Se o código
+              atualiza mesmo com <span class="m"><i>u</i> ∈ <i>S</i></span>,
+              <span class="m"><i>d</i>[<i>u</i>]</span> vira −6, mas <span class="m"><i>v</i></span> <b>não é
+              re-relaxado</b> — <span class="m"><i>u</i></span> já saiu da fila. Em qualquer das duas
+              implementações, <span class="m"><i>d</i>[<i>v</i>]</span> termina em 2.
+            </p>
+            <p>
+              Distâncias verdadeiras:
+              <span class="m">dist(<i>s</i>, <i>u</i>) = min(1, 2−8) = −6</span> e
+              <span class="m">dist(<i>s</i>, <i>v</i>) = −5</span>. Dijkstra devolve 2 para
+              <span class="m"><i>v</i></span>. Está errado.
+            </p>
+            <p>
+              A moral: ausência de circuito negativo <b>não</b> salva Dijkstra. A hipótese é peso ≥ 0 em
+              <i>todo</i> arco. <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 77</span><div class="stmt">
+            <p>
+              Considere o seguinte algoritmo, que recebe um grafo com pesos nas arestas e um par
+              <span class="m"><i>w</i>, <i>v</i></span> de vértices e devolve uma sequência
+              <span class="m"><i>w</i> = <i>v</i><sub>1</sub>, <i>v</i><sub>2</sub>, …, <i>v</i><sub><i>k</i></sub> = <i>v</i></span>.
+              Prove que a resposta de Imprime_caminho_minimo(<i>G</i>, <i>w</i>, <i>v</i>) é um caminho mínimo que
+              liga <span class="m"><i>w</i></span> e <span class="m"><i>v</i></span>.
+            </p>
+            <div class="algo">
+              <div class="nome">Imprime_caminho_minimo(G, w, v)</div>
+<pre><span class="cm">// o original inicializa d[s] e p[s]; s é a origem w (escorregão de notação)</span>
+S ← ∅
+<span class="kw">para cada</span> x ∈ V(G) <span class="kw">faça</span>
+    d[x] ← ∞
+    p[x] ← nil
+d[w] ← 0
+p[w] ← nil
+construa uma fila de prioridades Q com chaves d[ ]
+<span class="kw">enquanto</span> Q não-vazio <span class="kw">faça</span>
+    u ← extrai_mínimo(Q)
+    insira u em S
+    <span class="kw">para cada</span> t ∈ N(u) <span class="kw">faça</span>
+        <span class="kw">se</span> d[t] &gt; d[u] + ρ(u, t) <span class="kw">então</span>
+            d[t] ← d[u] + ρ(u, t)
+            p[t] ← u
+            atualize t em Q
+L ← pilha vazia
+<span class="kw">enquanto</span> p[v] ≠ nil <span class="kw">faça</span>
+    empilhe v em L
+    v ← p[v]
+imprima w
+<span class="kw">enquanto</span> L é não-vazia <span class="kw">faça</span>
+    imprima(desempilhe(L))</pre>
+            </div>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h77" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a77" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h77"><div class="plab">Dica</div>
+            <p>
+              A primeira metade é Dijkstra com um vetor de predecessores: cada vez que a Relaxação melhora
+              <span class="m"><i>t</i></span>, grava-se “cheguei em <span class="m"><i>t</i></span> vindo de
+              <span class="m"><i>u</i></span>”. Pelo Teorema 14, <span class="m"><i>d</i>[<i>x</i>] = dist(<i>w</i>, <i>x</i>)</span>
+              no fim. A segunda metade só desempilha os predecessores. Mostre, por indução saindo de
+              <span class="m"><i>v</i></span>, que os arcos <span class="m">(<i>p</i>[<i>x</i>], <i>x</i>)</span>
+              formam um caminho mínimo.
+            </p>
+          </div>
+          <div class="panel answer" id="a77"><div class="plab">Resolução</div>
+            <p>
+              Duas observações de leitura. O original escreve <span class="m"><i>d</i>[<i>s</i>] ← 0</span> e
+              <span class="m"><i>p</i>[<i>s</i>] ← nil</span>, mas os parâmetros são
+              <span class="m"><i>w</i></span> e <span class="m"><i>v</i></span>: a origem é
+              <span class="m"><i>w</i></span>, e foi assim que o algoritmo foi reconstituído. Também o laço
+              “<span class="m">para cada <i>v</i> ∈ <i>V</i></span>” no original colide com o destino
+              <span class="m"><i>v</i></span>; usamos <span class="m"><i>x</i></span>. A linha “atualize
+              <span class="m"><i>t</i></span> em <span class="m"><i>Q</i></span>” não aparece no fragmento
+              extraído; sem ela (ou um equivalente preguiçoso com chaves repetidas) a fila de prioridades não
+              reflete o novo <span class="m"><i>d</i>[<i>t</i>]</span>. Incluímos a atualização, que é o que torna
+              a implementação por heap correta.
+            </p>
+            <p class="kicker">A primeira metade é Dijkstra</p>
+            <p>
+              Trocando <span class="m"><i>s</i></span> por <span class="m"><i>w</i></span>, o laço sobre
+              <span class="m"><i>Q</i></span> é exatamente Dijkstra(<i>G</i>, <i>w</i>), com a Relaxação aumentada
+              pela atribuição <span class="m"><i>p</i>[<i>t</i>] ← <i>u</i></span>. Pelo Teorema 14, ao esvaziar
+              <span class="m"><i>Q</i></span> temos <span class="m"><i>d</i>[<i>x</i>] = dist(<i>w</i>, <i>x</i>)</span>
+              para todo <span class="m"><i>x</i></span>.
+            </p>
+            <p>
+              Se <span class="m"><i>v</i></span> não é alcançável,
+              <span class="m"><i>p</i>[<i>v</i>]</span> permanece <span class="m">nil</span> e o algoritmo imprime
+              só <span class="m"><i>w</i></span>. Não existe caminho, e a “resposta” não é um caminho mínimo — o
+              enunciado pressupõe, implicitamente, que <span class="m"><i>w</i></span> e
+              <span class="m"><i>v</i></span> são ligados. Resolvemos nesse caso, que é o único em que a tese
+              faz sentido. Se <span class="m"><i>w</i> = <i>v</i></span>, a pilha fica vazia e imprime-se
+              <span class="m"><i>w</i></span>: o caminho trivial, de comprimento 0, que é mínimo.
+            </p>
+            <p class="kicker">Os predecessores formam um caminho mínimo</p>
+            <p>
+              Afirmação: para todo <span class="m"><i>x</i></span> alcançável a partir de
+              <span class="m"><i>w</i></span>, se <span class="m"><i>x</i> ≠ <i>w</i></span> então
+              <span class="m"><i>p</i>[<i>x</i>]</span> é o predecessor de <span class="m"><i>x</i></span> em
+              <i>algum</i> caminho mínimo de <span class="m"><i>w</i></span> a <span class="m"><i>x</i></span>, e
+            </p>
+            <div class="eq"><div class="body">
+              <i>d</i>[<i>x</i>] = <i>d</i>[<i>p</i>[<i>x</i>]] + ρ(<i>p</i>[<i>x</i>], <i>x</i>) = dist(<i>w</i>, <i>x</i>).
+            </div></div>
+            <p>
+              De fato, <span class="m"><i>p</i>[<i>x</i>]</span> é gravado exatamente quando a Relaxação define o
+              valor final de <span class="m"><i>d</i>[<i>x</i>]</span> (Proposição 12(a): depois da igualdade,
+              <span class="m"><i>d</i></span> não muda, e portanto <span class="m"><i>p</i></span> tampouco). A
+              Proposição 13 diz que essa Relaxação ocorre ao longo de um caminho mínimo. Logo o arco
+              <span class="m">(<i>p</i>[<i>x</i>], <i>x</i>)</span> é a última aresta de um caminho mínimo até
+              <span class="m"><i>x</i></span>.
+            </p>
+            <p>
+              Iterando a partir de <span class="m"><i>v</i></span>, a sequência
+              <span class="m"><i>v</i>, <i>p</i>[<i>v</i>], <i>p</i>[<i>p</i>[<i>v</i>]], …</span> chega em
+              <span class="m"><i>w</i></span> em no máximo <span class="m">|<i>V</i>| − 1</span> passos (cada
+              predecessor está estritamente mais perto da origem, porque
+              <span class="m"><i>d</i>[<i>p</i>[<i>x</i>]] = <i>d</i>[<i>x</i>] − ρ &lt; <i>d</i>[<i>x</i>]</span>
+              se o último peso for positivo, e se for zero o número de vértices ainda cai porque o algoritmo não
+              cria ciclos — <span class="m"><i>p</i></span> aponta para um vértice já extraído, portanto já em
+              <span class="m"><i>S</i></span>). Invertendo a sequência com a pilha
+              <span class="m"><i>L</i></span>, o algoritmo imprime um caminho
+              <span class="m"><i>w</i> = <i>x</i><sub>0</sub>, <i>x</i><sub>1</sub>, …, <i>x</i><sub>ℓ</sub> = <i>v</i></span>
+              cujas arestas satisfazem
+              <span class="m"><i>d</i>[<i>x</i><sub><i>i</i></sub>] = <i>d</i>[<i>x</i><sub><i>i</i>−1</sub>] + ρ(<i>x</i><sub><i>i</i>−1</sub>, <i>x</i><sub><i>i</i></sub>)</span>.
+              Telescopando, <span class="m"><i>c</i>(caminho) = <i>d</i>[<i>v</i>] = dist(<i>w</i>, <i>v</i>)</span>.
+              É um caminho mínimo. <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 78</span><div class="stmt">
+            <p>
+              Dado um grafo <span class="m"><i>D</i></span> com pesos
+              <span class="m">ρ: <i>E</i>(<i>D</i>) → [0, 1]</span> que representam a probabilidade de uma aresta
+              <b>não</b> falhar, a probabilidade de um caminho em <span class="m"><i>D</i></span> estar operacional
+              é o produto das probabilidades das arestas desse caminho (isto é, estamos supondo independência das
+              probabilidades de não falhar). Escreva um algoritmo para descobrir o caminho mais seguro entre dois
+              vértices. Prove que o algoritmo está correto.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h78" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a78" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h78"><div class="plab">Dica</div>
+            <p>
+              Maximizar um produto de números em <span class="m">(0, 1]</span> é o mesmo que minimizar a soma dos
+              <span class="m">− log</span>. Essa nova função peso é ≥ 0, e Dijkstra aplica. (Aresta com
+              probabilidade 0 se comporta como aresta ausente.)
+            </p>
+          </div>
+          <div class="panel answer" id="a78"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>P</i></span> um caminho. A confiabilidade é
+              <span class="m"><i>r</i>(<i>P</i>) = ∏<sub><i>e</i> ∈ <i>P</i></sub> ρ(<i>e</i>)</span>. Queremos um
+              caminho de <span class="m"><i>s</i></span> a <span class="m"><i>t</i></span> que maximize
+              <span class="m"><i>r</i></span>. Se alguma aresta tem <span class="m">ρ(<i>e</i>) = 0</span>, ela
+              zera qualquer caminho que a use: trate-a como ausente. Daqui em diante
+              <span class="m">ρ(<i>e</i>) ∈ (0, 1]</span>.
+            </p>
+            <p class="kicker">Redução a Dijkstra</p>
+            <p>
+              A função <span class="m">x ↦ − log <i>x</i></span> é estritamente decrescente em
+              <span class="m">(0, 1]</span>, e
+            </p>
+            <div class="eq"><div class="body">
+              − log <i>r</i>(<i>P</i>)
+              = − log <span>(</span>∏ ρ(<i>e</i>)<span>)</span>
+              =
+              <span class="sum"><span class="o">∑</span><span class="l"><i>e</i> ∈ <i>P</i></span></span>
+              (− log ρ(<i>e</i>)).
+            </div></div>
+            <p>
+              Maximizar <span class="m"><i>r</i>(<i>P</i>)</span> é equivalente a minimizar
+              <span class="m">∑ (− log ρ(<i>e</i>))</span>. Defina um novo peso
+              <span class="m">ρ′(<i>e</i>) = − log ρ(<i>e</i>)</span>. Como
+              <span class="m">ρ(<i>e</i>) ≤ 1</span>, tem-se <span class="m">ρ′(<i>e</i>) ≥ 0</span>. O algoritmo é:
+            </p>
+            <div class="algo">
+              <div class="nome">Caminho-mais-seguro(D, s, t)</div>
+<pre><span class="kw">para cada</span> e ∈ E(D) <span class="kw">faça</span>
+    <span class="kw">se</span> ρ(e) = 0 <span class="kw">então</span> remova e
+    <span class="kw">senão</span> ρ′(e) ← −log ρ(e)
+execute Dijkstra(D, s) com pesos ρ′
+devolva o caminho s ↝ t reconstruído pelos predecessores
+    (como em Imprime_caminho_minimo)</pre>
+            </div>
+            <p class="kicker">Correção</p>
+            <p>
+              Dijkstra com <span class="m">ρ′ ≥ 0</span> devolve um caminho <span class="m"><i>P</i>*</span> que
+              minimiza <span class="m">∑ ρ′</span>, pelo Teorema 14 e pelo exercício 77. Pela equivalência do
+              logaritmo, <span class="m"><i>P</i>*</span> maximiza <span class="m"><i>r</i></span>. Qualquer outro
+              caminho <span class="m"><i>Q</i></span> com <span class="m"><i>r</i>(<i>Q</i>) &gt; <i>r</i>(<i>P</i>*)</span>
+              teria <span class="m">∑ ρ′(<i>Q</i>) &lt; ∑ ρ′(<i>P</i>*)</span>, contradizendo a minimalidade.
+            </p>
+            <p>
+              Variante sem logaritmo, igualmente correta: rode um Dijkstra “multiplicativo”, inicializando
+              <span class="m"><i>d</i>[<i>s</i>] ← 1</span> e <span class="m"><i>d</i>[<i>x</i>] ← 0</span> nos demais,
+              extraindo o vértice de <b>maior</b> <span class="m"><i>d</i></span> e relaxando com
+              <span class="m"><i>d</i>[<i>t</i>] &lt; <i>d</i>[<i>u</i>] · ρ(<i>u</i>, <i>t</i>)</span>. A prova é a
+              mesma, porque esta regra é a Relaxação de <span class="m">ρ′</span> transportada pela exponencial.
+              A redução ao Dijkstra padrão deixa a correção herdada do Teorema 14, sem reescrever as invariantes.
+              <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 79</span><div class="stmt">
+            <p>
+              Seja <span class="m"><i>D</i> = (<i>V</i>, <i>E</i>, ρ)</span> um grafo com peso
+              <span class="m">ρ: <i>E</i> → {0, 1, …, <i>m</i>}</span> nas arestas,
+              <span class="m"><i>m</i> ∈ ℕ</span>. Modifique Dijkstra para computar caminhos mínimos em tempo
+              <span class="cplx"><i>O</i>(<i>m</i>|<i>V</i>| + |<i>E</i>|)</span>.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h79" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a79" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h79"><div class="plab">Dica</div>
+            <p>
+              A distância máxima finita é no máximo <span class="m"><i>m</i>(|<i>V</i>| − 1)</span>. Em vez de heap,
+              use um vetor de <span class="m"><i>m</i>|<i>V</i>| + 1</span> baldes (listas): o vértice
+              <span class="m"><i>u</i></span> com chave <span class="m"><i>d</i>[<i>u</i>]</span> mora no balde
+              dessa chave. Percorra os baldes da esquerda para a direita; um <i>decrease-key</i> é mover o vértice
+              de lista. Isso é o algoritmo de Dial.
+            </p>
+          </div>
+          <div class="panel answer" id="a79"><div class="plab">Resolução</div>
+            <p>
+              Como cada aresta pesa no máximo <span class="m"><i>m</i></span> e um caminho simples tem no máximo
+              <span class="m">|<i>V</i>| − 1</span> arestas, toda distância finita satisfaz
+              <span class="m">dist(<i>s</i>, <i>v</i>) ≤ <i>m</i>(|<i>V</i>| − 1)</span>. Basta, portanto, um universo
+              de chaves <span class="m">{0, 1, …, <i>m</i>|<i>V</i>|}</span>.
+            </p>
+            <div class="algo">
+              <div class="nome">Dijkstra-Dial(G, s, m)</div>
+<pre>Inicie(G, s)                          <span class="cm">// d[s] = 0, demais ∞</span>
+C ← m·|V|
+<span class="kw">para</span> i ← 0 <span class="kw">até</span> C <span class="kw">faça</span> B[i] ← lista vazia
+insira s em B[0]
+S ← ∅
+i ← 0
+<span class="kw">enquanto</span> i ≤ C <span class="kw">faça</span>
+    <span class="kw">enquanto</span> B[i] não-vazia <span class="kw">faça</span>
+        u ← remove um elemento de B[i]
+        <span class="kw">se</span> u ∈ S <span class="kw">então</span> continue      <span class="cm">// chave velha, se houver</span>
+        insira u em S                   <span class="cm">// d[u] = i = dist(s, u)</span>
+        <span class="kw">para cada</span> t ∈ N(u) <span class="kw">faça</span>
+            alt ← d[u] + ρ(u, t)
+            <span class="kw">se</span> alt &lt; d[t] <span class="kw">então</span>
+                remova t de B[d[t]]     <span class="cm">// se d[t] era finito</span>
+                d[t] ← alt
+                insira t em B[alt]
+    i ← i + 1</pre>
+            </div>
+            <p class="kicker">Correção</p>
+            <p>
+              O invariante de Dijkstra se preserva: o primeiro vértice extraído de um balde
+              <span class="m"><i>i</i></span> é um vértice em aberto de menor
+              <span class="m"><i>d</i></span> (os baldes &lt; <span class="m"><i>i</i></span> já foram esvaziados, e
+              as chaves só diminuem). A Relaxação é a mesma. O Teorema 14 aplica.
+            </p>
+            <p class="kicker">Complexidade</p>
+            <p>
+              O índice <span class="m"><i>i</i></span> anda de 0 a <span class="m"><i>m</i>|<i>V</i>|</span>:
+              <span class="cplx"><i>O</i>(<i>m</i>|<i>V</i>|)</span> incrementos. Cada vértice é inserido em
+              <span class="m"><i>S</i></span> uma vez. Cada aresta provoca <span class="cplx"><i>O</i>(1)</span>
+              trabalho na Relaxação, e cada <i>decrease-key</i> é uma remoção e uma inserção em lista encadeada,
+              também <span class="cplx"><i>O</i>(1)</span> se cada vértice guardar um ponteiro para o seu nó.
+              Total: <span class="cplx"><i>O</i>(<i>m</i>|<i>V</i>| + |<i>E</i>|)</span>, como pedido. <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 80</span><div class="stmt">
+            <p>
+              <b>Algoritmo de Bellman–Ford.</b> O algoritmo recebe um grafo com pesos
+              <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>, ρ)</span>, onde <span class="m">ρ</span> pode assumir
+              valores negativos, e um vértice <span class="m"><i>s</i></span>. Devolve um valor booleano indicando a
+              <b>não-existência</b> em <span class="m"><i>G</i></span> de um circuito negativo alcançável a partir
+              de <span class="m"><i>s</i></span>. No caso do valor devolvido ser verdadeiro, o algoritmo computou
+              corretamente as distâncias <span class="m">dist<sub><i>G</i></sub>(<i>s</i>, <i>v</i>)</span> para todo
+              <span class="m"><i>v</i> ∈ <i>V</i></span>.
+            </p>
+            <div class="algo">
+              <div class="nome">Bellman-Ford(G, s)</div>
+<pre>Inicie(G, s)
+<span class="kw">repita</span> |V| − 1 vezes
+    <span class="kw">para cada</span> u em V <span class="kw">faça</span>
+        <span class="kw">para cada</span> w em N(u) <span class="kw">faça</span>
+            Relaxação(u, w)
+<span class="kw">para cada</span> u em V <span class="kw">faça</span>
+    <span class="kw">para cada</span> w em N(u) <span class="kw">faça</span>
+        <span class="kw">se</span> d[w] &gt; d[u] + ρ(u, w) <span class="kw">então</span>
+            devolva falso
+devolva verdadeiro</pre>
+            </div>
+            <p>
+              Seja <span class="m"><i>G</i></span> um grafo com pesos nas arestas, possivelmente negativos. Prove
+              que, independente do número de vezes que a Relaxação foi executada, sempre valem:
+            </p>
+            <p>
+              <b>(a)</b> <span class="m">dist<sub><i>G</i></sub>(<i>s</i>, <i>w</i>) ≤ dist<sub><i>G</i></sub>(<i>s</i>, <i>u</i>) + ρ(<i>u</i>, <i>w</i>)</span>,
+              para toda aresta <span class="m">{<i>u</i>, <i>w</i>} ∈ <i>E</i>(<i>G</i>)</span>;
+            </p>
+            <p>
+              <b>(b)</b> <span class="m"><i>d</i>[<i>v</i>] ≥ dist<sub><i>G</i></sub>(<i>s</i>, <i>v</i>)</span> para
+              todo <span class="m"><i>v</i> ∈ <i>V</i>(<i>G</i>)</span>, e uma vez que vale a igualdade o valor de
+              <span class="m"><i>d</i>[<i>v</i>]</span> não muda após qualquer execução de Relaxação;
+            </p>
+            <p>
+              <b>(c)</b> se <span class="m">dist<sub><i>G</i></sub>(<i>s</i>, <i>v</i>) = ∞</span> então
+              <span class="m"><i>d</i>[<i>v</i>] = ∞</span>;
+            </p>
+            <p>
+              <b>(d)</b> se <span class="m"><i>s</i>, …, <i>u</i>, <i>w</i></span> é caminho mínimo e
+              <span class="m"><i>d</i>[<i>u</i>] = dist<sub><i>G</i></sub>(<i>s</i>, <i>u</i>)</span>, então
+              Relaxação(<i>u</i>, <i>w</i>) resulta em
+              <span class="m"><i>d</i>[<i>w</i>] = dist<sub><i>G</i></sub>(<i>s</i>, <i>w</i>)</span>;
+            </p>
+            <p>
+              <b>(e)</b> seja
+              <span class="m"><i>s</i> = <i>v</i><sub>0</sub>, <i>v</i><sub>1</sub>, …, <i>v</i><sub><i>k</i></sub> = <i>w</i></span>
+              um caminho mínimo. Se ocorrem as relaxações
+              <span class="m">(<i>v</i><sub>0</sub>, <i>v</i><sub>1</sub>)</span>,
+              <span class="m">(<i>v</i><sub>1</sub>, <i>v</i><sub>2</sub>)</span>, …,
+              <span class="m">(<i>v</i><sub><i>k</i>−1</sub>, <i>v</i><sub><i>k</i></sub>)</span>, nessa ordem e com
+              possíveis outras relaxações intermediárias, então no final da sequência
+              <span class="m"><i>d</i>[<i>w</i>] = dist<sub><i>G</i></sub>(<i>s</i>, <i>w</i>)</span>;
+            </p>
+            <p>
+              <b>(f)</b> prove que o algoritmo de Bellman–Ford devolve o valor booleano prometido;
+            </p>
+            <p>
+              <b>(g)</b> conclua que o algoritmo de Bellman–Ford funciona corretamente.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h80" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a80" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h80"><div class="plab">Dica</div>
+            <p>
+              (a)–(d) são as Proposições 12 e 13 sem usar <span class="m">ρ ≥ 0</span> na extração — só a Relaxação
+              e a definição de distância (com a convenção <span class="m">−∞</span> se houver circuito negativo
+              alcançável; nesse caso “caminho mínimo” significa caminho simples de peso mínimo, ou a tese de (a)
+              lê-se em <span class="m">[−∞, ∞]</span>). Para (e), indução ao longo do caminho: cada Relaxação na
+              ordem “acerta” o próximo vértice, e relaxações extras não estragam por (b). Para (f): um caminho
+              simples tem ≤ <span class="m">|<i>V</i>| − 1</span> arestas, logo
+              <span class="m">|<i>V</i>| − 1</span> rodadas bastam se não há circuito negativo; a rodada extra
+              detecta o circuito.
+            </p>
+          </div>
+          <div class="panel answer" id="a80"><div class="plab">Resolução</div>
+            <p>
+              Convenção: se existe circuito de peso negativo alcançável a partir de
+              <span class="m"><i>s</i></span> e a partir do qual se alcança <span class="m"><i>v</i></span>, então
+              <span class="m">dist(<i>s</i>, <i>v</i>) = −∞</span>. Caminhos, quando existirem e a distância for
+              finita, podem ser tomados simples (um circuito de peso ≥ 0 pode ser cortado; um de peso &lt; 0 torna
+              a distância <span class="m">−∞</span>).
+            </p>
+            <p class="kicker">(a) Triângulo</p>
+            <p>
+              Se <span class="m">dist(<i>s</i>, <i>u</i>) = ∞</span>, o lado direito é
+              <span class="m">∞</span>. Se <span class="m">dist(<i>s</i>, <i>u</i>) = −∞</span>, o lado direito é
+              <span class="m">−∞</span> e a desigualdade vale. Se a distância é finita, um caminho mínimo até
+              <span class="m"><i>u</i></span> concatenado com a aresta <span class="m">{<i>u</i>, <i>w</i>}</span>
+              é um passeio até <span class="m"><i>w</i></span> de comprimento
+              <span class="m">dist(<i>s</i>, <i>u</i>) + ρ(<i>u</i>, <i>w</i>)</span>; a distância (ínfimo sobre
+              passeios/caminhos) não pode ser maior. (Com circuito negativo a afirmação continua válida em
+              <span class="m">[−∞, ∞]</span>.)
+            </p>
+            <p class="kicker">(b) Cota superior que só desce até a distância</p>
+            <p>
+              Por indução no número de Relaxações: no início,
+              <span class="m"><i>d</i>[<i>s</i>] = 0 ≥ dist(<i>s</i>, <i>s</i>)</span> (igualdade, salvo circuito
+              negativo em <span class="m"><i>s</i></span>, caso em que
+              <span class="m">dist = −∞</span> e a cota 0 ainda é ≥) e
+              <span class="m"><i>d</i>[<i>v</i>] = ∞ ≥ dist</span> nos demais. Uma Relaxação(<i>u</i>, <i>w</i>)
+              só altera <span class="m"><i>d</i>[<i>w</i>]</span> para
+              <span class="m"><i>d</i>[<i>u</i>] + ρ(<i>u</i>, <i>w</i>)</span>. Por indução
+              <span class="m"><i>d</i>[<i>u</i>] ≥ dist(<i>s</i>, <i>u</i>)</span>, e por (a)
+              <span class="m">dist(<i>s</i>, <i>u</i>) + ρ ≥ dist(<i>s</i>, <i>w</i>)</span>. Logo o novo valor
+              continua ≥ <span class="m">dist(<i>s</i>, <i>w</i>)</span>.
+            </p>
+            <p>
+              Se em algum momento <span class="m"><i>d</i>[<i>v</i>] = dist(<i>s</i>, <i>v</i>)</span> (finita),
+              uma Relaxação posterior que diminuísse <span class="m"><i>d</i>[<i>v</i>]</span> contradiria a cota
+              que acabamos de provar. Portanto o valor não muda.
+            </p>
+            <p class="kicker">(c) Inalcançáveis</p>
+            <p>
+              Se <span class="m">dist(<i>s</i>, <i>v</i>) = ∞</span>, então por (b)
+              <span class="m"><i>d</i>[<i>v</i>] ≥ ∞</span>, logo
+              <span class="m"><i>d</i>[<i>v</i>] = ∞</span>.
+            </p>
+            <p class="kicker">(d) Uma Relaxação no lugar certo acerta o sucessor</p>
+            <p>
+              Após Relaxação(<i>u</i>, <i>w</i>),
+              <span class="m"><i>d</i>[<i>w</i>] ≤ <i>d</i>[<i>u</i>] + ρ(<i>u</i>, <i>w</i>) = dist(<i>s</i>, <i>u</i>) + ρ(<i>u</i>, <i>w</i>)</span>.
+              O exercício 74 (o argumento não usa sinal, só a minimalidade do caminho) dá
+              <span class="m">dist(<i>s</i>, <i>u</i>) + ρ = dist(<i>s</i>, <i>w</i>)</span>. Com (b),
+              <span class="m"><i>d</i>[<i>w</i>] = dist(<i>s</i>, <i>w</i>)</span>.
+            </p>
+            <p class="kicker">(e) Relaxações na ordem do caminho</p>
+            <p>
+              Indução em <span class="m"><i>i</i></span>: depois de processar a sequência até
+              <span class="m">(<i>v</i><sub><i>i</i>−1</sub>, <i>v</i><sub><i>i</i></sub>)</span>, vale
+              <span class="m"><i>d</i>[<i>v</i><sub><i>i</i></sub>] = dist(<i>s</i>, <i>v</i><sub><i>i</i></sub>)</span>.
+              Base <span class="m"><i>i</i> = 0</span>: <span class="m"><i>d</i>[<i>s</i>] = 0 = dist(<i>s</i>, <i>s</i>)</span>
+              (distância finita, porque o caminho mínimo até <span class="m"><i>w</i></span> existe e é finito por
+              hipótese de (e)). Passo: a Relaxação(<i>v</i><sub><i>i</i></sub>, <i>v</i><sub><i>i</i>+1</sub>)
+              acerta <span class="m"><i>v</i><sub><i>i</i>+1</sub></span> por (d). Relaxações intercaladas não
+              aumentam <span class="m"><i>d</i></span> e, por (b), não descem abaixo da distância: uma vez certa,
+              a cota permanece certa.
+            </p>
+            <p class="kicker">(f) O booleano prometido</p>
+            <p>
+              Cada repetição do laço externo relaxa <b>todas</b> as arestas (cada
+              <span class="m"><i>u</i></span>, cada <span class="m"><i>w</i> ∈ <i>N</i>(<i>u</i>)</span>). Portanto,
+              para qualquer caminho <span class="m"><i>v</i><sub>0</sub>, …, <i>v</i><sub><i>k</i></sub></span>, as
+              relaxações <span class="m">(<i>v</i><sub>0</sub>, <i>v</i><sub>1</sub>)</span>, …,
+              <span class="m">(<i>v</i><sub><i>k</i>−1</sub>, <i>v</i><sub><i>k</i></sub>)</span> ocorrem nessa
+              ordem ao longo de <span class="m"><i>k</i></span> rodadas (a <span class="m"><i>j</i></span>-ésima
+              aresta na rodada <span class="m"><i>j</i></span>), com outras relaxações no meio.
+            </p>
+            <p>
+              <b>Caso 1: não há circuito negativo alcançável a partir de <span class="m"><i>s</i></span>.</b>
+              Para cada <span class="m"><i>w</i></span> com distância finita existe um caminho mínimo simples, logo
+              com <span class="m"><i>k</i> ≤ |<i>V</i>| − 1</span> arestas. Por (e), após
+              <span class="m">|<i>V</i>| − 1</span> rodadas,
+              <span class="m"><i>d</i>[<i>w</i>] = dist(<i>s</i>, <i>w</i>)</span>. Vértices inalcançáveis ficam
+              <span class="m">∞</span> por (c). Na última varredura, a condição
+              <span class="m"><i>d</i>[<i>w</i>] &gt; <i>d</i>[<i>u</i>] + ρ(<i>u</i>, <i>w</i>)</span> falha para
+              toda aresta: se valesse, (a) e a igualdade <span class="m"><i>d</i> = dist</span> dariam
+              <span class="m">dist(<i>s</i>, <i>w</i>) &gt; dist(<i>s</i>, <i>u</i>) + ρ</span>, contradizendo (a).
+              O algoritmo devolve <b>verdadeiro</b>.
+            </p>
+            <p>
+              <b>Caso 2: há circuito negativo alcançável a partir de <span class="m"><i>s</i></span>.</b>
+              Seja <span class="m"><i>C</i> = <i>x</i><sub>0</sub>, …, <i>x</i><sub><i>r</i></sub> = <i>x</i><sub>0</sub></span>
+              tal circuito, e suponha que todos os <span class="m"><i>x</i><sub><i>j</i></sub></span> são alcançáveis
+              a partir de <span class="m"><i>s</i></span>. Se, após <span class="m">|<i>V</i>| − 1</span> rodadas, a
+              última varredura não encontrasse aresta relaxável, teríamos
+              <span class="m"><i>d</i>[<i>x</i><sub><i>j</i>+1</sub>] ≤ <i>d</i>[<i>x</i><sub><i>j</i></sub>] + ρ</span>
+              em todo o circuito. Somando,
+              <span class="m">∑ <i>d</i>[<i>x</i><sub><i>j</i></sub>] ≤ ∑ <i>d</i>[<i>x</i><sub><i>j</i></sub>] + <i>c</i>(<i>C</i>)</span>,
+              logo <span class="m"><i>c</i>(<i>C</i>) ≥ 0</span>, contradição. Portanto alguma aresta ainda relaxa,
+              e o algoritmo devolve <b>falso</b>.
+            </p>
+            <p class="kicker">(g) Correção</p>
+            <p>
+              Por (f), o booleano é o prometido. Quando ele é verdadeiro, o caso 1 de (f) diz que
+              <span class="m"><i>d</i>[<i>v</i>] = dist(<i>s</i>, <i>v</i>)</span> para todo
+              <span class="m"><i>v</i></span>. É exatamente o contrato do enunciado. <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 81</span><div class="stmt">
+            <p>
+              Prove que a complexidade do algoritmo de Bellman–Ford é
+              <span class="cplx"><i>O</i>(|<i>V</i>| |<i>E</i>|)</span>.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a81" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a81"><div class="plab">Resolução</div>
+            <p>
+              Inicie custa <span class="cplx"><i>O</i>(|<i>V</i>|)</span>. O laço externo de
+              Bellman–Ford executa <span class="m">|<i>V</i>| − 1</span> vezes. Em cada vez, o par de laços
+              “para cada <span class="m"><i>u</i></span>, para cada <span class="m"><i>w</i> ∈ <i>N</i>(<i>u</i>)</span>”
+              percorre todas as listas de adjacência: tempo
+              <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>, ou simplesmente
+              <span class="cplx"><i>O</i>(|<i>E</i>|)</span> se a implementação itera o conjunto de arestas
+              diretamente. Cada Relaxação é <span class="cplx"><i>O</i>(1)</span>.
+            </p>
+            <p>
+              As <span class="m">|<i>V</i>| − 1</span> rodadas custam portanto
+              <span class="cplx"><i>O</i>(|<i>V</i>| |<i>E</i>|)</span>. A varredura final, que procura uma aresta
+              ainda relaxável, custa mais <span class="cplx"><i>O</i>(|<i>E</i>|)</span>. Total:
+            </p>
+            <div class="eq"><div class="body">
+              <i>O</i>(|<i>V</i>|) + <i>O</i>(|<i>V</i>| |<i>E</i>|) + <i>O</i>(|<i>E</i>|)
+              = <span class="cplx"><i>O</i>(|<i>V</i>| |<i>E</i>|)</span>.
+            </div><div class="tag">□</div></div>
+            <p>
+              Em grafo não dirigido cada aresta aparece em duas listas, o que só altera a constante. Em dígrafo,
+              <span class="m"><i>N</i>(<i>u</i>)</span> são os vizinhos de saída, e a contagem é a mesma.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 82</span><div class="stmt">
+            <p>
+              <b>Algoritmo de Floyd–Warshall.</b> Seja
+              <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>, ρ)</span> um grafo com pesos nas arestas, representado
+              pela matriz
+            </p>
+            <div class="eq"><div class="body">
+              <i>a</i><sub><i>ij</i></sub> = 0 se <i>i</i> = <i>j</i>;
+              &nbsp; ρ(<i>i</i>, <i>j</i>) se {<i>i</i>, <i>j</i>} ∈ <i>E</i>;
+              &nbsp; ∞ caso contrário.
+            </div></div>
+            <p>
+              A estratégia abaixo determina <span class="m">dist<sub><i>G</i></sub>(<i>i</i>, <i>j</i>)</span> para
+              todos <span class="m"><i>i</i>, <i>j</i> ∈ <i>V</i></span> por programação dinâmica. Identifique
+              <span class="m"><i>V</i> = {1, 2, …, |<i>V</i>|}</span>. Para cada
+              <span class="m"><i>k</i> ∈ {0, 1, …, |<i>V</i>|}</span> denotamos por
+              <span class="m">[<i>k</i>]</span> o subconjunto
+              <span class="m">{1, 2, …, <i>k</i>} ⊆ <i>V</i></span>, com <span class="m">[0] = ∅</span>. Um caminho
+              <span class="m"><i>P</i> = <i>i</i>, <i>v</i><sub>0</sub>, …, <i>v</i><sub><i>t</i></sub>, <i>j</i></span>
+              é um <b><span class="m">[<i>k</i>]</span>-caminho</b> se os vértices internos
+              <span class="m"><i>v</i><sub>0</sub>, …, <i>v</i><sub><i>t</i></sub></span> pertencem a
+              <span class="m">[<i>k</i>]</span>. A <b><span class="m">[<i>k</i>]</span>-distância</b>
+              <span class="m">dist<sub><i>k</i></sub>(<i>i</i>, <i>j</i>)</span> é o comprimento do menor
+              <span class="m">[<i>k</i>]</span>-caminho que liga <span class="m"><i>i</i></span> a
+              <span class="m"><i>j</i></span>, com
+              <span class="m">dist<sub>0</sub>(<i>i</i>, <i>j</i>) = <i>a</i><sub><i>ij</i></sub></span>.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 420 220" role="img" aria-label="K4 com pesos: 1–2 vale 10, 1–3 vale 2, 1–4 vale 2, 2–3 vale 2, 2–4 vale 1, 3–4 vale 5. O caminho 1-4-2 de peso 3 está destacado.">
+                <line class="e faint" x1="80" y1="40" x2="340" y2="40"/>
+                <line class="e" x1="80" y1="40" x2="80" y2="180"/>
+                <line class="e match" x1="80" y1="40" x2="340" y2="180"/>
+                <line class="e" x1="340" y1="40" x2="80" y2="180"/>
+                <line class="e match" x1="340" y1="40" x2="340" y2="180"/>
+                <line class="e" x1="80" y1="180" x2="340" y2="180"/>
+                <circle class="peso-bg" cx="210" cy="32" r="11"/>
+                <text class="peso" x="210" y="36">10</text>
+                <circle class="peso-bg" cx="68" cy="110" r="11"/>
+                <text class="peso" x="68" y="114">2</text>
+                <circle class="peso-bg" cx="160" cy="90" r="11"/>
+                <text class="peso" x="160" y="94">2</text>
+                <circle class="peso-bg" cx="260" cy="90" r="11"/>
+                <text class="peso" x="260" y="94">2</text>
+                <circle class="peso-bg" cx="352" cy="110" r="11"/>
+                <text class="peso" x="352" y="114">1</text>
+                <circle class="peso-bg" cx="210" cy="192" r="11"/>
+                <text class="peso" x="210" y="196">5</text>
+                <g class="v"><circle cx="80" cy="40" r="16"/><text x="80" y="40">1</text></g>
+                <g class="v"><circle cx="340" cy="40" r="16"/><text x="340" y="40">2</text></g>
+                <g class="v"><circle cx="80" cy="180" r="16"/><text x="80" y="180">3</text></g>
+                <g class="v"><circle cx="340" cy="180" r="16"/><text x="340" y="180">4</text></g>
+              </svg>
+              <div class="legend">
+                <span><i class="ln" style="background:var(--ok)"></i>caminho mínimo 1–4–2, comprimento 3</span>
+              </div>
+              <figcaption><b>Figura 5.</b> Exemplo equivalente ao da figura 18 das notas, reconstruído a partir das distâncias citadas no original. O único [0]-caminho entre 3 e 4 é a aresta 3–4 (peso 5); os [1]-caminhos são 3–4 e 3–1–4; a partir de [2] entram os caminhos que usam 2 como vértice interno. Conferência: <span class="m">d<sub>0</sub>(3,4) = 5</span>, <span class="m">d<sub>1</sub>(3,4) = 4</span>, <span class="m">d<sub>2</sub>(3,4) = d<sub>3</sub>(3,4) = d<sub>4</sub>(3,4) = 3</span>; e <span class="m">d<sub>0</sub>(1,2) = d<sub>1</sub>(1,2) = d<sub>2</sub>(1,2) = 10</span>, <span class="m">d<sub>3</sub>(1,2) = 4</span>, <span class="m">d<sub>4</sub>(1,2) = 3</span>.</figcaption>
+            </figure>
+            <p>
+              Por definição, a <span class="m">[<i>k</i>+1]</span>-distância é o comprimento do menor
+              <span class="m">[<i>k</i>+1]</span>-caminho. A diferença em relação a um
+              <span class="m">[<i>k</i>]</span>-caminho é que agora o vértice
+              <span class="m"><i>k</i>+1</span> <i>pode</i> ser interno. Logo
+            </p>
+            <div class="eq"><div class="body">
+              dist<sub><i>k</i>+1</sub>(<i>i</i>, <i>j</i>)
+              = min { dist<sub><i>k</i></sub>(<i>i</i>, <i>j</i>),
+              dist<sub><i>k</i></sub>(<i>i</i>, <i>k</i>+1) + dist<sub><i>k</i></sub>(<i>k</i>+1, <i>j</i>) }.
+            </div><div class="tag">(29)</div></div>
+            <div class="algo">
+              <div class="nome">Floyd-Warshall(G)</div>
+<pre><span class="kw">para cada</span> i e j em V <span class="kw">faça</span>
+    d<sub>0</sub>(i, j) ← a<sub>ij</sub>
+<span class="kw">para cada</span> k ∈ {1, 2, …, |V|} <span class="kw">faça</span>
+    <span class="kw">para cada</span> i e j em V <span class="kw">faça</span>
+        d<sub>k</sub>(i, j) ← min { d<sub>k−1</sub>(i, j), d<sub>k−1</sub>(i, k) + d<sub>k−1</sub>(k, j) }</pre>
+            </div>
+            <p>
+              Prove que o tempo de execução é <span class="cplx"><i>O</i>(|<i>V</i>|<sup>3</sup>)</span> e que o
+              algoritmo está correto (segue de (29)).
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h82" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a82" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h82"><div class="plab">Dica</div>
+            <p>
+              Três laços aninhados de <span class="m">|<i>V</i>|</span> iterações, corpo
+              <span class="cplx"><i>O</i>(1)</span>, dão o cubo. Para a correção, mostre por indução em
+              <span class="m"><i>k</i></span> que a matriz <span class="m"><i>d</i><sub><i>k</i></sub></span> armazena
+              exatamente as <span class="m">[<i>k</i>]</span>-distâncias; o passo é a recorência (29), justificada
+              pela partição “o ótimo usa <span class="m"><i>k</i></span> como interno, ou não”.
+            </p>
+          </div>
+          <div class="panel answer" id="a82"><div class="plab">Resolução</div>
+            <p class="kicker">Tempo</p>
+            <p>
+              A inicialização percorre <span class="m">|<i>V</i>|<sup>2</sup></span> entradas:
+              <span class="cplx"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span>. O laço em
+              <span class="m"><i>k</i></span> tem <span class="m">|<i>V</i>|</span> valores; para cada
+              <span class="m"><i>k</i></span>, os laços em <span class="m"><i>i</i></span> e
+              <span class="m"><i>j</i></span> cobrem <span class="m">|<i>V</i>|<sup>2</sup></span> pares; o corpo é
+              um mínimo e uma soma, <span class="cplx"><i>O</i>(1)</span> (com a convenção
+              <span class="m">∞ + <i>x</i> = ∞</span>). Total
+              <span class="cplx"><i>O</i>(|<i>V</i>|<sup>3</sup>)</span>.
+            </p>
+            <p class="kicker">Correção, a partir de (29)</p>
+            <p>
+              Afirmação: após o processamento do valor <span class="m"><i>k</i></span>,
+              <span class="m"><i>d</i><sub><i>k</i></sub>(<i>i</i>, <i>j</i>) = dist<sub><i>k</i></sub>(<i>i</i>, <i>j</i>)</span>
+              para todo par. Base <span class="m"><i>k</i> = 0</span>: um [0]-caminho não tem vértice interno, logo
+              é a aresta <span class="m"><i>ij</i></span> (ou o caminho trivial se
+              <span class="m"><i>i</i> = <i>j</i></span>), e
+              <span class="m">dist<sub>0</sub> = <i>a</i><sub><i>ij</i></sub></span> por definição.
+            </p>
+            <p>
+              Passo: um <span class="m">[<i>k</i>]</span>-caminho mínimo de
+              <span class="m"><i>i</i></span> a <span class="m"><i>j</i></span> ou (i) não usa o vértice
+              <span class="m"><i>k</i></span> como interno — e então é um
+              <span class="m">[<i>k</i>−1]</span>-caminho mínimo, de comprimento
+              <span class="m">dist<sub><i>k</i>−1</sub>(<i>i</i>, <i>j</i>)</span> — ou (ii) usa
+              <span class="m"><i>k</i></span> exatamente uma vez como interno (usá-lo duas vezes criaria um
+              circuito; com a convenção usual de não haver circuito negativo, circuitos não ajudam). Nesse caso o
+              caminho se parte em um <span class="m">[<i>k</i>−1]</span>-caminho
+              <span class="m"><i>i</i> ↝ <i>k</i></span> e um <span class="m">[<i>k</i>−1]</span>-caminho
+              <span class="m"><i>k</i> ↝ <i>j</i></span>, e pelo exercício 74 os dois pedaços podem ser tomados
+              mínimos. O comprimento é
+              <span class="m">dist<sub><i>k</i>−1</sub>(<i>i</i>, <i>k</i>) + dist<sub><i>k</i>−1</sub>(<i>k</i>, <i>j</i>)</span>.
+              O mínimo entre (i) e (ii) é (29), e o algoritmo implementa exatamente isso.
+            </p>
+            <p>
+              No fim, <span class="m"><i>k</i> = |<i>V</i>|</span>: os internos podem ser qualquer subconjunto de
+              <span class="m"><i>V</i></span>, e <span class="m">dist<sub>|<i>V</i>|</sub>(<i>i</i>, <i>j</i>) = dist<sub><i>G</i></sub>(<i>i</i>, <i>j</i>)</span>.
+              <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 83</span><div class="stmt">
+            <p>
+              Determine <span class="m"><i>d</i><sub><i>i</i></sub>(<i>j</i>, <i>k</i>)</span> para toda terna
+              <span class="m">(<i>i</i>, <i>j</i>, <i>k</i>) ∈ <i>V</i><sup>3</sup></span> no grafo da figura 5
+              (equivalente à figura 18 das notas).
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a83" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a83"><div class="plab">Resolução</div>
+            <p>
+              O enunciado pede a terna em <span class="m"><i>V</i><sup>3</sup></span>. Com
+              <span class="m"><i>V</i> = {1,2,3,4}</span> isso são 64 valores, mas o objeto natural do algoritmo —
+              e o que o original ilustra com <span class="m"><i>d</i><sub>0</sub>(3,4)</span>,
+              <span class="m"><i>d</i><sub>1</sub>(3,4)</span>, … — é a família de matrizes
+              <span class="m"><i>d</i><sub><i>i</i></sub></span> para
+              <span class="m"><i>i</i> = 0,1,2,3,4</span>, cada uma indexada por
+              <span class="m">(<i>j</i>, <i>k</i>)</span>. É isso que calculamos. (Incluir
+              <span class="m"><i>i</i> = 0</span> cobre a inicialização; <span class="m"><i>i</i> ∈ <i>V</i></span>
+              seria só as quatro últimas matrizes.)
+            </p>
+            <p>
+              Matriz de adjacência ponderada, com a convenção <span class="m"><i>a</i><sub><i>ii</i></sub> = 0</span>:
+            </p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th><i>d</i><sub>0</sub></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>0</td><td>10</td><td>2</td><td>2</td></tr>
+                <tr><td>2</td><td>10</td><td>0</td><td>2</td><td>1</td></tr>
+                <tr><td>3</td><td>2</td><td>2</td><td>0</td><td>5</td></tr>
+                <tr><td>4</td><td>2</td><td>1</td><td>5</td><td>0</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              <span class="m"><i>k</i> = 1</span>:
+              <span class="m"><i>d</i><sub>1</sub>(<i>i</i>,<i>j</i>) = min(<i>d</i><sub>0</sub>(<i>i</i>,<i>j</i>), <i>d</i><sub>0</sub>(<i>i</i>,1) + <i>d</i><sub>0</sub>(1,<i>j</i>))</span>.
+              Só o par {3,4} melhora: <span class="m">min(5, 2+2) = 4</span>.
+            </p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th><i>d</i><sub>1</sub></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>0</td><td>10</td><td>2</td><td>2</td></tr>
+                <tr><td>2</td><td>10</td><td>0</td><td>2</td><td>1</td></tr>
+                <tr><td>3</td><td>2</td><td>2</td><td>0</td><td>4</td></tr>
+                <tr><td>4</td><td>2</td><td>1</td><td>4</td><td>0</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              <span class="m"><i>k</i> = 2</span>: o par {3,4} cai outra vez,
+              <span class="m">min(4, 2+1) = 3</span> (caminho 3–2–4).
+            </p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th><i>d</i><sub>2</sub></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>0</td><td>10</td><td>2</td><td>2</td></tr>
+                <tr><td>2</td><td>10</td><td>0</td><td>2</td><td>1</td></tr>
+                <tr><td>3</td><td>2</td><td>2</td><td>0</td><td>3</td></tr>
+                <tr><td>4</td><td>2</td><td>1</td><td>3</td><td>0</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              <span class="m"><i>k</i> = 3</span>: o par {1,2} cai de 10 para
+              <span class="m">min(10, 2+2) = 4</span> (caminho 1–3–2).
+            </p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th><i>d</i><sub>3</sub></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>0</td><td>4</td><td>2</td><td>2</td></tr>
+                <tr><td>2</td><td>4</td><td>0</td><td>2</td><td>1</td></tr>
+                <tr><td>3</td><td>2</td><td>2</td><td>0</td><td>3</td></tr>
+                <tr><td>4</td><td>2</td><td>1</td><td>3</td><td>0</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              <span class="m"><i>k</i> = 4</span>: o par {1,2} cai de 4 para
+              <span class="m">min(4, 2+1) = 3</span> (caminho 1–4–2).
+            </p>
+            <div class="scroll">
+            <table class="tbl">
+              <thead><tr><th><i>d</i><sub>4</sub></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>0</td><td>3</td><td>2</td><td>2</td></tr>
+                <tr><td>2</td><td>3</td><td>0</td><td>2</td><td>1</td></tr>
+                <tr><td>3</td><td>2</td><td>2</td><td>0</td><td>3</td></tr>
+                <tr><td>4</td><td>2</td><td>1</td><td>3</td><td>0</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              Conferência com o original: <span class="m"><i>d</i><sub>0</sub>(3,4) = 5</span>,
+              <span class="m"><i>d</i><sub>1</sub>(3,4) = 4</span>,
+              <span class="m"><i>d</i><sub>2</sub> = <i>d</i><sub>3</sub> = <i>d</i><sub>4</sub>(3,4) = 3</span>;
+              <span class="m"><i>d</i><sub>0</sub> = <i>d</i><sub>1</sub> = <i>d</i><sub>2</sub>(1,2) = 10</span>,
+              <span class="m"><i>d</i><sub>3</sub>(1,2) = 4</span>,
+              <span class="m"><i>d</i><sub>4</sub>(1,2) = 3</span> ✔
+              Os pesos da figura 5 foram escolhidos exatamente para reproduzir essas contas
+              (<span class="m">ρ(1,3) = ρ(1,4) = ρ(2,3) = 2</span>,
+              <span class="m">ρ(2,4) = 1</span>, <span class="m">ρ(3,4) = 5</span>,
+              <span class="m">ρ(1,2) = 10</span>). <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 84</span><div class="stmt">
+            <p>A seguinte versão do algoritmo de Floyd–Warshall funciona corretamente?</p>
+            <div class="algo">
+              <div class="nome">Floyd-Warshall(G) · versão in-place</div>
+<pre><span class="kw">para cada</span> i e j em V <span class="kw">faça</span>
+    d(i, j) ← a<sub>ij</sub>
+<span class="kw">para cada</span> k ∈ {1, 2, …, |V|} <span class="kw">faça</span>
+    <span class="kw">para cada</span> i e j em V <span class="kw">faça</span>
+        d(i, j) ← min { d(i, j), d(i, k) + d(k, j) }</pre>
+            </div>
+            <p>
+              O original mistura, nessa última linha, a notação
+              <span class="m"><i>d</i><sub><i>k</i>−1</sub>(<i>i</i>, <i>k</i>)</span> com
+              <span class="m"><i>d</i>(<i>k</i>, <i>j</i>)</span> — artefato da extração. A pergunta clássica, e a
+              única leitura coerente, é a versão acima: uma única matriz, atualizada no lugar.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h84" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a84" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h84"><div class="plab">Dica</div>
+            <p>
+              O que a recorência (29) exige de fato é
+              <span class="m">dist<sub><i>k</i>−1</sub>(<i>i</i>, <i>k</i>)</span> e
+              <span class="m">dist<sub><i>k</i>−1</sub>(<i>k</i>, <i>j</i>)</span>. Mostre que essas duas
+              quantidades <b>não mudam</b> quando o vértice interno permitido passa a incluir
+              <span class="m"><i>k</i></span>: um caminho de <span class="m"><i>i</i></span> a
+              <span class="m"><i>k</i></span> que usasse <span class="m"><i>k</i></span> como interno teria um
+              circuito. Por isso ler ou escrever na mesma matriz não estraga os valores necessários.
+            </p>
+          </div>
+          <div class="panel answer" id="a84"><div class="plab">Resolução</div>
+            <p>
+              <b>Sim, funciona</b> — é a implementação usual, com uma matriz só.
+            </p>
+            <p>
+              Na iteração <span class="m"><i>k</i></span>, a recorência (29) pede
+              <span class="m">dist<sub><i>k</i>−1</sub>(<i>i</i>, <i>j</i>)</span>,
+              <span class="m">dist<sub><i>k</i>−1</sub>(<i>i</i>, <i>k</i>)</span> e
+              <span class="m">dist<sub><i>k</i>−1</sub>(<i>k</i>, <i>j</i>)</span>. O algoritmo in-place, no momento
+              de atualizar <span class="m">(<i>i</i>, <i>j</i>)</span>, lê
+              <span class="m"><i>d</i>(<i>i</i>, <i>j</i>)</span>,
+              <span class="m"><i>d</i>(<i>i</i>, <i>k</i>)</span> e
+              <span class="m"><i>d</i>(<i>k</i>, <i>j</i>)</span>. Precisamos que as duas últimas ainda sejam as
+              <span class="m">[<i>k</i>−1]</span>-distâncias, mesmo que outros pares já tenham sido atualizados
+              nesta iteração.
+            </p>
+            <p>
+              Um <span class="m">[<i>k</i>]</span>-caminho de <span class="m"><i>i</i></span> a
+              <span class="m"><i>k</i></span> que usasse <span class="m"><i>k</i></span> como vértice <i>interno</i>
+              repetiria <span class="m"><i>k</i></span> e conteria um circuito. Na ausência de circuito negativo
+              (hipótese sob a qual as distâncias são finitas e bem definidas), esse circuito pode ser removido sem
+              aumentar o comprimento. Logo
+            </p>
+            <div class="eq"><div class="body">
+              dist<sub><i>k</i></sub>(<i>i</i>, <i>k</i>) = dist<sub><i>k</i>−1</sub>(<i>i</i>, <i>k</i>),
+              &nbsp;&nbsp;
+              dist<sub><i>k</i></sub>(<i>k</i>, <i>j</i>) = dist<sub><i>k</i>−1</sub>(<i>k</i>, <i>j</i>).
+            </div></div>
+            <p>
+              Atualizar a coluna <span class="m"><i>k</i></span> ou a linha <span class="m"><i>k</i></span> nesta
+              iteração é um no-op. Qualquer ordem nos pares <span class="m">(<i>i</i>, <i>j</i>)</span> lê, portanto,
+              os valores corretos de <span class="m"><i>d</i>(<i>i</i>, <i>k</i>)</span> e
+              <span class="m"><i>d</i>(<i>k</i>, <i>j</i>)</span>, e a atribuição
+              <span class="m"><i>d</i>(<i>i</i>, <i>j</i>) ← min{…}</span> instala
+              <span class="m">dist<sub><i>k</i></sub>(<i>i</i>, <i>j</i>)</span>. Por indução, a matriz final é
+              <span class="m">dist<sub><i>G</i></sub></span>.
+            </p>
+            <p>
+              Aviso: se houver circuito negativo, Floyd–Warshall (in-place ou não) pode produzir diagonais
+              negativas, o que serve como detecção, mas os valores fora da diagonal deixam de ser distâncias
+              confiáveis. <b>□</b>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 85</span><div class="stmt">
+            <p>
+              <b>Fecho transitivo.</b> Se <span class="m"><i>D</i> = (<i>V</i>, <i>E</i>)</span> é um grafo dirigido,
+              então o fecho transitivo de <span class="m"><i>D</i></span> é o grafo
+              <span class="m"><i>D</i><sup>∗</sup> = (<i>V</i>, <i>E</i><sup>∗</sup>)</span> onde
+            </p>
+            <div class="eq"><div class="body">
+              <i>E</i><sup>∗</sup> = { (<i>i</i>, <i>j</i>) : existe um caminho dirigido de <i>i</i> para <i>j</i> em <i>D</i> }.
+            </div></div>
+            <p>
+              Escreva um algoritmo de tempo <span class="cplx"><i>O</i>(|<i>V</i>|<sup>3</sup>)</span> para determinar
+              o fecho transitivo de um grafo.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a85" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a85"><div class="plab">Resolução</div>
+            <p>
+              O fecho transitivo é a relação “existe caminho” sobre os pares de vértices. Floyd–Warshall calcula
+              distâncias; basta especializá-lo para a semiríngue booleana
+              <span class="m">(∨, ∧)</span> no lugar de <span class="m">(min, +)</span>, ou, equivalentemente,
+              colocar peso 1 em cada arco e testar se a distância saiu finita.
+            </p>
+            <div class="algo">
+              <div class="nome">Fecho-Transitivo(D)</div>
+<pre><span class="cm">// t[i,j] = verdadeiro sse existe caminho i ↝ j</span>
+<span class="kw">para cada</span> i e j em V <span class="kw">faça</span>
+    <span class="kw">se</span> i = j <span class="kw">ou</span> (i, j) ∈ E <span class="kw">então</span> t[i, j] ← verdadeiro
+    <span class="kw">senão</span> t[i, j] ← falso
+<span class="kw">para cada</span> k ∈ V <span class="kw">faça</span>
+    <span class="kw">para cada</span> i ∈ V <span class="kw">faça</span>
+        <span class="kw">para cada</span> j ∈ V <span class="kw">faça</span>
+            t[i, j] ← t[i, j] ∨ (t[i, k] ∧ t[k, j])
+devolva t</pre>
+            </div>
+            <p>
+              Os três laços aninhados custam <span class="cplx"><i>O</i>(|<i>V</i>|<sup>3</sup>)</span>; o corpo é
+              <span class="cplx"><i>O</i>(1)</span>. A correção é a do exercício 82, com a tradução: “comprimento
+              finito” vira “existe caminho”, a soma de comprimentos vira concatenação (o
+              <span class="m">∧</span>), e o mínimo vira existência de pelo menos uma das duas opções (o
+              <span class="m">∨</span>). No fim, <span class="m"><i>t</i>[<i>i</i>, <i>j</i>]</span> é verdadeiro
+              precisamente quando <span class="m">(<i>i</i>, <i>j</i>) ∈ <i>E</i><sup>∗</sup></span>.
+            </p>
+            <p>
+              (Há alternativas também <span class="cplx"><i>O</i>(|<i>V</i>|<sup>3</sup>)</span> no pior caso: uma
+              BFS a partir de cada vértice custa
+              <span class="cplx"><i>O</i>(|<i>V</i>|(|<i>V</i>| + |<i>E</i>|))</span>, que é
+              <span class="cplx"><i>O</i>(|<i>V</i>|<sup>3</sup>)</span> em dígrafo denso. O enunciado pede
+              explicitamente o cubo, e o contexto é Floyd–Warshall; a versão booleana acima é a resposta alinhada
+              ao bloco.) <b>□</b>
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="06-caminhos-e-circuitos.html"><span class="dir">Capítulo anterior</span><span class="ttl">6. Caminhos e circuitos</span></a>
+        <a class="next" href="08-conexidade.html"><span class="dir">Próximo capítulo</span><span class="ttl">8. Conexidade</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática das seções “Caminhos mínimos em grafos com pesos nas arestas”
+          e “Algoritmo de Dijkstra para caminhos mínimos” das notas de Teoria dos Grafos (CI065 / BC1429) do
+          Prof. Jair Donadelli. Enunciados dos 13 exercícios preservados; explicações, diagramas e resoluções foram
+          escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>

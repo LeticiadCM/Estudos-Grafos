@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5. Percursos e busca — Teoria dos Grafos</title>
+<meta name="description" content="Alcançabilidade, o algoritmo genérico Visite, busca em largura, busca em profundidade e a DFS rotulada com os intervalos chega/sai, com 9 exercícios resolvidos.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo 5 · Visitar o grafo</span>
+    <h1>Percursos e algoritmos de busca</h1>
+    <p class="lead">
+      Ao terminar, você saberá o que significa um vértice alcançar outro, como o algoritmo genérico
+      <i>Visite</i> percorre o pedaço alcançável a partir de um vértice usando uma lista
+      <span class="m"><i>L</i></span>, e por que ele termina em tempo linear nesse pedaço.
+      Depois especializa <span class="m"><i>L</i></span> em fila (busca em largura) ou pilha (busca em profundidade)
+      e lê os rótulos <span class="m">chega</span>/<span class="m">sai</span> da DFS rotulada:
+      dois intervalos ou se aninham, ou são disjuntos.
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> alcançabilidade · passeio · Visite · Teorema 3 · BFS · DFS · busca rotulada · Proposição 10</span>
+      <span><b>Exercícios:</b> 9 com resolução (53 a 61)</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#como-usar">Como usar</a>
+        <a href="#s7">7. Percursos em grafos</a>
+        <a class="sub" href="#s7-alc">Alcançabilidade e passeio</a>
+        <a class="sub" href="#s7-visite">O algoritmo Visite</a>
+        <a class="sub" href="#s7-teorema">Teorema 3 e Corolário 4</a>
+        <a class="sub" href="#s7-props">Proposições 5–6 e Lema 8</a>
+        <a class="sub" href="#s7-todo">Percorrer o grafo inteiro</a>
+        <a class="sub" href="#s7-receita">Receita: complexidade de um percurso</a>
+        <a href="#ex1">Exercícios 53 a 57</a>
+        <a href="#s8">8. Algoritmos de busca</a>
+        <a class="sub" href="#s8-bfs">Busca em largura (fila)</a>
+        <a class="sub" href="#s8-dfs">Busca em profundidade (pilha)</a>
+        <a class="sub" href="#s8-cmp">BFS versus DFS no mesmo grafo</a>
+        <a class="sub" href="#s8-rot">DFS rotulada: chega e sai</a>
+        <a class="sub" href="#s8-prop">Proposição 10 e o vetor pai</a>
+        <a href="#ex2">Exercícios 58 a 61</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <section class="chapter" id="como-usar">
+        <div class="box tip">
+          <div class="h">Como aproveitar este material</div>
+          <ol>
+            <li><b>Leia a teoria do bloco</b> — ela contém exatamente o que os exercícios seguintes exigem, nada além.</li>
+            <li><b>Tente o exercício sem abrir nada.</b> Se travar, use o botão <i>Dica</i> (quando existir) antes da resposta.</li>
+            <li><b>Só então abra <i>Mostrar resposta</i></b> e compare o seu raciocínio com o argumento apresentado.</li>
+          </ol>
+          <p>As respostas ficam ocultas por padrão. O botão no topo da página abre ou fecha todas de uma vez, e a impressão da página já sai com tudo aberto.</p>
+        </div>
+        <p>
+          Este capítulo continua do <a href="04-representacao-computacional.html">capítulo 4</a> e assume o grafo
+          representado por <b>lista de adjacências</b>, com
+          <span class="m"><i>V</i>(<i>G</i>) = {1, 2, …, <i>n</i>}</span>.
+          A vizinhança de <span class="m"><i>u</i></span> é a lista
+          <span class="m"><i>N</i>(<i>u</i>)</span> (ou <span class="m"><i>E</i><sub><i>G</i></sub>(<i>u</i>)</span>,
+          as arestas incidentes a <span class="m"><i>u</i></span>).
+          O corte <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span> é o do
+          <a href="02-subgrafos-cliques-bipartidos.html">capítulo 2</a>: arestas com um extremo em
+          <span class="m"><i>U</i></span> e o outro fora.
+        </p>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 7 ============================ -->
+      <section class="chapter" id="s7">
+        <h2><span class="num">§7</span> Percursos em grafos</h2>
+        <p class="sub-lead">Objetivo do bloco: visitar sistematicamente vértices e arestas, provar que o algoritmo genérico Visite faz exatamente isso no pedaço alcançável, e calcular a complexidade.</p>
+
+        <h3 id="s7-alc">7.1 Alcançabilidade e passeio</h3>
+        <p>
+          Um percurso num grafo <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span> tem um objetivo simples:
+          dado o grafo, <b>visitar todos os vértices e todas as arestas</b> de forma sistemática.
+          Antes de escrever o algoritmo, precisamos saber <i>a partir de onde</i> dá para chegar.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · alcançabilidade e passeio</div>
+          <p>
+            O vértice <span class="m"><i>u</i></span> é <b>alcançável por</b> <span class="m"><i>w</i></span> em
+            <span class="m"><i>G</i></span> se existe uma sequência
+            <span class="m"><i>v</i><sub>1</sub>, <i>v</i><sub>2</sub>, …, <i>v</i><sub><i>m</i></sub></span> de vértices de
+            <span class="m"><i>G</i></span> tal que
+          </p>
+          <ul>
+            <li><span class="m"><i>w</i> = <i>v</i><sub>1</sub></span>,</li>
+            <li><span class="m"><i>u</i> = <i>v</i><sub><i>m</i></sub></span>,</li>
+            <li><span class="m"><i>v</i><sub><i>i</i></sub></span> e <span class="m"><i>v</i><sub><i>i</i>+1</sub></span> são adjacentes, para todo <span class="m"><i>i</i> ∈ {1, 2, …, <i>m</i> − 1}</span>.</li>
+          </ul>
+          <p>
+            Uma sequência dessas é um <b>passeio</b> em <span class="m"><i>G</i></span> de
+            <span class="m"><i>w</i></span> até <span class="m"><i>u</i></span>.
+            Por definição, <span class="m"><i>w</i></span> é alcançável por <span class="m"><i>w</i></span>
+            (passeio trivial, <span class="m"><i>m</i> = 1</span>).
+          </p>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · passeio não é caminho</div>
+          <p>
+            Um passeio <b>pode repetir vértices e arestas</b>. O que importa é a existência de uma sequência de
+            adjacências. Caminho (sem repetir vértice) e circuito entram no
+            <a href="06-caminhos-e-circuitos.html">capítulo 6</a>. Para alcançabilidade, passeio basta:
+            se existe um passeio, existe um caminho — mas a definição acima não exige isso.
+          </p>
+        </div>
+        <p>
+          Fixe um vértice <span class="m"><i>v</i></span>. Escrevemos
+          <span class="m"><i>A</i></span> para o conjunto dos vértices alcançáveis por
+          <span class="m"><i>v</i></span>. O subgrafo induzido
+          <span class="m"><i>G</i>[<i>A</i>]</span> é o “pedaço” que um percurso a partir de
+          <span class="m"><i>v</i></span> consegue ver. O resto do grafo simplesmente não é alcançável.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 520 200" role="img" aria-label="Dois componentes: à esquerda o pedaço alcançável a partir do vértice 1; à direita dois vértices inalcançáveis">
+            <line class="e" x1="70" y1="50" x2="170" y2="50"/>
+            <line class="e" x1="170" y1="50" x2="170" y2="140"/>
+            <line class="e" x1="70" y1="50" x2="70" y2="140"/>
+            <line class="e" x1="70" y1="140" x2="170" y2="140"/>
+            <line class="e faint" x1="380" y1="70" x2="460" y2="140"/>
+            <g class="v hl"><circle cx="70" cy="50" r="17"/><text x="70" y="50">1</text></g>
+            <g class="v"><circle cx="170" cy="50" r="17"/><text x="170" y="50">2</text></g>
+            <g class="v"><circle cx="70" cy="140" r="17"/><text x="70" y="140">4</text></g>
+            <g class="v"><circle cx="170" cy="140" r="17"/><text x="170" y="140">3</text></g>
+            <g class="v open"><circle cx="380" cy="70" r="17"/><text x="380" y="70">5</text></g>
+            <g class="v open"><circle cx="460" cy="140" r="17"/><text x="460" y="140">6</text></g>
+            <text class="lbl" x="120" y="188">A = {1, 2, 3, 4}</text>
+            <text class="lbl" x="420" y="188">inalcançáveis por 1</text>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c2)"></i>vértice de partida</span>
+            <span><i style="background:var(--node)"></i>alcançável por 1</span>
+            <span><i style="background:var(--card); outline:2px solid var(--edge)"></i>fora de A</span>
+          </div>
+          <figcaption><b>Figura 1.</b> Exemplo construído para esta versão. A partir de 1 o passeio só enxerga o quadrado da esquerda. Os vértices 5 e 6 são outra componente: <span class="m">Visite(<i>G</i>, 1)</span> nunca os toca.</figcaption>
+        </figure>
+
+        <h3 id="s7-visite">7.2 Percurso genérico: o algoritmo Visite</h3>
+        <p>
+          Durante a execução, cada vértice está em um de dois estados: <b>não-visitado</b> ou <b>visitado</b>.
+          Cada aresta <span class="m">{<i>u</i>, <i>w</i>}</span> tem <b>dois</b> estados de visita, um por extremo:
+          “visitada a partir de <span class="m"><i>u</i></span>” e “visitada a partir de
+          <span class="m"><i>w</i></span>”. No início, tudo está não-visitado.
+        </p>
+        <p>
+          O algoritmo <span class="m">Visite(<i>G</i>, <i>v</i>)</span> recebe um grafo e um vértice
+          <span class="m"><i>v</i></span> e visita exatamente os vértices de <span class="m"><i>A</i></span>
+          (uma vez cada) e as arestas de <span class="m"><i>G</i>[<i>A</i>]</span> (duas vezes cada, uma por extremo).
+          Para gerenciar o trabalho ele usa uma lista <span class="m"><i>L</i></span> na qual
+          <b>escolha, inserção e remoção custam tempo constante</b> — a política de quem entra e quem sai
+          ainda é arbitrária; as buscas da seção 8 é que vão fixá-la.
+        </p>
+        <div class="algo">
+          <div class="nome">Visite(G, v)</div>
+<pre><span class="cm">// L: lista com escolha/inserção/remoção em O(1)
+// cada vértice tem um cursor na sua lista de adjacências</span>
+insira v em L e marque v visitado                             <span class="cm">// 1</span>
+<span class="kw">enquanto</span> L ≠ ∅ <span class="kw">faça</span>                                          <span class="cm">// 2</span>
+    escolha u ∈ L                                             <span class="cm">// 3</span>
+    <span class="kw">se</span> em E<sub>G</sub>(u) há aresta não-visitada a partir de u <span class="kw">então</span>  <span class="cm">// 4</span>
+        escolha {u, w} ∈ E<sub>G</sub>(u) não-visitada a partir de u     <span class="cm">// 6</span>
+        marque {u, w} visitada a partir de u                  <span class="cm">// 7</span>
+        <span class="kw">se</span> w é não-visitado <span class="kw">então</span>                           <span class="cm">// 8</span>
+            insira w em L e marque w visitado                 <span class="cm">// 9</span>
+    <span class="kw">senão</span>                                                    <span class="cm">// 10</span>
+        remova u de L</pre>
+        </div>
+        <p>
+          A numeração das linhas é a do original (a linha 5 não aparece). O
+          <span class="m">senão</span> da linha 10 casa com o <span class="m">se</span> da linha 4:
+          <span class="m"><i>u</i></span> só sai de <span class="m"><i>L</i></span> quando
+          <b>todas</b> as arestas incidentes já foram visitadas a partir dele.
+        </p>
+        <div class="box warn">
+          <div class="h">Atenção · o senão é da linha 4, não da linha 8</div>
+          <p>
+            Se o <span class="m">senão</span> casasse com a linha 8, o algoritmo removeria
+            <span class="m"><i>u</i></span> na primeira aresta que apontasse para um vizinho já visitado,
+            mesmo com arestas de <span class="m"><i>u</i></span> ainda intocadas. A aresta
+            <span class="m">{<i>u</i>, <i>w</i>}</span> não seria visitada a partir de
+            <span class="m"><i>u</i></span> no futuro, e o Teorema 3 cairia. O
+            <span class="m">senão</span> responde à pergunta “ainda há aresta não-visitada a partir de
+            <span class="m"><i>u</i></span>?”.
+          </p>
+        </div>
+        <div class="box tip">
+          <div class="h">Intuição</div>
+          <p>
+            <span class="m"><i>L</i></span> é a fronteira: vértices já descobertos cujo entorno ainda não
+            foi esgotado. Cada iteração ou avança uma aresta a partir de alguém na fronteira, ou retira
+            alguém que já não tem aresta pendente. Um vértice novo entra em
+            <span class="m"><i>L</i></span> no instante em que é descoberto, e nunca mais volta ao estado
+            não-visitado.
+          </p>
+        </div>
+        <p>
+          Invariante informal, enquanto o laço roda:
+          todo vértice em <span class="m"><i>L</i></span> está visitado; toda aresta já marcada “a partir de
+          <span class="m"><i>u</i></span>” tem o extremo <span class="m"><i>u</i></span> visitado; e
+          <span class="m"><i>L</i></span> só esvazia quando não resta aresta pendente a partir de nenhum
+          vértice já descoberto.
+        </p>
+        <p>
+          O algoritmo termina (Corolário 7, abaixo) porque cada vértice entra em
+          <span class="m"><i>L</i></span> no máximo uma vez e, para cada
+          <span class="m"><i>u</i></span>, a linha 3 executa no máximo
+          <span class="m"><i>d</i>(<i>u</i>) + 1</span> vezes. A complexidade, com as operações de
+          <span class="m"><i>L</i></span> em <span class="m"><i>O</i>(1)</span> e um cursor por lista de
+          adjacências, é linear no pedaço visitado.
+        </p>
+
+        <h3 id="s7-teorema">7.3 Teorema 3 e Corolário 4</h3>
+        <p>Seja <span class="m"><i>A</i></span> o conjunto dos vértices alcançáveis por <span class="m"><i>v</i></span>.</p>
+        <div class="box thm">
+          <div class="h">Teorema 3</div>
+          <p>
+            Após <span class="m">Visite(<i>G</i>, <i>v</i>)</span>, cada vértice de
+            <span class="m"><i>A</i></span> foi visitado uma vez e cada aresta de
+            <span class="m"><i>G</i>[<i>A</i>]</span> foi visitada duas vezes.
+          </p>
+        </div>
+        <div class="box thm">
+          <div class="h">Corolário 4</div>
+          <p>
+            A complexidade do algoritmo é
+            <span class="cplx"><i>O</i>(|<i>A</i>| + |<i>E</i>(<i>G</i>[<i>A</i>])|)</span>.
+          </p>
+        </div>
+        <p>
+          O teorema não é óbvio: precisamos garantir que ninguém de <span class="m"><i>A</i></span>
+          fica de fora, que ninguém é visitado duas vezes, e que cada aresta do induzido é olhada
+          pelos dois extremos. Isso sai de quatro resultados menores, na ordem em que o original os prova.
+        </p>
+
+        <h3 id="s7-props">7.4 Proposições 5 e 6, Lema 8</h3>
+        <div class="box thm">
+          <div class="h">Proposição 5</div>
+          <p>Cada vértice de <span class="m"><i>G</i></span> entra em <span class="m"><i>L</i></span> no máximo uma vez.</p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Um vértice <span class="m"><i>w</i></span> só é inserido na linha 1 ou na linha 9.
+              Em ambos os casos a condição é “<span class="m"><i>w</i></span> é não-visitado”. Logo após a inserção,
+              <span class="m"><i>w</i></span> é marcado visitado. Um vértice visitado nunca volta a não-visitado.
+              Portanto a condição de inserção de <span class="m"><i>w</i></span> fica falsa para o resto da execução.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+        <div class="box thm">
+          <div class="h">Proposição 6</div>
+          <p>
+            A linha 3 é executada no máximo <span class="m"><i>d</i><sub><i>G</i></sub>(<i>w</i>) + 1</span> vezes,
+            para cada <span class="m"><i>w</i> ∈ <i>V</i>(<i>G</i>)</span>.
+          </p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Fixe <span class="m"><i>w</i></span> e suponha
+              <span class="m"><i>w</i> ∈ <i>L</i></span>. Cada vez que a linha 3 escolhe
+              <span class="m"><i>u</i> = <i>w</i></span>, ou a linha 4 é verdadeira — e então o número de arestas
+              não-visitadas a partir de <span class="m"><i>w</i></span> cai de 1 — ou
+              <span class="m"><i>w</i></span> é removido de <span class="m"><i>L</i></span>.
+              Depois de <span class="m"><i>d</i>(<i>w</i>)</span> execuções “produtivas” restam 0 arestas
+              pendentes; a execução seguinte remove <span class="m"><i>w</i></span>.
+              Pela Proposição 5, <span class="m"><i>w</i></span> não reentra.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+        <div class="box thm">
+          <div class="h">Corolário 7</div>
+          <p><span class="m">Visite(<i>G</i>, <i>v</i>)</span> termina.</p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> <span class="m">|<i>V</i>(<i>G</i>)|</span> é finito. Pela Proposição 5 cada
+              vértice entra em <span class="m"><i>L</i></span> no máximo uma vez. Pela Proposição 6, após no máximo
+            </p>
+            <div class="eq"><div class="body">
+              <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>V</i>(<i>G</i>)</span></span>
+              (<i>d</i>(<i>u</i>) + 1) = 2|<i>E</i>| + |<i>V</i>|
+            </div></div>
+            <p>
+              iterações do <span class="m">enquanto</span> temos <span class="m"><i>L</i> = ∅</span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+        <div class="box thm">
+          <div class="h">Lema 8</div>
+          <p>
+            Numa execução de <span class="m">Visite(<i>G</i>, <i>v</i>)</span>, todo vértice alcançável por
+            <span class="m"><i>v</i></span> é visitado.
+          </p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Seja <span class="m"><i>w</i></span> alcançável por
+              <span class="m"><i>v</i></span>. Existe uma sequência de arestas
+            </p>
+            <div class="eq"><div class="body">
+              <i>e</i><sub>1</sub>, <i>e</i><sub>2</sub>, …, <i>e</i><sub><i>m</i></sub>
+            </div><div class="tag">(16)</div></div>
+            <p>
+              com <span class="m"><i>v</i> ∈ <i>e</i><sub>1</sub></span>,
+              <span class="m"><i>w</i> ∈ <i>e</i><sub><i>m</i></sub></span>, e
+              <span class="m"><i>e</i><sub><i>i</i></sub></span> adjacente a
+              <span class="m"><i>e</i><sub><i>i</i>+1</sub></span> (compartilham um extremo) para todo
+              <span class="m"><i>i</i></span>. Provamos por indução em <span class="m"><i>m</i></span> que
+              <span class="m"><i>w</i></span> é visitado.
+            </p>
+            <p>
+              <b>Base.</b> <span class="m"><i>m</i> = 1</span>, escreva
+              <span class="m"><i>e</i><sub>1</sub> = {<i>v</i>, <i>w</i>}</span>.
+              Na linha 1 o vértice <span class="m"><i>v</i></span> é visitado e entra em
+              <span class="m"><i>L</i></span>. Pelo Corolário 7 ele é removido em algum momento; antes disso
+              a aresta <span class="m"><i>e</i><sub>1</sub></span> é visitada a partir de
+              <span class="m"><i>v</i></span>. Nesse instante, ou <span class="m"><i>w</i></span> já está
+              visitado, ou vale a linha 8 e <span class="m"><i>w</i></span> é visitado.
+            </p>
+            <p>
+              <b>Passo.</b> Hipótese: todo vértice alcançável por <span class="m"><i>v</i></span> com
+              <span class="m"><i>m</i> − 1</span> arestas é visitado. Escreva
+              <span class="m"><i>e</i><sub><i>m</i></sub> = {<i>x</i>, <i>w</i>}</span> com
+              <span class="m"><i>x</i> ∈ <i>e</i><sub><i>m</i></sub> ∩ <i>e</i><sub><i>m</i>−1</sub></span>.
+              Por hipótese <span class="m"><i>x</i></span> foi visitado. Antes de sair de
+              <span class="m"><i>L</i></span>, a aresta <span class="m">{<i>x</i>, <i>w</i>}</span> é visitada
+              a partir de <span class="m"><i>x</i></span>, e o mesmo argumento da base visita
+              <span class="m"><i>w</i></span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+        <div class="box thm">
+          <div class="h">Corolário 9</div>
+          <p>
+            Seja <span class="m"><i>A</i></span> o conjunto dos vértices alcançáveis por
+            <span class="m"><i>v</i></span>. Cada aresta de <span class="m"><i>G</i>[<i>A</i>]</span>
+            é visitada duas vezes.
+          </p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Seja <span class="m"><i>e</i> = {<i>x</i>, <i>y</i>}</span> uma aresta de
+              <span class="m"><i>G</i>[<i>A</i>]</span>. Então
+              <span class="m"><i>x</i>, <i>y</i> ∈ <i>A</i></span>, logo ambos entram em
+              <span class="m"><i>L</i></span> (Lema 8 + Proposição 5). Antes de
+              <span class="m"><i>x</i></span> sair de <span class="m"><i>L</i></span>, a aresta
+              <span class="m"><i>e</i></span> é visitada a partir de <span class="m"><i>x</i></span>;
+              analogamente a partir de <span class="m"><i>y</i></span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </div>
+        <p>
+          O Teorema 3 é a soma do Lema 8 (todo mundo de <span class="m"><i>A</i></span> é visitado),
+          da Proposição 5 (ninguém entra — logo ninguém é “visitado de novo” — duas vezes) e do
+          Corolário 9 (cada aresta do induzido, duas vezes). O Corolário 4 segue: com custo constante
+          nas operações de <span class="m"><i>L</i></span> e um cursor por lista, o trabalho total é
+          proporcional a <span class="m">|<i>A</i>| + |<i>E</i>(<i>G</i>[<i>A</i>])|</span>, que é o
+          tamanho da representação do pedaço alcançável.
+        </p>
+
+        <h3 id="s7-todo">7.5 Percorrer o grafo inteiro</h3>
+        <p>
+          Se o grafo tem mais de uma componente, <span class="m">Visite(<i>G</i>, <i>v</i>)</span>
+          só vê a de <span class="m"><i>v</i></span>. Para visitar
+          <b>todo</b> vértice uma vez e <b>toda</b> aresta duas vezes, reiniciamos enquanto restar
+          vértice não-visitado.
+        </p>
+        <div class="algo">
+          <div class="nome">Visite(G)</div>
+<pre><span class="kw">enquanto</span> há vértice não-visitado em V <span class="kw">faça</span>
+    escolha v ∈ V não-visitado
+    insira v em L e marque v visitado
+    <span class="kw">enquanto</span> L ≠ ∅ <span class="kw">faça</span>
+        escolha u ∈ L
+        <span class="kw">se</span> em E<sub>G</sub>(u) há aresta não-visitada a partir de u <span class="kw">então</span>
+            escolha {u, w} ∈ E<sub>G</sub>(u) não-visitada a partir de u
+            marque {u, w} visitada a partir de u
+            <span class="kw">se</span> w é não-visitado <span class="kw">então</span>
+                insira w em L e marque w visitado
+        <span class="kw">senão</span>
+            remova u de L</pre>
+        </div>
+        <p>
+          Cada chamada interna é um <span class="m">Visite(<i>G</i>, <i>v</i>)</span> numa componente
+          ainda intocada. Somando o Corolário 4 sobre as componentes, a complexidade é
+          <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>.
+        </p>
+
+        <h3 id="s7-receita">7.6 Receita: complexidade de um percurso</h3>
+        <div class="box rec">
+          <div class="h">Receita: quanto custa visitar o grafo?</div>
+          <ol>
+            <li><b>Identifique a representação.</b> Lista de adjacências: percorrer
+              <span class="m"><i>N</i>(<i>u</i>)</span> custa
+              <span class="m"><i>O</i>(<i>d</i>(<i>u</i>))</span>. Matriz: varrer a linha de
+              <span class="m"><i>u</i></span> custa <span class="m"><i>O</i>(|<i>V</i>|)</span>.</li>
+            <li><b>Conte quantas vezes cada vértice é escolhido.</b> Em
+              <span class="m">Visite</span>, no máximo
+              <span class="m"><i>d</i>(<i>u</i>) + 1</span> vezes (Proposição 6).</li>
+            <li><b>Não recomece a lista do zero.</b> O custo
+              <span class="m"><i>O</i>(1)</span> da linha 4 exige um <b>cursor</b> em
+              <span class="m"><i>N</i>(<i>u</i>)</span>: a próxima aresta não-visitada a partir de
+              <span class="m"><i>u</i></span> é o próximo vizinho ainda não lido. Sem cursor, cada
+              “há aresta pendente?” revarre a lista e o
+              <span class="m"><i>O</i>(1)</span> some.</li>
+            <li><b>Some.</b> Com lista e cursor:
+              <span class="m"><i>O</i>(|<i>A</i>| + |<i>E</i>(<i>G</i>[<i>A</i>])|)</span>.
+              Com matriz e cursor por linha:
+              <span class="m"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span> — cada linha é varrida uma vez.</li>
+          </ol>
+        </div>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Símbolo</th><th>Significado</th><th>No Visite</th></tr></thead>
+          <tbody>
+            <tr><td><i>A</i></td><td>vértices alcançáveis por <span class="m"><i>v</i></span></td><td>os que entram em <span class="m"><i>L</i></span></td></tr>
+            <tr><td><i>G</i>[<i>A</i>]</td><td>subgrafo induzido por <span class="m"><i>A</i></span></td><td>arestas visitadas (2 vezes cada)</td></tr>
+            <tr><td><i>L</i></td><td>lista da fronteira</td><td>política ainda livre</td></tr>
+            <tr><td><i>E</i><sub><i>G</i></sub>(<i>u</i>)</td><td>arestas incidentes a <span class="m"><i>u</i></span></td><td>percorridas com cursor</td></tr>
+            <tr><td><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</td><td>corte: um extremo em <span class="m"><i>U</i></span>, o outro fora</td><td>exercícios 55–57 e 61</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="box def">
+          <div class="h">Resumo do bloco em cinco linhas</div>
+          <ul>
+            <li>Alcançável por <span class="m"><i>w</i></span> = existe passeio a partir de <span class="m"><i>w</i></span>.</li>
+            <li><span class="m">Visite(<i>G</i>, <i>v</i>)</span> visita <span class="m"><i>A</i></span> uma vez e as arestas de <span class="m"><i>G</i>[<i>A</i>]</span> duas vezes.</li>
+            <li>Cada vértice entra em <span class="m"><i>L</i></span> no máximo uma vez; a linha 3 roda no máximo <span class="m"><i>d</i>(<i>w</i>) + 1</span> vezes por vértice.</li>
+            <li>Complexidade com lista: <span class="m"><i>O</i>(|<i>A</i>| + |<i>E</i>(<i>G</i>[<i>A</i>])|)</span>; com matriz: <span class="m"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span>.</li>
+            <li>Para o grafo inteiro, reinicie enquanto houver não-visitado: <span class="m"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================ EX 53–57 ============================ -->
+      <section class="chapter" id="ex1">
+        <div class="ex-head">
+          <h3>Exercícios 53 a 57</h3>
+          <button class="toggle" type="button" data-scope="#ex1" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: custo das linhas de Visite, matriz versus lista, cálculo do corte e uma variante que cresce pelo corte.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 53</span><div class="stmt">
+            <p>Justifique detalhadamente o custo <span class="m"><i>O</i>(1)</span> nas linhas do algoritmo <span class="m">Visite(<i>G</i>, <i>v</i>)</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h53" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a53" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h53"><div class="plab">Dica</div>
+            <p>
+              A hipótese do texto é que escolha, inserção e remoção em
+              <span class="m"><i>L</i></span> custam constante. O ponto que não está escrito no
+              pseudocódigo — e sem o qual a linha 4 <b>não</b> é
+              <span class="m"><i>O</i>(1)</span> — é um cursor em cada lista de adjacências.
+            </p>
+          </div>
+          <div class="panel answer" id="a53"><div class="plab">Resolução</div>
+            <p>
+              Assumimos a representação por lista de adjacências, um vetor
+              <span class="m">visitado[1‥<i>n</i>]</span> e, para cada vértice, um ponteiro
+              <span class="m">prox[<i>u</i>]</span> para o próximo vizinho ainda não lido em
+              <span class="m"><i>N</i>(<i>u</i>)</span> (o cursor). A lista
+              <span class="m"><i>L</i></span> admite escolha, inserção e remoção em
+              <span class="m"><i>O</i>(1)</span>, como o original fixa.
+            </p>
+            <div class="scroll">
+            <table class="tbl livre">
+              <thead><tr><th>Linha</th><th>O que faz</th><th>Por que é O(1)</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>insere <span class="m"><i>v</i></span> em <span class="m"><i>L</i></span> e marca visitado</td><td>inserção em <span class="m"><i>L</i></span> é <span class="m"><i>O</i>(1)</span>; <span class="m">visitado[<i>v</i>] ← verdadeiro</span> é uma escrita no vetor.</td></tr>
+                <tr><td>2</td><td>testa <span class="m"><i>L</i> ≠ ∅</span></td><td>basta um contador de tamanho, ou olhar o ponteiro da cabeça.</td></tr>
+                <tr><td>3</td><td>escolhe <span class="m"><i>u</i> ∈ <i>L</i></span></td><td>hipótese sobre <span class="m"><i>L</i></span>: a escolha é <span class="m"><i>O</i>(1)</span> (cabeça, topo, ou um ponteiro guardado).</td></tr>
+                <tr><td>4</td><td>há aresta não-visitada a partir de <span class="m"><i>u</i></span>?</td><td>olhe o cursor: se <span class="m">prox[<i>u</i>]</span> ainda aponta para um nó da lista, sim; se chegou ao fim, não. <b>Não</b> se recomeça <span class="m"><i>N</i>(<i>u</i>)</span> do zero.</td></tr>
+                <tr><td>6</td><td>escolhe essa aresta <span class="m">{<i>u</i>, <i>w</i>}</span></td><td>o vizinho no nó apontado por <span class="m">prox[<i>u</i>]</span> é <span class="m"><i>w</i></span>.</td></tr>
+                <tr><td>7</td><td>marca a aresta visitada a partir de <span class="m"><i>u</i></span></td><td>avance o cursor: <span class="m">prox[<i>u</i>] ← prox[<i>u</i>]→prox</span>. A visita “a partir de <span class="m"><i>u</i></span>” <b>é</b> esse avanço — não precisamos marcar a aresta do outro lado agora.</td></tr>
+                <tr><td>8</td><td><span class="m"><i>w</i></span> é não-visitado?</td><td>leitura de <span class="m">visitado[<i>w</i>]</span>.</td></tr>
+                <tr><td>9</td><td>insere <span class="m"><i>w</i></span> e marca visitado</td><td>como a linha 1.</td></tr>
+                <tr><td>10</td><td>remove <span class="m"><i>u</i></span> de <span class="m"><i>L</i></span></td><td>remoção em <span class="m"><i>O</i>(1)</span> pela hipótese. (Se <span class="m"><i>L</i></span> for lista simplesmente ligada e <span class="m"><i>u</i></span> não for a cabeça, a hipótese exige que a estrutura permita essa remoção — por exemplo, lista duplamente ligada, ou <span class="m"><i>u</i></span> é sempre a cabeça/topo.)</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <p>
+              Conferência: somando, cada linha do corpo é
+              <span class="m"><i>O</i>(1)</span>, e o número de execuções é
+              <span class="m"><i>O</i>(|<i>A</i>| + |<i>E</i>(<i>G</i>[<i>A</i>])|)</span>
+              pelas Proposições 5 e 6. Sem o cursor, a linha 4 varreria
+              <span class="m"><i>N</i>(<i>u</i>)</span> a cada escolha de
+              <span class="m"><i>u</i></span> e o custo por vértice passaria a
+              <span class="m"><i>O</i>(<i>d</i>(<i>u</i>)<sup>2</sup>)</span> — o
+              <span class="m"><i>O</i>(1)</span> do enunciado <b>depende</b> do cursor.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 54</span><div class="stmt">
+            <p>Prove que se <span class="m"><i>G</i></span> está representado por uma matriz de adjacências então o algoritmo <span class="m">Visite</span> tem complexidade <span class="m"><i>O</i>(|<i>V</i>(<i>G</i>)|<sup>2</sup>)</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h54" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a54" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h54"><div class="plab">Dica</div>
+            <p>
+              Na matriz, a “lista” de <span class="m"><i>u</i></span> é a linha inteira, de comprimento
+              <span class="m"><i>n</i> = |<i>V</i>|</span>. Um cursor nessa linha varre cada entrada
+              <span class="m"><i>A</i>(<i>u</i>, ·)</span> no máximo uma vez. Some sobre todos os
+              <span class="m"><i>u</i></span>.
+            </p>
+          </div>
+          <div class="panel answer" id="a54"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>n</i> = |<i>V</i>(<i>G</i>)|</span> e
+              <span class="m"><i>A</i></span> a matriz <span class="m"><i>n</i> × <i>n</i></span>.
+              Mantemos, para cada <span class="m"><i>u</i></span>, um índice
+              <span class="m"><i>j</i><sub><i>u</i></sub></span> (o cursor) inicialmente igual a 1.
+              “Há aresta não-visitada a partir de <span class="m"><i>u</i></span>?” vira:
+              avance <span class="m"><i>j</i><sub><i>u</i></sub></span> até achar uma coluna
+              <span class="m"><i>w</i></span> com <span class="m"><i>A</i>(<i>u</i>, <i>w</i>) = 1</span>
+              ainda não consumida, ou até <span class="m"><i>j</i><sub><i>u</i></sub> &gt; <i>n</i></span>.
+            </p>
+            <p>
+              <b>Trabalho por vértice.</b> Ao longo de toda a execução, o cursor de
+              <span class="m"><i>u</i></span> só anda para a frente. Cada uma das
+              <span class="m"><i>n</i></span> entradas da linha é examinada no máximo uma vez.
+              Custo por vértice: <span class="m"><i>O</i>(<i>n</i>)</span>.
+            </p>
+            <p>
+              <b>Trabalho nas demais linhas.</b> Inserir, remover e testar
+              <span class="m"><i>L</i></span> continuam
+              <span class="m"><i>O</i>(1)</span>. Pela Proposição 5 há no máximo
+              <span class="m"><i>n</i></span> inserções. Pela Proposição 6 a linha 3 executa
+              <span class="m"><i>O</i>(<i>n</i> + |<i>E</i>|)</span> vezes, mas o trabalho
+              <i>caro</i> (varrer a matriz) já foi cobrado no parágrafo anterior: as execuções
+              “baratas” da linha 3, depois que o cursor esgotou a linha, são
+              <span class="m"><i>O</i>(1)</span> cada e somam
+              <span class="m"><i>O</i>(<i>n</i>)</span>.
+            </p>
+            <p>
+              <b>Total.</b>
+              <span class="m"><i>n</i> · <i>O</i>(<i>n</i>) + <i>O</i>(<i>n</i>) = <i>O</i>(<i>n</i><sup>2</sup>) = <i>O</i>(|<i>V</i>(<i>G</i>)|<sup>2</sup>)</span>.
+              O mesmo vale para <span class="m">Visite(<i>G</i>)</span> no grafo inteiro: cada linha da
+              matriz é varrida no máximo uma vez.
+            </p>
+            <p>
+              A cota é justa no pior caso: um grafo denso tem
+              <span class="m">Θ(<i>n</i><sup>2</sup>)</span> entradas 1, e qualquer algoritmo que
+              visite todas as arestas a partir dos dois extremos precisa olhar
+              <span class="m">Θ(<i>n</i><sup>2</sup>)</span> posições da matriz.
+              <span class="qed">□</span>
+            </p>
+            <div class="box warn">
+              <div class="h">Sem cursor a conta piora</div>
+              <p>
+                Se, a cada escolha de <span class="m"><i>u</i></span>, recomeçássemos a linha do índice 1,
+                cada uma das <span class="m"><i>d</i>(<i>u</i>) + 1</span> escolhas custaria
+                <span class="m"><i>O</i>(<i>n</i>)</span> e o total seria
+                <span class="m"><i>O</i>(<i>n</i>(|<i>V</i>| + |<i>E</i>|))</span>, que chega a
+                <span class="m"><i>O</i>(<i>n</i><sup>3</sup>)</span> no grafo completo. O
+                <span class="m"><i>O</i>(<i>n</i><sup>2</sup>)</span> do enunciado pressupõe que não
+                relemos entradas já consumidas.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 55</span><div class="stmt">
+            <p>Escreva um algoritmo que recebe um grafo <span class="m"><i>G</i></span> e um subconjunto de vértices <span class="m"><i>U</i></span> e devolve as arestas no corte <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>)</span>. Determine a complexidade do algoritmo.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h55" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a55" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h55"><div class="plab">Dica</div>
+            <p>
+              Percorra só as listas dos vértices de <span class="m"><i>U</i></span>. Uma aresta
+              <span class="m">{<i>u</i>, <i>w</i>}</span> está no corte se e somente se
+              <span class="m"><i>u</i> ∈ <i>U</i></span> e <span class="m"><i>w</i> ∉ <i>U</i></span>.
+              Para o teste <span class="m"><i>w</i> ∉ <i>U</i></span> ser
+              <span class="m"><i>O</i>(1)</span>, prepare um vetor característico de
+              <span class="m"><i>U</i></span>.
+            </p>
+          </div>
+          <div class="panel answer" id="a55"><div class="plab">Resolução</div>
+            <p>
+              Lembrete: <span class="m"><i>E</i>(<i>U</i>, <span class="ovl"><i>U</i></span>) = { {<i>x</i>, <i>y</i>} ∈ <i>E</i>(<i>G</i>) : <i>x</i> ∈ <i>U</i>, <i>y</i> ∉ <i>U</i> }</span>.
+              Cada aresta do corte tem exatamente um extremo em <span class="m"><i>U</i></span>, então
+              basta olhar as vizinhanças a partir de <span class="m"><i>U</i></span>.
+            </p>
+            <div class="algo">
+              <div class="nome">Cortar(G, U)</div>
+<pre><span class="cm">// G por lista de adjacências; U dado como lista de vértices</span>
+<span class="kw">para cada</span> x ∈ V(G) <span class="kw">faça</span> emU[x] ← falso
+<span class="kw">para cada</span> u ∈ U <span class="kw">faça</span> emU[u] ← verdadeiro
+C ← ∅
+<span class="kw">para cada</span> u ∈ U <span class="kw">faça</span>
+    <span class="kw">para cada</span> w ∈ N(u) <span class="kw">faça</span>
+        <span class="kw">se</span> emU[w] = falso <span class="kw">então</span> C ← C ∪ {{u, w}}
+<span class="kw">devolva</span> C</pre>
+            </div>
+            <p>
+              <b>Correção.</b> Se <span class="m">{<i>u</i>, <i>w</i>}</span> entra em
+              <span class="m"><i>C</i></span>, então <span class="m"><i>u</i> ∈ <i>U</i></span> e
+              <span class="m"><i>w</i> ∉ <i>U</i></span>, logo a aresta está no corte. Reciprocamente,
+              toda aresta do corte tem um extremo <span class="m"><i>u</i> ∈ <i>U</i></span> e o outro
+              <span class="m"><i>w</i> ∉ <i>U</i></span>; quando o laço externo processa esse
+              <span class="m"><i>u</i></span>, o vizinho <span class="m"><i>w</i></span> é encontrado
+              e a aresta é inserida. Cada aresta do corte é inserida uma única vez (só a partir do
+              extremo que está em <span class="m"><i>U</i></span>).
+            </p>
+            <p>
+              <b>Complexidade.</b> Montar <span class="m">emU</span> custa
+              <span class="m"><i>O</i>(|<i>V</i>| + |<i>U</i>|)</span>. O laço duplo examina
+              <span class="m"><span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>U</i></span></span> <i>d</i>(<i>u</i>)</span>
+              nós de lista. Inserir em <span class="m"><i>C</i></span> é
+              <span class="m"><i>O</i>(1)</span> por aresta (lista). Total
+            </p>
+            <div class="eq"><div class="body">
+              <i>O</i>(|<i>V</i>| + <span class="sum"><span class="o">∑</span><span class="l"><i>u</i>∈<i>U</i></span></span> <i>d</i>(<i>u</i>))
+              ⊆ <i>O</i>(|<i>V</i>| + |<i>E</i>|).
+            </div></div>
+            <p>
+              Com matriz de adjacências, o laço interno varreria a linha de cada
+              <span class="m"><i>u</i> ∈ <i>U</i></span> e o custo passaria a
+              <span class="m"><i>O</i>(|<i>U</i>| · |<i>V</i>|) ⊆ <i>O</i>(|<i>V</i>|<sup>2</sup>)</span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 56</span><div class="stmt">
+            <p>
+              Seja <span class="m"><i>G</i></span> um grafo. Para simplificar, suponha que todo vértice de
+              <span class="m"><i>G</i></span> é alcançável a partir de qualquer vértice dado.
+              Para cada vértice temos dois estados possíveis: não-visitado ou visitado. De início todos
+              os vértices de <span class="m"><i>G</i></span> estão não-visitado. Prove ou refute: o
+              seguinte algoritmo visita todos os vértices de <span class="m"><i>G</i></span>.
+            </p>
+            <div class="algo">
+              <div class="nome">Visite-vertices(G)</div>
+<pre>escolha um vértice v não-visitado
+insira v em L e marque v visitado
+<span class="kw">enquanto</span> houver aresta no corte E(L, V \ L) <span class="kw">faça</span>
+    escolha uma aresta e no corte E(L, V \ L)
+    <span class="kw">se</span> e ∩ (V \ L) é não-visitado <span class="kw">então</span>
+        insira e ∩ (V \ L) em L
+    marque e ∩ (V \ L) visitado</pre>
+            </div>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h56" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a56" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h56"><div class="plab">Dica</div>
+            <p>
+              A hipótese “todo vértice é alcançável a partir de qualquer outro” é a conexidade de
+              <span class="m"><i>G</i></span>. Mantenha o invariante
+              <span class="m"><i>L</i> =</span> {vértices já visitados} e pergunte o que acontece com o
+              corte enquanto <span class="m"><i>L</i></span> for um subconjunto próprio.
+            </p>
+          </div>
+          <div class="panel answer" id="a56"><div class="plab">Resolução</div>
+            <p>
+              <b>A afirmação é verdadeira:</b> o algoritmo visita todos os vértices.
+              (A hipótese de conexidade é essencial; sem ela, o algoritmo pararia na componente do
+              <span class="m"><i>v</i></span> inicial. O enunciado pede que a usemos.)
+            </p>
+            <p>
+              <b>Invariante.</b> No início de cada iteração, e também ao terminar,
+              <span class="m"><i>L</i></span> coincide com o conjunto dos vértices já visitados.
+              Vale no começo: só <span class="m"><i>v</i></span> está em
+              <span class="m"><i>L</i></span> e só ele está visitado. Numa iteração,
+              <span class="m"><i>e</i> = {<i>x</i>, <i>y</i>}</span> com
+              <span class="m"><i>x</i> ∈ <i>L</i></span> e
+              <span class="m"><i>y</i> = <i>e</i> ∩ (<i>V</i> \ <i>L</i>)</span>.
+              Pelo invariante, <span class="m"><i>y</i></span> ainda não foi visitado — portanto o
+              <span class="m">se</span> é verdadeiro, <span class="m"><i>y</i></span> entra em
+              <span class="m"><i>L</i></span> e em seguida é marcado visitado. O invariante se
+              preserva. (O <span class="m">se</span> é, neste algoritmo, sempre verdadeiro: um vértice
+              fora de <span class="m"><i>L</i></span> ainda não foi marcado. Ele não estraga a
+              correção; só é redundante.)
+            </p>
+            <p>
+              <b>O laço não gira no vazio.</b> Depois de processar
+              <span class="m"><i>e</i></span>, o vértice <span class="m"><i>y</i></span> está em
+              <span class="m"><i>L</i></span>, logo <span class="m"><i>e</i></span> deixa o corte.
+              Cada iteração aumenta <span class="m">|<i>L</i>|</span> de 1. Como
+              <span class="m">|<i>V</i>|</span> é finito, o laço termina.
+            </p>
+            <p>
+              <b>Ao terminar, <span class="m"><i>L</i> = <i>V</i></span>.</b>
+              O laço para quando <span class="m"><i>E</i>(<i>L</i>, <i>V</i> \ <i>L</i>) = ∅</span>.
+              <span class="m"><i>L</i></span> é não vazio (contém o
+              <span class="m"><i>v</i></span> inicial). Se fosse
+              <span class="m"><i>L</i> ≠ <i>V</i></span>, teríamos uma partição
+              <span class="m">(<i>L</i>, <i>V</i> \ <i>L</i>)</span> sem aresta cruzando o corte.
+              Mas a hipótese diz que todo vértice é alcançável a partir de
+              <span class="m"><i>v</i> ∈ <i>L</i></span>: em particular algum
+              <span class="m"><i>w</i> ∈ <i>V</i> \ <i>L</i></span> é alcançável, e o passeio até
+              <span class="m"><i>w</i></span> tem de usar uma aresta com um extremo em
+              <span class="m"><i>L</i></span> e o outro fora — uma aresta do corte. Contradição.
+              Logo <span class="m"><i>L</i> = <i>V</i></span>. Pelo invariante, todos os vértices
+              foram visitados.
+              <span class="qed">□</span>
+            </p>
+            <div class="box tip">
+              <div class="h">O que este algoritmo <i>não</i> faz</div>
+              <p>
+                Ele não visita arestas a partir dos dois extremos e não percorre
+                <span class="m"><i>E</i>(<i>G</i>)</span> de propósito. Só cresce
+                <span class="m"><i>L</i></span> enquanto o corte for não vazio. É um percurso
+                <i>só de vértices</i>, e a política de qual aresta do corte escolher ainda está
+                livre — o exercício 61 é que a especializa em fila ou pilha.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 57</span><div class="stmt">
+            <p>Determine a complexidade do algoritmo do exercício anterior.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a57" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a57"><div class="plab">Resolução</div>
+            <p>
+              O laço de <span class="m">Visite-vertices</span> executa exatamente
+              <span class="m">|<i>V</i>| − 1</span> vezes: cada iteração insere um vértice novo em
+              <span class="m"><i>L</i></span>, e paramos com <span class="m"><i>L</i> = <i>V</i></span>
+              (exercício 56). O custo depende de <b>como</b> implementamos
+              “há aresta no corte / escolha uma aresta do corte”.
+            </p>
+            <p class="kicker">Implementação ingênua</p>
+            <p>
+              A cada iteração, percorra <span class="m"><i>E</i></span> à procura de uma aresta com
+              um extremo em <span class="m"><i>L</i></span> e o outro fora
+              (teste de pertinência em <span class="m"><i>O</i>(1)</span> com vetor característico).
+              Cada varredura custa <span class="m"><i>O</i>(|<i>E</i>|)</span>. Total
+              <span class="cplx"><i>O</i>(|<i>V</i>| · |<i>E</i>|)</span>.
+            </p>
+            <p class="kicker">Implementação cuidadosa (a que o capítulo sugere)</p>
+            <p>
+              Mantenha uma lista <span class="m"><i>C</i></span> das arestas do corte atuais.
+              Ao inserir <span class="m"><i>y</i></span> em <span class="m"><i>L</i></span>, percorra
+              <span class="m"><i>N</i>(<i>y</i>)</span> uma vez:
+            </p>
+            <ul>
+              <li>vizinho ainda fora de <span class="m"><i>L</i></span>: a aresta entra no corte, insira-a em <span class="m"><i>C</i></span>;</li>
+              <li>vizinho já em <span class="m"><i>L</i></span>: a aresta <b>sai</b> do corte (era um cabo entre a fronteira antiga e <span class="m"><i>y</i></span>).</li>
+            </ul>
+            <p>
+              “Há aresta no corte?” é <span class="m"><i>C</i> ≠ ∅</span>, em
+              <span class="m"><i>O</i>(1)</span>. Cada aresta é inserida e removida de
+              <span class="m"><i>C</i></span> no máximo uma vez. Percorrer as listas custa
+              <span class="m"><span class="sum"><span class="o">∑</span><span class="l"><i>y</i></span></span> <i>d</i>(<i>y</i>) = 2|<i>E</i>|</span>.
+              Total
+              <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>
+              com lista de adjacências — o mesmo ordem do <span class="m">Visite</span>.
+            </p>
+            <p>
+              Com matriz, o passo “percorra <span class="m"><i>N</i>(<i>y</i>)</span>” vira varrer a
+              linha de <span class="m"><i>y</i></span>, e voltamos a
+              <span class="m"><i>O</i>(|<i>V</i>|<sup>2</sup>)</span>, como no exercício 54.
+            </p>
+            <p>
+              <b>Resposta que usamos daqui para frente:</b> com lista de adjacências e corte
+              mantido de forma incremental,
+              <span class="m"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>. A leitura ingênua do
+              pseudocódigo, varrendo <span class="m"><i>E</i></span> a cada teste, dá
+              <span class="m"><i>O</i>(|<i>V</i>| · |<i>E</i>|)</span>; o enunciado não fixa a
+              estrutura, e as duas contas são honestas.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <hr class="sep">
+
+      <!-- ============================ SEÇÃO 8 ============================ -->
+      <section class="chapter" id="s8">
+        <h2><span class="num">§8</span> Algoritmos de busca</h2>
+        <p class="sub-lead">Objetivo do bloco: especializar a lista L em fila ou pilha, comparar as ordens de descoberta a partir do mesmo vértice, e ler os intervalos da DFS rotulada.</p>
+        <p>
+          <b>Algoritmo de busca</b> é o nome usual de alguns percursos. A estratégia geral, a partir
+          de um vértice <span class="m"><i>v</i></span>, é: se ainda há vértice
+          <span class="m"><i>u</i></span> não-visitado na fronteira, visite
+          <span class="m"><i>u</i></span> e os vizinhos novos. O que muda é a
+          <b>política de <span class="m"><i>L</i></span></b>.
+        </p>
+
+        <h3 id="s8-bfs">8.1 Busca em largura</h3>
+        <p>
+          Primeiro visitamos cada vizinho novo de <span class="m"><i>v</i></span>, percorrendo
+          <span class="m"><i>N</i>(<i>v</i>)</span>, e o guardamos numa <b>fila</b>; quando não
+          houver mais vizinhos, retiramos o primeiro da fila e repetimos. Em outras palavras,
+          <span class="m"><i>L</i></span> é administrada como fila: inserção no fim, escolha e
+          remoção no começo.
+        </p>
+        <div class="algo">
+          <div class="nome">Visite-em-Largura(G, v)</div>
+<pre><span class="cm">// L é uma fila: insere no fim, escolhe e remove o primeiro</span>
+insira v no fim da fila L e marque v visitado                 <span class="cm">// 1</span>
+<span class="kw">enquanto</span> L ≠ ∅ <span class="kw">faça</span>                                          <span class="cm">// 2</span>
+    seja u ∈ L o primeiro vértice da fila                     <span class="cm">// 3</span>
+    <span class="kw">se</span> em E<sub>G</sub>(u) há aresta não-visitada a partir de u <span class="kw">então</span>  <span class="cm">// 4</span>
+        escolha {u, w} ∈ E<sub>G</sub>(u) não-visitada a partir de u     <span class="cm">// 6</span>
+        marque {u, w} visitada a partir de u                  <span class="cm">// 7</span>
+        <span class="kw">se</span> w é não-visitado <span class="kw">então</span>                           <span class="cm">// 8</span>
+            insira w no fim da fila L e marque w visitado     <span class="cm">// 9</span>
+    <span class="kw">senão</span>                                                    <span class="cm">// 10</span>
+        remova u da fila L</pre>
+        </div>
+        <p>
+          É o <span class="m">Visite</span> da seção 7 com a política FIFO. O invariante extra:
+          os vértices saem da fila em ordem não-decrescente de distância (número de arestas no
+          passeio mais curto) até <span class="m"><i>v</i></span>. A complexidade continua
+          <span class="cplx"><i>O</i>(|<i>A</i>| + |<i>E</i>(<i>G</i>[<i>A</i>])|)</span>:
+          cada operação de fila é <span class="m"><i>O</i>(1)</span>, e o resto da análise não muda.
+          O algoritmo termina pelo Corolário 7.
+        </p>
+        <div class="box tip">
+          <div class="h">Intuição</div>
+          <p>
+            A fila força a esgotar um nível antes de ir ao seguinte. As arestas que descobrem um
+            vértice novo formam uma <b>árvore de busca em largura</b> enraizada em
+            <span class="m"><i>v</i></span>: o caminho na árvore até um vértice é um passeio
+            mais curto no grafo.
+          </p>
+        </div>
+
+        <h3 id="s8-dfs">8.2 Busca em profundidade</h3>
+        <p>
+          Visitamos cada vizinho novo e o guardamos numa <b>pilha</b>; quando o topo não tem mais
+          vizinho novo, desempilhamos e repetimos. A lista <span class="m"><i>L</i></span> é
+          administrada como pilha: inserção, escolha e remoção no topo.
+        </p>
+        <div class="algo">
+          <div class="nome">Visite-em-Profundidade(G, v)</div>
+<pre><span class="cm">// L é uma pilha: insere, escolhe e remove o topo</span>
+insira v no topo da pilha L e marque v visitado
+<span class="kw">enquanto</span> L ≠ ∅ <span class="kw">faça</span>
+    seja u ∈ L o vértice do topo
+    <span class="kw">se</span> em E<sub>G</sub>(u) há aresta não-visitada a partir de u <span class="kw">então</span>
+        escolha {u, w} ∈ E<sub>G</sub>(u) não-visitada a partir de u
+        marque {u, w} visitada a partir de u
+        <span class="kw">se</span> w é não-visitado <span class="kw">então</span>
+            insira w no topo da pilha L e marque w visitado
+    <span class="kw">senão</span>
+        remova u da pilha L</pre>
+        </div>
+        <p>
+          Mesma correção e mesma complexidade do <span class="m">Visite</span> genérico. A
+          diferença é a ordem: a pilha força a descer por um vizinho recém-descoberto antes de
+          olhar os irmãos. As arestas que descobrem vértice novo formam uma
+          <b>árvore de busca em profundidade</b>.
+        </p>
+        <div class="box warn">
+          <div class="h">Atenção · a ordem das listas muda a ordem da busca</div>
+          <p>
+            Lista de adjacências não é única: qualquer permutação de
+            <span class="m"><i>N</i>(<i>u</i>)</span> é válida. BFS e DFS a partir do mesmo
+            <span class="m"><i>v</i></span> só ficam determinadas depois de fixarmos, em cada
+            vértice, a ordem em que as arestas são escolhidas. Nos exemplos abaixo as listas
+            estão em ordem crescente de rótulo.
+          </p>
+        </div>
+
+        <h3 id="s8-cmp">8.3 BFS versus DFS no mesmo grafo</h3>
+        <p>
+          As figuras do original não puderam ser extraídas. O grafo abaixo foi construído para
+          esta versão: é pequeno, conexo, e as duas buscas a partir de 1 — com
+          <span class="m"><i>N</i>(<i>u</i>)</span> em ordem crescente — produzem ordens
+          claramente distintas.
+        </p>
+        <div class="eq"><div class="body">
+          <i>V</i> = {1, 2, 3, 4, 5, 6}<br>
+          <i>E</i> = { {1,2}, {1,3}, {2,4}, {2,5}, {3,6}, {5,6} }
+        </div></div>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Vértice</th><th><i>N</i>(<i>u</i>) (ordem da lista)</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>2, 3</td></tr>
+            <tr><td>2</td><td>1, 4, 5</td></tr>
+            <tr><td>3</td><td>1, 6</td></tr>
+            <tr><td>4</td><td>2</td></tr>
+            <tr><td>5</td><td>2, 6</td></tr>
+            <tr><td>6</td><td>3, 5</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <figure>
+          <svg class="dg" viewBox="0 0 400 230" role="img" aria-label="Grafo de referência com vértices 1 a 6: 1 ligado a 2 e 3; 2 ligado a 4 e 5; 3 e 5 ligados a 6">
+            <line class="e" x1="200" y1="36" x2="110" y2="100"/>
+            <line class="e" x1="200" y1="36" x2="290" y2="100"/>
+            <line class="e" x1="110" y1="100" x2="50" y2="190"/>
+            <line class="e" x1="110" y1="100" x2="170" y2="190"/>
+            <line class="e" x1="290" y1="100" x2="290" y2="190"/>
+            <line class="e" x1="170" y1="190" x2="290" y2="190"/>
+            <g class="v hl"><circle cx="200" cy="36" r="17"/><text x="200" y="36">1</text></g>
+            <g class="v"><circle cx="110" cy="100" r="17"/><text x="110" y="100">2</text></g>
+            <g class="v"><circle cx="290" cy="100" r="17"/><text x="290" y="100">3</text></g>
+            <g class="v"><circle cx="50" cy="190" r="17"/><text x="50" y="190">4</text></g>
+            <g class="v"><circle cx="170" cy="190" r="17"/><text x="170" y="190">5</text></g>
+            <g class="v"><circle cx="290" cy="190" r="17"/><text x="290" y="190">6</text></g>
+          </svg>
+          <figcaption><b>Figura 2.</b> Exemplo construído para esta versão. Partimos sempre do vértice 1, destacado. As duas buscas usam as mesmas listas, em ordem crescente.</figcaption>
+        </figure>
+        <p class="kicker">Busca em largura a partir de 1</p>
+        <p>
+          A fila começa com 1. O vértice 1 descobre 2 e depois 3 (nessa ordem). Em seguida 2
+          descobre 4 e 5; depois 3 descobre 6. Ordem de descoberta:
+          <span class="m">1, 2, 3, 4, 5, 6</span>.
+          Arestas da árvore BFS:
+          <span class="m">{1,2}, {1,3}, {2,4}, {2,5}, {3,6}</span>.
+          A aresta <span class="m">{5,6}</span> é visitada, mas 6 já estava visitado.
+        </p>
+        <p class="kicker">Busca em profundidade a partir de 1</p>
+        <p>
+          A pilha começa com 1. O vértice 1 descobre 2; 2 descobre 4 (sem filhos novos); 2
+          descobre 5; 5 descobre 6; 6 descobre 3. Ordem de descoberta:
+          <span class="m">1, 2, 4, 5, 6, 3</span>.
+          Arestas da árvore DFS:
+          <span class="m">{1,2}, {2,4}, {2,5}, {5,6}, {6,3}</span>.
+          A aresta <span class="m">{1,3}</span> é visitada tarde, quando 3 já está visitado.
+        </p>
+        <div class="figrow">
+          <figure>
+            <svg class="dg" viewBox="0 0 360 230" role="img" aria-label="Mesmo grafo com as arestas da árvore BFS em destaque e ordem de descoberta 1 2 3 4 5 6">
+              <line class="e tree" x1="180" y1="36" x2="90" y2="100"/>
+              <line class="e tree" x1="180" y1="36" x2="270" y2="100"/>
+              <line class="e tree" x1="90" y1="100" x2="40" y2="190"/>
+              <line class="e tree" x1="90" y1="100" x2="150" y2="190"/>
+              <line class="e tree" x1="270" y1="100" x2="270" y2="190"/>
+              <line class="e faint" x1="150" y1="190" x2="270" y2="190"/>
+              <g class="v c1"><circle cx="180" cy="36" r="17"/><text x="180" y="36">1</text></g>
+              <g class="v c2"><circle cx="90" cy="100" r="17"/><text x="90" y="100">2</text></g>
+              <g class="v c2"><circle cx="270" cy="100" r="17"/><text x="270" y="100">3</text></g>
+              <g class="v c3"><circle cx="40" cy="190" r="17"/><text x="40" y="190">4</text></g>
+              <g class="v c3"><circle cx="150" cy="190" r="17"/><text x="150" y="190">5</text></g>
+              <g class="v c3"><circle cx="270" cy="190" r="17"/><text x="270" y="190">6</text></g>
+              <text class="lbl" x="180" y="18">1º</text>
+              <text class="lbl" x="68" y="88">2º</text>
+              <text class="lbl" x="292" y="88">3º</text>
+              <text class="lbl" x="40" y="216">4º</text>
+              <text class="lbl" x="150" y="216">5º</text>
+              <text class="lbl" x="270" y="216">6º</text>
+            </svg>
+            <div class="legend">
+              <span><i class="ln" style="background:var(--brand)"></i>árvore BFS</span>
+              <span><i style="background:var(--c1)"></i>nível 0</span>
+              <span><i style="background:var(--c2)"></i>nível 1</span>
+              <span><i style="background:var(--c3)"></i>nível 2</span>
+            </div>
+            <figcaption><b>Figura 3.</b> BFS a partir de 1. Descoberta: 1, 2, 3, 4, 5, 6. Níveis = distância até 1.</figcaption>
+          </figure>
+          <figure>
+            <svg class="dg" viewBox="0 0 360 230" role="img" aria-label="Mesmo grafo com as arestas da árvore DFS em destaque e ordem de descoberta 1 2 4 5 6 3">
+              <line class="e tree" x1="180" y1="36" x2="90" y2="100"/>
+              <line class="e faint" x1="180" y1="36" x2="270" y2="100"/>
+              <line class="e tree" x1="90" y1="100" x2="40" y2="190"/>
+              <line class="e tree" x1="90" y1="100" x2="150" y2="190"/>
+              <line class="e tree" x1="270" y1="100" x2="270" y2="190"/>
+              <line class="e tree" x1="150" y1="190" x2="270" y2="190"/>
+              <g class="v c1"><circle cx="180" cy="36" r="17"/><text x="180" y="36">1</text></g>
+              <g class="v c2"><circle cx="90" cy="100" r="17"/><text x="90" y="100">2</text></g>
+              <g class="v c5"><circle cx="270" cy="100" r="17"/><text x="270" y="100">3</text></g>
+              <g class="v c3"><circle cx="40" cy="190" r="17"/><text x="40" y="190">4</text></g>
+              <g class="v c3"><circle cx="150" cy="190" r="17"/><text x="150" y="190">5</text></g>
+              <g class="v c4"><circle cx="270" cy="190" r="17"/><text x="270" y="190">6</text></g>
+              <text class="lbl" x="180" y="18">1º</text>
+              <text class="lbl" x="68" y="88">2º</text>
+              <text class="lbl" x="292" y="88">6º</text>
+              <text class="lbl" x="40" y="216">3º</text>
+              <text class="lbl" x="150" y="216">4º</text>
+              <text class="lbl" x="270" y="216">5º</text>
+            </svg>
+            <div class="legend">
+              <span><i class="ln" style="background:var(--brand)"></i>árvore DFS</span>
+              <span><i class="ln" style="background:var(--edge)"></i>já visitado (1–3)</span>
+            </div>
+            <figcaption><b>Figura 4.</b> DFS a partir de 1. Descoberta: 1, 2, 4, 5, 6, 3. A aresta 1–3 não descobre ninguém.</figcaption>
+          </figure>
+        </div>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th></th><th>Ordem de descoberta a partir de 1</th><th>Árvore (arestas que descobrem)</th></tr></thead>
+          <tbody>
+            <tr><td>BFS</td><td>1, 2, 3, 4, 5, 6</td><td>{1,2}, {1,3}, {2,4}, {2,5}, {3,6}</td></tr>
+            <tr><td>DFS</td><td>1, 2, 4, 5, 6, 3</td><td>{1,2}, {2,4}, {2,5}, {5,6}, {6,3}</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Conferência: os seis vértices aparecem nas duas ordens, e cada árvore tem
+          <span class="m">|<i>V</i>| − 1 = 5</span> arestas ✔ A diferença está em <i>quando</i>
+          3 é descoberto: na BFS ele é irmão de 2 (nível 1); na DFS ele é neto de 5, no fundo
+          da primeira descida.
+        </p>
+
+        <h3 id="s8-rot">8.4 Busca em profundidade rotulada</h3>
+        <p>
+          Uma versão da DFS que será útil adiante mantém um contador global
+          <span class="m">cont</span> e dois inteiros por vértice: o valor do contador quando o
+          vértice <b>entra</b> na pilha e o valor quando <b>sai</b>. Chamamos o procedimento de
+          <span class="m">BP</span> (busca em profundidade) e escrevemos a versão recursiva.
+          No início,
+          <span class="m">cont = sai[<i>x</i>] = chega[<i>x</i>] = 0</span> e
+          <span class="m">pai[<i>x</i>] = nulo</span> para todo vértice
+          <span class="m"><i>x</i></span>.
+        </p>
+        <div class="algo">
+          <div class="nome">BP(G, w)</div>
+<pre>cont ← cont + 1
+chega[w] ← cont
+<span class="kw">para cada</span> u ∈ N(w) <span class="kw">faça</span>
+    <span class="kw">se</span> chega[u] = 0 <span class="kw">então</span>
+        BP(G, u)
+        pai[u] ← w
+cont ← cont + 1
+sai[w] ← cont</pre>
+        </div>
+        <p>
+          O vértice <span class="m"><i>u</i></span> ainda não foi descoberto se e somente se
+          <span class="m">chega[<i>u</i>] = 0</span>. O campo
+          <span class="m">pai[<i>u</i>]</span> guarda o vértice a partir do qual
+          <span class="m"><i>u</i></span> foi descoberto — é a árvore DFS. O contador anda
+          duas vezes por vértice (entrada e saída), então ao fim de
+          <span class="m">BP(<i>G</i>, <i>w</i>)</span> temos
+          <span class="m">cont = 2|<i>A</i>|</span>, onde <span class="m"><i>A</i></span>
+          é o conjunto alcançável por <span class="m"><i>w</i></span>.
+        </p>
+        <p>
+          Invariante da recursão: enquanto a chamada <span class="m">BP(<i>G</i>, <i>x</i>)</span>
+          está ativa, o tempo <span class="m">cont</span> está no intervalo aberto
+          <span class="m">(chega[<i>x</i>], sai[<i>x</i>])</span> — o
+          <span class="m">sai[<i>x</i>]</span> só é escrito no retorno. A chamada aninhada
+          <span class="m">BP(<i>G</i>, <i>u</i>)</span> começa e termina inteira dentro desse
+          intervalo. Por isso o algoritmo termina: cada vértice é chamado no máximo uma vez
+          (<span class="m">chega</span> passa de 0 para um positivo e nunca volta), e cada
+          chamada percorre <span class="m"><i>N</i>(<i>w</i>)</span> uma vez. Complexidade
+          <span class="cplx"><i>O</i>(|<i>A</i>| + |<i>E</i>(<i>G</i>[<i>A</i>])|)</span>.
+        </p>
+        <p>
+          No grafo da Figura 2, a execução de <span class="m">BP(<i>G</i>, 1)</span> com as
+          listas em ordem crescente produz
+        </p>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Vértice</th><th>chega</th><th>sai</th><th>intervalo</th><th>pai</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td>12</td><td>[1, 12]</td><td>nulo</td></tr>
+            <tr><td>2</td><td>2</td><td>11</td><td>[2, 11]</td><td>1</td></tr>
+            <tr><td>4</td><td>3</td><td>4</td><td>[3, 4]</td><td>2</td></tr>
+            <tr><td>5</td><td>5</td><td>10</td><td>[5, 10]</td><td>2</td></tr>
+            <tr><td>6</td><td>6</td><td>9</td><td>[6, 9]</td><td>5</td></tr>
+            <tr><td>3</td><td>7</td><td>8</td><td>[7, 8]</td><td>6</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>
+          Conferência: <span class="m">cont</span> termina em 12 = 2 · 6 ✔
+          A ordem de <span class="m">chega</span> é a ordem de descoberta da DFS da Figura 4
+          (1, 2, 4, 5, 6, 3) ✔
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 520 220" role="img" aria-label="Linha do tempo dos intervalos chega-sai dos seis vértices, mostrando aninhamento e disjunção">
+            <line class="e faint" x1="80" y1="200" x2="500" y2="200"/>
+            <line class="e tree" x1="80" y1="28" x2="500" y2="28"/>
+            <line class="e tree" x1="115" y1="56" x2="465" y2="56"/>
+            <line class="e match" x1="150" y1="84" x2="220" y2="84"/>
+            <line class="e tree" x1="220" y1="112" x2="430" y2="112"/>
+            <line class="e tree" x1="255" y1="140" x2="395" y2="140"/>
+            <line class="e match" x1="290" y1="168" x2="360" y2="168"/>
+            <text class="lbl" x="48" y="28">1</text>
+            <text class="lbl" x="48" y="56">2</text>
+            <text class="lbl" x="48" y="84">4</text>
+            <text class="lbl" x="48" y="112">5</text>
+            <text class="lbl" x="48" y="140">6</text>
+            <text class="lbl" x="48" y="168">3</text>
+            <text class="lbl" x="80" y="214">1</text>
+            <text class="lbl" x="150" y="214">3</text>
+            <text class="lbl" x="220" y="214">5</text>
+            <text class="lbl" x="290" y="214">7</text>
+            <text class="lbl" x="360" y="214">9</text>
+            <text class="lbl" x="430" y="214">11</text>
+            <text class="lbl" x="500" y="214">12</text>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--brand)"></i>intervalo de um ancestral</span>
+            <span><i class="ln" style="background:var(--ok)"></i>folha (4 e 3)</span>
+          </div>
+          <figcaption><b>Figura 5.</b> Intervalos <span class="m">[chega, sai]</span> de <span class="m">BP(<i>G</i>, 1)</span> no grafo da Figura 2. Ou um intervalo contém o outro, ou eles não se tocam. Não há sobreposição parcial.</figcaption>
+        </figure>
+
+        <h3 id="s8-prop">8.5 Proposição 10 e o vetor pai iterado</h3>
+        <div class="box thm">
+          <div class="h">Proposição 10</div>
+          <p>
+            Após uma execução de <span class="m">BP(<i>G</i>, <i>w</i>)</span>, dados
+            <span class="m"><i>u</i>, <i>v</i> ∈ <i>V</i>(<i>G</i>)</span> alcançáveis por
+            <span class="m"><i>w</i></span>, um e somente um dos itens abaixo vale para esse par:
+          </p>
+          <p>(a) <span class="m">chega[<i>u</i>] &lt; sai[<i>u</i>] &lt; chega[<i>v</i>] &lt; sai[<i>v</i>]</span>;</p>
+          <p>(a′) <span class="m">chega[<i>v</i>] &lt; sai[<i>v</i>] &lt; chega[<i>u</i>] &lt; sai[<i>u</i>]</span>;</p>
+          <p>(b) <span class="m">chega[<i>u</i>] &lt; chega[<i>v</i>] &lt; sai[<i>v</i>] &lt; sai[<i>u</i>]</span>;</p>
+          <p>(c) <span class="m">chega[<i>v</i>] &lt; chega[<i>u</i>] &lt; sai[<i>u</i>] &lt; sai[<i>v</i>]</span>.</p>
+          <div class="proof">
+            <p>
+              <b>Demonstração.</b> Deixada como exercício 59. A leitura: os intervalos
+              <span class="m">[chega[<i>x</i>], sai[<i>x</i>]]</span> ou são
+              <b>disjuntos</b> — (a) ou (a′) — ou estão <b>aninhados</b> — (b) ou (c).
+              Não existe sobreposição parcial do tipo
+              <span class="m">chega[<i>u</i>] &lt; chega[<i>v</i>] &lt; sai[<i>u</i>] &lt; sai[<i>v</i>]</span>.
+            </p>
+          </div>
+        </div>
+        <p>
+          No exemplo da Figura 5: 4 e 5 são disjuntos (a) para
+          <span class="m"><i>u</i> = 4</span>, <span class="m"><i>v</i> = 5</span>;
+          3 está aninhado em 6, que está aninhado em 5, que está aninhado em 2, que está
+          aninhado em 1 — itens (b)/(c).
+        </p>
+        <div class="box def">
+          <div class="h">Definição · a <span class="m"><i>t</i></span>-ésima iteração de pai</div>
+          <p>
+            Para todo <span class="m"><i>t</i> ∈ ℕ</span> (aqui
+            <span class="m">0 ∈ ℕ</span>), o vetor <span class="m">pai<sup>(<i>t</i>)</sup></span>
+            é
+          </p>
+          <div class="eq"><div class="body">
+            pai<sup>(<i>t</i>)</sup>[<i>x</i>] =
+            <i>x</i> &nbsp;se <i>t</i> = 0;&nbsp;&nbsp;
+            pai<sup>(<i>t</i>−1)</sup>[ pai[<i>x</i>] ] &nbsp;se <i>t</i> &gt; 0.
+          </div><div class="tag">(17)</div></div>
+          <p>
+            Em prosa: <span class="m">pai<sup>(<i>t</i>)</sup>[<i>x</i>]</span> é o ancestral de
+            <span class="m"><i>x</i></span> a <span class="m"><i>t</i></span> passos na árvore
+            DFS (o próprio <span class="m"><i>x</i></span> quando
+            <span class="m"><i>t</i> = 0</span>). Existe
+            <span class="m"><i>t</i></span> com
+            <span class="m">pai<sup>(<i>t</i>)</sup>[<i>v</i>] = <i>u</i></span> se e somente se
+            <span class="m"><i>u</i></span> está no caminho de
+            <span class="m"><i>v</i></span> até a raiz — inclusive
+            <span class="m"><i>u</i> = <i>v</i></span>.
+          </p>
+        </div>
+        <div class="box rec">
+          <div class="h">Receita: intervalos da DFS</div>
+          <ol>
+            <li><b>Desenhe a árvore</b> (arestas que descobriram vértice novo), não o grafo todo.</li>
+            <li><b>Aninhado = ancestral.</b>
+              <span class="m">[chega[<i>v</i>], sai[<i>v</i>]] ⊆ [chega[<i>u</i>], sai[<i>u</i>]]</span>
+              se e somente se <span class="m"><i>u</i></span> é ancestral de
+              <span class="m"><i>v</i></span> (possivelmente
+              <span class="m"><i>u</i> = <i>v</i></span>).</li>
+            <li><b>Disjunto = incomparáveis.</b> Se os intervalos não se encontram, nenhum dos
+              dois está no caminho do outro até a raiz.</li>
+            <li><b>Proibido.</b> Intervalos que se cruzam pela metade contradizem a disciplina
+              de pilha da recursão. Se a conta der isso, o
+              <span class="m">chega</span>/<span class="m">sai</span> está errado.</li>
+          </ol>
+        </div>
+        <div class="box def">
+          <div class="h">Resumo do bloco em cinco linhas</div>
+          <ul>
+            <li>BFS = <span class="m">Visite</span> com fila; DFS = <span class="m">Visite</span> com pilha.</li>
+            <li>A ordem de descoberta depende da política <b>e</b> da ordem das listas.</li>
+            <li>No grafo da Figura 2, a partir de 1: BFS dá 1, 2, 3, 4, 5, 6; DFS dá 1, 2, 4, 5, 6, 3.</li>
+            <li><span class="m">BP</span> rotula entrada e saída; os intervalos ou se aninham ou são disjuntos (Proposição 10).</li>
+            <li><span class="m">pai<sup>(<i>t</i>)</sup></span> sobe <span class="m"><i>t</i></span> degraus na árvore DFS — é a língua do exercício 60.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex2">
+        <div class="ex-head">
+          <h3>Exercícios 58 a 61</h3>
+          <button class="toggle" type="button" data-scope="#ex2" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: DFS rotulada iterativa, prova da Proposição 10, intervalos versus ancestrais, e a política de corte que reproduz BFS e DFS.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 58</span><div class="stmt">
+            <p>Escreva uma versão não recursiva da busca em profundidade rotulada.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h58" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a58" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h58"><div class="plab">Dica</div>
+            <p>
+              A pilha da recursão guarda, para cada chamada ativa, o vértice e o ponto em que
+              a varredura de <span class="m"><i>N</i>(<i>w</i>)</span> parou. Empilhe o par
+              <span class="m">(<i>w</i>, índice)</span>; ao descobrir um vizinho novo, empilhe-o
+              com índice 0; ao esgotar a lista, desempilhe e grave
+              <span class="m">sai</span>.
+            </p>
+          </div>
+          <div class="panel answer" id="a58"><div class="plab">Resolução</div>
+            <p>
+              A versão abaixo reproduz <span class="m">BP(<i>G</i>, <i>w</i>)</span>: os valores
+              de <span class="m">chega</span>, <span class="m">sai</span> e
+              <span class="m">pai</span> coincidem com os da recursão, desde que a ordem das
+              listas seja a mesma. O <span class="m">pai</span> é gravado na descoberta (antes
+              de empilhar o filho), o que é equivalente a gravá-lo após o retorno da chamada —
+              o valor escrito é o mesmo.
+            </p>
+            <div class="algo">
+              <div class="nome">BP-iterativa(G, w)</div>
+<pre><span class="cm">// N(x)[0], N(x)[1], … é a lista de x; S é uma pilha de pares (vértice, índice)</span>
+<span class="kw">para cada</span> x ∈ V(G) <span class="kw">faça</span>
+    chega[x] ← 0; sai[x] ← 0; pai[x] ← nulo
+cont ← 0
+cont ← cont + 1
+chega[w] ← cont
+empilhe (w, 0) em S
+<span class="kw">enquanto</span> S ≠ ∅ <span class="kw">faça</span>
+    (u, i) ← topo de S
+    <span class="kw">se</span> i &lt; |N(u)| <span class="kw">então</span>
+        substitua o topo por (u, i + 1)
+        x ← N(u)[i]
+        <span class="kw">se</span> chega[x] = 0 <span class="kw">então</span>
+            pai[x] ← u
+            cont ← cont + 1
+            chega[x] ← cont
+            empilhe (x, 0) em S
+    <span class="kw">senão</span>
+        desempilhe S
+        cont ← cont + 1
+        sai[u] ← cont</pre>
+            </div>
+            <p>
+              <b>Invariante.</b> Os pares em <span class="m"><i>S</i></span>, da base ao topo,
+              são os ancestrais do vértice corrente na árvore DFS, cada um com o índice do
+              próximo vizinho ainda não examinado — exatamente o quadro de ativação da
+              recursão. Um vértice é empilhado só quando
+              <span class="m">chega</span> ainda é 0, e nesse instante
+              <span class="m">chega</span> passa a positivo; portanto cada vértice é empilhado
+              no máximo uma vez.
+            </p>
+            <p>
+              <b>Término.</b> Cada vértice empilhado gera
+              <span class="m">|<i>N</i>(<i>u</i>)| + 1</span> iterações (uma por vizinho, mais
+              a que desempilha). Soma
+              <span class="m"><i>O</i>(|<i>A</i>| + |<i>E</i>(<i>G</i>[<i>A</i>])|)</span>.
+            </p>
+            <p>
+              <b>Complexidade:</b>
+              <span class="cplx"><i>O</i>(|<i>A</i>| + |<i>E</i>(<i>G</i>[<i>A</i>])|)</span>
+              com lista de adjacências, a mesma da versão recursiva. Para percorrer o grafo
+              inteiro, envolva o procedimento num laço que escolhe um
+              <span class="m"><i>w</i></span> com <span class="m">chega[<i>w</i>] = 0</span>
+              enquanto existir tal vértice.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 59</span><div class="stmt">
+            <p>Prove a proposição 10.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h59" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a59" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h59"><div class="plab">Dica</div>
+            <p>
+              Compare <span class="m">chega[<i>u</i>]</span> e
+              <span class="m">chega[<i>v</i>]</span>. Se o menor intervalo ainda não fechou
+              quando o outro começa, a chamada do segundo está aninhada na do primeiro, e o
+              <span class="m">sai</span> do segundo sai primeiro — disciplina de pilha. O caso
+              <span class="m"><i>u</i> = <i>v</i></span> não cabe em nenhuma das quatro
+              desigualdades estritas; a proposição fala de um <i>par</i>, e a lemos para
+              <span class="m"><i>u</i> ≠ <i>v</i></span>.
+            </p>
+          </div>
+          <div class="panel answer" id="a59"><div class="plab">Resolução</div>
+            <p>
+              O enunciado original não exclui <span class="m"><i>u</i> = <i>v</i></span>.
+              Se <span class="m"><i>u</i> = <i>v</i></span>, nenhuma das quatro cadeias de
+              desigualdades estritas vale. Tratamos o par com
+              <span class="m"><i>u</i> ≠ <i>v</i></span>, que é a leitura em que “um e somente
+              um” faz sentido. Ambos são alcançáveis por <span class="m"><i>w</i></span>, logo
+              ambos recebem <span class="m">chega</span> e <span class="m">sai</span> positivos,
+              com <span class="m">chega[<i>x</i>] &lt; sai[<i>x</i>]</span> para cada um
+              (o contador cresce entre a entrada e a saída).
+            </p>
+            <p>
+              <b>Fato da pilha.</b> Durante a execução de
+              <span class="m">BP(<i>G</i>, <i>x</i>)</span>, depois de gravar
+              <span class="m">chega[<i>x</i>]</span> e antes de gravar
+              <span class="m">sai[<i>x</i>]</span>, toda chamada recursiva começa e termina.
+              Portanto, se <span class="m">BP(<i>G</i>, <i>y</i>)</span> é invocada enquanto
+              <span class="m">BP(<i>G</i>, <i>x</i>)</span> está ativa, então
+            </p>
+            <div class="eq"><div class="body">
+              chega[<i>x</i>] &lt; chega[<i>y</i>] &lt; sai[<i>y</i>] &lt; sai[<i>x</i>].
+            </div></div>
+            <p>
+              Reciprocamente, se <span class="m">chega[<i>x</i>] &lt; chega[<i>y</i>] &lt; sai[<i>x</i>]</span>,
+              então <span class="m"><i>y</i></span> foi descoberto com a chamada de
+              <span class="m"><i>x</i></span> ainda aberta, e a desigualdade acima segue.
+            </p>
+            <p>
+              <b>Os quatro casos.</b> Sem perda de generalidade,
+              <span class="m">chega[<i>u</i>] &lt; chega[<i>v</i>]</span>
+              (o outro lado troca <span class="m"><i>u</i></span> com
+              <span class="m"><i>v</i></span> e produz (a′) ou (c) no lugar de (a) ou (b)).
+              Há duas possibilidades para <span class="m">sai[<i>u</i>]</span>:
+            </p>
+            <p>
+              <i>Caso 1:</i>
+              <span class="m">sai[<i>u</i>] &lt; chega[<i>v</i>]</span>.
+              Então
+              <span class="m">chega[<i>u</i>] &lt; sai[<i>u</i>] &lt; chega[<i>v</i>] &lt; sai[<i>v</i>]</span>,
+              que é (a). Os intervalos são disjuntos.
+            </p>
+            <p>
+              <i>Caso 2:</i>
+              <span class="m">chega[<i>v</i>] &lt; sai[<i>u</i>]</span>.
+              Pelo fato da pilha,
+              <span class="m">sai[<i>v</i>] &lt; sai[<i>u</i>]</span>, e obtemos
+              <span class="m">chega[<i>u</i>] &lt; chega[<i>v</i>] &lt; sai[<i>v</i>] &lt; sai[<i>u</i>]</span>,
+              que é (b). Os intervalos estão aninhados.
+            </p>
+            <p>
+              Os dois casos esgotam as posições relativas de
+              <span class="m">sai[<i>u</i>]</span> e
+              <span class="m">chega[<i>v</i>]</span> (igualdade é impossível: o contador é
+              incrementado a cada escrita, e
+              <span class="m">chega[<i>v</i>]</span> e
+              <span class="m">sai[<i>u</i>]</span> são escritas em instantes distintos).
+              Logo exatamente um entre (a) e (b) vale quando
+              <span class="m">chega[<i>u</i>] &lt; chega[<i>v</i>]</span>, e exatamente um
+              entre (a′) e (c) vale no outro lado.
+            </p>
+            <p>
+              Em particular, a configuração
+              <span class="m">chega[<i>u</i>] &lt; chega[<i>v</i>] &lt; sai[<i>u</i>] &lt; sai[<i>v</i>]</span>
+              — intervalos que se cruzam — é impossível: contradiz o fato da pilha.
+              <span class="qed">□</span>
+            </p>
+            <p>
+              Conferência na Figura 5: o par (4, 5) cai em (a); o par (5, 6) cai em (b) com
+              <span class="m"><i>u</i> = 5</span>; o par (6, 2) cai em (c) com
+              <span class="m"><i>u</i> = 6</span>, <span class="m"><i>v</i> = 2</span> ✔
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 60</span><div class="stmt">
+            <p>
+              Considere uma execução da busca rotulada <span class="m">BP(<i>G</i>, <i>w</i>)</span>.
+              Para simplificar, considere que todo vértice de <span class="m"><i>G</i></span> é
+              alcançável a partir de <span class="m"><i>w</i></span>. Prove as seguintes
+              equivalências. Para quaisquer <span class="m"><i>u</i>, <i>v</i> ∈ <i>V</i>(<i>G</i>)</span>
+            </p>
+            <div class="eq"><div class="body">
+              [chega[<i>v</i>], sai[<i>v</i>]] ∩ [chega[<i>u</i>], sai[<i>u</i>]] = ∅
+              &nbsp;⟺&nbsp;
+              não existe <i>t</i> ∈ ℕ tal que pai<sup>(<i>t</i>)</sup>[<i>u</i>] = <i>v</i>
+              e não existe <i>t</i>′ ∈ ℕ tal que pai<sup>(<i>t</i>′)</sup>[<i>v</i>] = <i>u</i>;
+            </div></div>
+            <div class="eq"><div class="body">
+              [chega[<i>v</i>], sai[<i>v</i>]] ⊂ [chega[<i>u</i>], sai[<i>u</i>]]
+              &nbsp;⟺&nbsp;
+              existe <i>t</i> ∈ ℕ tal que pai<sup>(<i>t</i>)</sup>[<i>v</i>] = <i>u</i>;
+            </div></div>
+            <div class="eq"><div class="body">
+              [chega[<i>v</i>], sai[<i>v</i>]] ⊃ [chega[<i>u</i>], sai[<i>u</i>]]
+              &nbsp;⟺&nbsp;
+              existe <i>t</i> ∈ ℕ tal que pai<sup>(<i>t</i>)</sup>[<i>u</i>] = <i>v</i>.
+            </div></div>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h60" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a60" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h60"><div class="plab">Dica</div>
+            <p>
+              A Proposição 10 já classificou o par de intervalos. Resta traduzir “aninhado” e
+              “disjunto” para a língua de <span class="m">pai<sup>(<i>t</i>)</sup></span>.
+              Lembre que <span class="m">pai<sup>(0)</sup>[<i>x</i>] = <i>x</i></span>, e leia
+              <span class="m">⊂</span> como inclusão (possivelmente igual), senão o caso
+              <span class="m"><i>u</i> = <i>v</i></span> quebra a segunda equivalência.
+            </p>
+          </div>
+          <div class="panel answer" id="a60"><div class="plab">Resolução</div>
+            <p>
+              Escreva <span class="m"><i>I</i>(<i>x</i>) = [chega[<i>x</i>], sai[<i>x</i>]]</span>.
+              Pela definição (17), <span class="m">pai<sup>(<i>t</i>)</sup>[<i>x</i>] = <i>y</i></span>
+              significa que <span class="m"><i>y</i></span> é o ancestral de
+              <span class="m"><i>x</i></span> a <span class="m"><i>t</i></span> passos na árvore
+              DFS (<span class="m"><i>y</i> = <i>x</i></span> se
+              <span class="m"><i>t</i> = 0</span>). O original usa
+              <span class="m">⊂</span>; lemos como inclusão não necessariamente própria —
+              caso contrário, com <span class="m"><i>u</i> = <i>v</i></span>, o lado direito da
+              segunda equivalência vale (<span class="m"><i>t</i> = 0</span>) e o esquerdo
+              falha. Também <span class="m">0 ∈ ℕ</span>, como na definição (17).
+            </p>
+            <p>
+              <b>Lema auxiliar.</b>
+              <span class="m"><i>u</i></span> é ancestral de <span class="m"><i>v</i></span>
+              na árvore DFS (inclusive <span class="m"><i>u</i> = <i>v</i></span>) se e
+              somente se <span class="m"><i>I</i>(<i>v</i>) ⊆ <i>I</i>(<i>u</i>)</span>.
+            </p>
+            <p>
+              (⇒) Se <span class="m"><i>u</i> = <i>v</i></span>, vale a igualdade dos
+              intervalos. Se <span class="m"><i>u</i></span> é ancestral próprio, existe uma
+              cadeia de descobertas de <span class="m"><i>u</i></span> até
+              <span class="m"><i>v</i></span>: a chamada
+              <span class="m">BP(<i>G</i>, <i>v</i>)</span> ocorre com
+              <span class="m">BP(<i>G</i>, <i>u</i>)</span> ainda ativa, e o fato da pilha
+              do exercício 59 dá
+              <span class="m">chega[<i>u</i>] &lt; chega[<i>v</i>] &lt; sai[<i>v</i>] &lt; sai[<i>u</i>]</span>,
+              isto é, <span class="m"><i>I</i>(<i>v</i>) ⊂ <i>I</i>(<i>u</i>)</span>.
+            </p>
+            <p>
+              (⇐) Se <span class="m"><i>I</i>(<i>v</i>) ⊆ <i>I</i>(<i>u</i>)</span> e
+              <span class="m"><i>u</i> ≠ <i>v</i></span>, a Proposição 10 força o item (b)
+              com esse par: <span class="m"><i>v</i></span> foi descoberto durante
+              <span class="m">BP(<i>G</i>, <i>u</i>)</span>, logo
+              <span class="m"><i>u</i></span> está no caminho de
+              <span class="m"><i>v</i></span> até a raiz, e algum
+              <span class="m"><i>t</i> ≥ 1</span> satisfaz
+              <span class="m">pai<sup>(<i>t</i>)</sup>[<i>v</i>] = <i>u</i></span>.
+            </p>
+            <p class="kicker">Segunda equivalência</p>
+            <p>
+              <span class="m"><i>I</i>(<i>v</i>) ⊂ <i>I</i>(<i>u</i>)</span>, na leitura
+              <span class="m">⊆</span>, é exatamente o lema auxiliar: existe
+              <span class="m"><i>t</i></span> com
+              <span class="m">pai<sup>(<i>t</i>)</sup>[<i>v</i>] = <i>u</i></span>.
+            </p>
+            <p class="kicker">Terceira equivalência</p>
+            <p>
+              Troque <span class="m"><i>u</i></span> e <span class="m"><i>v</i></span> na
+              segunda. (O original omite a vírgula em
+              <span class="m">[chega[<i>u</i>], sai[<i>u</i>]]</span> no terceiro item;
+              é esse o intervalo.)
+            </p>
+            <p class="kicker">Primeira equivalência</p>
+            <p>
+              Pela Proposição 10, para <span class="m"><i>u</i> ≠ <i>v</i></span> os
+              intervalos ou são disjuntos ou um contém o outro. Logo
+              <span class="m"><i>I</i>(<i>v</i>) ∩ <i>I</i>(<i>u</i>) = ∅</span> se e
+              somente se <b>não</b> vale
+              <span class="m"><i>I</i>(<i>v</i>) ⊆ <i>I</i>(<i>u</i>)</span> e
+              <b>não</b> vale
+              <span class="m"><i>I</i>(<i>u</i>) ⊆ <i>I</i>(<i>v</i>)</span>.
+              Pelo lema, isso é “<span class="m"><i>u</i></span> não é ancestral de
+              <span class="m"><i>v</i></span> e <span class="m"><i>v</i></span> não é
+              ancestral de <span class="m"><i>u</i></span>”, que é o lado direito.
+            </p>
+            <p>
+              Se <span class="m"><i>u</i> = <i>v</i></span>, a interseção é
+              <span class="m"><i>I</i>(<i>u</i>) ≠ ∅</span> (lado esquerdo falso) e
+              <span class="m">pai<sup>(0)</sup>[<i>u</i>] = <i>v</i></span> (o “não existe
+              <span class="m"><i>t</i></span>” falha, lado direito falso). A equivalência
+              continua válida.
+              <span class="qed">□</span>
+            </p>
+            <p>
+              Conferência na Figura 5:
+              <span class="m"><i>I</i>(3) ⊂ <i>I</i>(6) ⊂ <i>I</i>(5) ⊂ <i>I</i>(2) ⊂ <i>I</i>(1)</span>,
+              e de fato
+              <span class="m">pai<sup>(1)</sup>[3] = 6</span>,
+              <span class="m">pai<sup>(2)</sup>[3] = 5</span>,
+              <span class="m">pai<sup>(3)</sup>[3] = 2</span>,
+              <span class="m">pai<sup>(4)</sup>[3] = 1</span>.
+              Já <span class="m"><i>I</i>(4) ∩ <i>I</i>(5) = ∅</span>, e nem 4 é ancestral
+              de 5 nem 5 é ancestral de 4 ✔
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 61</span><div class="stmt">
+            <p>Adapte o algoritmo do exercício 56 para que o percurso seja uma busca em largura. Repita para busca em profundidade.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h61" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a61" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h61"><div class="plab">Dica</div>
+            <p>
+              No exercício 56 a aresta do corte é escolhida à vontade. BFS e DFS são
+              <i>qual</i> aresta do corte você escolhe: a que sai do vértice mais antigo de
+              <span class="m"><i>L</i></span> (fila) ou a que sai do mais recente (pilha).
+            </p>
+          </div>
+          <div class="panel answer" id="a61"><div class="plab">Resolução</div>
+            <p>
+              O esqueleto de <span class="m">Visite-vertices</span> permanece: começamos com
+              um vértice em <span class="m"><i>L</i></span> e crescemos
+              <span class="m"><i>L</i></span> por arestas do corte
+              <span class="m"><i>E</i>(<i>L</i>, <i>V</i> \ <i>L</i>)</span>.
+              A política de escolha da aresta é que decide a busca.
+              (Como no exercício 56, o grafo é conexo por hipótese daquele enunciado.)
+            </p>
+            <p class="kicker">Busca em largura — <span class="m"><i>L</i></span> é fila</p>
+            <p>
+              Entre as arestas do corte, escolha uma cujo extremo em
+              <span class="m"><i>L</i></span> tenha sido <b>inserido primeiro</b>.
+              Equivalente e mais fácil de implementar: trate
+              <span class="m"><i>L</i></span> como fila e só examine arestas do primeiro
+              vértice que ainda tenha vizinho fora de <span class="m"><i>L</i></span>.
+            </p>
+            <div class="algo">
+              <div class="nome">Visite-vertices-BFS(G)</div>
+<pre>L ← fila vazia
+escolha um vértice v
+insira v no fim de L e marque v visitado
+<span class="kw">enquanto</span> L ≠ ∅ <span class="kw">faça</span>
+    u ← primeiro de L
+    <span class="kw">se</span> existe aresta {u, w} com w ∉ L <span class="kw">então</span>
+        escolha uma tal aresta
+        <span class="kw">se</span> w é não-visitado <span class="kw">então</span>
+            insira w no fim de L
+        marque w visitado
+    <span class="kw">senão</span>
+        remova u de L</pre>
+            </div>
+            <p>
+              Toda aresta escolhida tem um extremo em <span class="m"><i>L</i></span> e o
+              outro fora: é uma aresta do corte. A fila garante que um vértice inserido no
+              instante <span class="m"><i>t</i></span> só é expandido depois dos inseridos
+              antes — a definição operacional de BFS. No grafo da Figura 2, a partir de 1,
+              a ordem de inserção em <span class="m"><i>L</i></span> é 1, 2, 3, 4, 5, 6,
+              a mesma da Figura 3.
+            </p>
+            <p class="kicker">Busca em profundidade — <span class="m"><i>L</i></span> é pilha</p>
+            <p>
+              Entre as arestas do corte, escolha uma cujo extremo em
+              <span class="m"><i>L</i></span> tenha sido <b>inserido por último</b>.
+              Equivalente: <span class="m"><i>L</i></span> é pilha, e só examinamos arestas
+              do topo.
+            </p>
+            <div class="algo">
+              <div class="nome">Visite-vertices-DFS(G)</div>
+<pre>L ← pilha vazia
+escolha um vértice v
+insira v no topo de L e marque v visitado
+<span class="kw">enquanto</span> L ≠ ∅ <span class="kw">faça</span>
+    u ← topo de L
+    <span class="kw">se</span> existe aresta {u, w} com w ∉ L <span class="kw">então</span>
+        escolha uma tal aresta
+        <span class="kw">se</span> w é não-visitado <span class="kw">então</span>
+            insira w no topo de L
+        marque w visitado
+    <span class="kw">senão</span>
+        remova u de L</pre>
+            </div>
+            <p>
+              A pilha força a expandir o vértice recém-descoberto antes dos mais antigos —
+              a definição operacional de DFS. No grafo da Figura 2, a partir de 1, a ordem
+              de inserção é 1, 2, 4, 5, 6, 3, a mesma da Figura 4.
+            </p>
+            <p>
+              Em ambos os casos o invariante do exercício 56 se mantém no conjunto dos já
+              visitados (fronteira ainda em <span class="m"><i>L</i></span> união os que
+              já esgotaram o corte e foram removidos). Esse conjunto é o
+              <span class="m"><i>L</i></span> do exercício 56, e o argumento de lá se
+              aplica: enquanto ele for próprio e não vazio, o corte é não vazio e a
+              política escolhe uma aresta dele. Complexidade: a mesma do exercício 57,
+              com corte (ou cursor nas listas) mantido de forma incremental —
+              <span class="cplx"><i>O</i>(|<i>V</i>| + |<i>E</i>|)</span>
+              com lista de adjacências.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="04-representacao-computacional.html"><span class="dir">Capítulo anterior</span><span class="ttl">4. Representação computacional</span></a>
+        <a class="next" href="06-caminhos-e-circuitos.html"><span class="dir">Próximo capítulo</span><span class="ttl">6. Caminhos e circuitos</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática das seções “Percursos em grafos” e
+          “Algoritmos de busca” das notas de Teoria dos Grafos (CI065 / BC1429) do Prof. Jair
+          Donadelli. Enunciados dos 9 exercícios preservados; explicações, diagramas e
+          resoluções foram escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+

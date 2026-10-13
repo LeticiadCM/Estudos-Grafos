@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8. Conexidade — Teoria dos Grafos</title>
+<meta name="description" content="Conexidade, componentes, articulações, grafos biconexos, k-conexidade e o parâmetro κ(G), com os 12 exercícios 86 a 97 resolvidos.">
+<link rel="stylesheet" href="assets/grafos.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="allAnswers" type="button">Mostrar todas as respostas</button>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Capítulo 8 · Não se partir</span>
+    <h1>Conexidade</h1>
+    <p class="lead">
+      Ao terminar, você saberá decidir se um grafo é conexo, recortar seus componentes, reconhecer uma articulação
+      olhando para <span class="m"><i>G</i> − <i>v</i></span>, distinguir biconexo de simplesmente conexo e calcular o
+      parâmetro <span class="m">κ(<i>G</i>)</span>. Também vai saber por que
+      <span class="m">κ(<i>G</i>) ≤ δ(<i>G</i>)</span> e por que um grafo
+      <span class="m"><i>k</i></span>-conexo precisa de pelo menos
+      <span class="m"><i>k</i>|<i>V</i>|∕2</span> arestas — e construir o circulante
+      <span class="m"><i>H</i><sub><i>n</i>,<i>k</i></sub></span> que atinge essa cota.
+    </p>
+    <div class="meta">
+      <span><b>Conteúdo:</b> grafo conexo · componentes · articulação e <span class="m"><i>G</i> − <i>v</i></span> · biconexo · <span class="m"><i>k</i></span>-conexo e <span class="m">κ(<i>G</i>)</span> · <span class="m">κ ≤ δ</span> · <span class="m"><i>H</i><sub><i>n</i>,<i>k</i></sub></span></span>
+      <span><b>Exercícios:</b> 12 com resolução (86 a 97)</span>
+      <span><b>Fonte original:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas do Prof. Jair Donadelli</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <aside class="side">
+      <nav aria-label="Índice">
+        <div class="t">Nesta página</div>
+        <a href="#como-usar">Como usar</a>
+        <a href="#s12">12. Conexidade</a>
+        <a class="sub" href="#s12-conexo">Grafo conexo</a>
+        <a class="sub" href="#s12-comp">Componentes</a>
+        <a class="sub" href="#s12-art">Articulação e G − v</a>
+        <a class="sub" href="#s12-bi">Biconexo e blocos</a>
+        <a class="sub" href="#s12-receita">Receita do bloco</a>
+        <a href="#ex1">Exercícios 86 a 95</a>
+        <a href="#s12k">k-conexidade e κ(G)</a>
+        <a class="sub" href="#s12k-def">Definição e a escala</a>
+        <a class="sub" href="#s12k-desig">κ ≤ δ e a cota de arestas</a>
+        <a class="sub" href="#s12k-h">O circulante H<sub>n,k</sub></a>
+        <a href="#ex2">Exercícios 96 e 97</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <section class="chapter" id="como-usar">
+        <div class="box tip">
+          <div class="h">Como aproveitar este material</div>
+          <ol>
+            <li><b>Leia a teoria do bloco</b> — ela contém exatamente o que os exercícios seguintes exigem, nada além.</li>
+            <li><b>Tente o exercício sem abrir nada.</b> Se travar, use o botão <i>Dica</i> (quando existir) antes da resposta.</li>
+            <li><b>Só então abra <i>Mostrar resposta</i></b> e compare o seu raciocínio com o argumento apresentado.</li>
+          </ol>
+          <p>As respostas ficam ocultas por padrão. O botão no topo da página abre ou fecha todas de uma vez, e a impressão da página já sai com tudo aberto.</p>
+        </div>
+        <p>
+          Este capítulo usa sem cerimônia caminho, circuito, <span class="m"><i>N</i>(<i>v</i>)</span>,
+          <span class="m"><i>E</i>(<i>v</i>)</span>, <span class="m">δ</span>, <span class="m">Δ</span>
+          e subgrafo induzido, dos capítulos anteriores. O <b>grafo linha</b>
+          <span class="m"><i>L</i><sub><i>G</i></sub></span> reaparece no exercício 92
+          (definição no exercício 16 do capítulo 1).
+        </p>
+      </section>
+
+      <hr class="sep">
+
+      <section class="chapter" id="s12">
+        <h2><span class="num">§12</span> Conexidade</h2>
+        <p class="sub-lead">Objetivo do bloco: decidir se o grafo “é um só pedaço”, nomear os pedaços quando não é, e apontar os vértices cuja remoção o parte.</p>
+
+        <h3 id="s12-conexo">12.1 Grafo conexo</h3>
+        <p>
+          A pergunta mais básica que se faz a um grafo é se dá para ir de qualquer vértice a qualquer outro
+          andando pelas arestas. Se a resposta é sim, o grafo é um único pedaço; se não, ele se quebra em ilhas.
+          A definição oficial exige ainda que o grafo não seja vazio — um grafo sem vértices não tem “dois vértices
+          para ligar”, e as notas recusam o vacuidade.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · grafo conexo</div>
+          <p>
+            Um grafo <span class="m"><i>G</i></span> é <b>conexo</b> se é não-vazio e quaisquer dois vértices de
+            <span class="m"><i>G</i></span> são ligados por um caminho.
+          </p>
+        </div>
+        <div class="box tip">
+          <div class="h">Intuição</div>
+          <p>
+            “Ligado por um caminho” é simétrico e transitivo: se <span class="m"><i>u</i></span> alcança
+            <span class="m"><i>v</i></span> e <span class="m"><i>v</i></span> alcança
+            <span class="m"><i>w</i></span>, concatene os dois caminhos e, se precisar, extraia um caminho do passeio.
+            O exercício 86 transforma isso na relação de equivalência cuja partição <i>são</i> os componentes.
+          </p>
+        </div>
+        <p>
+          Três operações de remoção vão aparecer o tempo todo. Grave a notação agora, porque o resto do capítulo
+          é “o que acontece com a conexidade quando se apaga alguma coisa”.
+        </p>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Notação</th><th>O que se apaga</th><th>O que resta</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="m"><i>G</i> − <i>v</i></span></td>
+              <td>o vértice <span class="m"><i>v</i></span> e todas as arestas de <span class="m"><i>E</i>(<i>v</i>)</span></td>
+              <td><span class="m">(<i>V</i> \ {<i>v</i>}, <i>E</i> \ <i>E</i>(<i>v</i>))</span> — o induzido por <span class="m"><i>V</i> \ {<i>v</i>}</span></td>
+            </tr>
+            <tr>
+              <td><span class="m"><i>G</i> − <i>e</i></span></td>
+              <td>só a aresta <span class="m"><i>e</i></span>; os extremos ficam</td>
+              <td><span class="m">(<i>V</i>, <i>E</i> \ {<i>e</i>})</span></td>
+            </tr>
+            <tr>
+              <td><span class="m"><i>G</i> − <i>U</i></span></td>
+              <td>todos os vértices de <span class="m"><i>U</i> ⊂ <i>V</i></span> e as arestas que os tocam</td>
+              <td>o subgrafo induzido por <span class="m"><i>V</i> \ <i>U</i></span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · apagar uma aresta de um circuito não desconecta</div>
+          <p>
+            Se <span class="m"><i>e</i></span> pertence a um circuito, existe um desvio: o outro caminho do circuito
+            entre os extremos de <span class="m"><i>e</i></span>. Por isso
+            <span class="m"><i>G</i> − <i>e</i></span> continua conexo sempre que
+            <span class="m"><i>G</i></span> era conexo e <span class="m"><i>e</i></span> está em um circuito
+            (exercício 87). A aresta cuja remoção <i>parte</i> o grafo é uma <b>ponte</b>: ela não pertence a circuito nenhum.
+          </p>
+        </div>
+
+        <h3 id="s12-comp">12.2 Componentes conexos</h3>
+        <p>
+          Se <span class="m"><i>G</i></span> não é conexo, ainda assim cada “ilha” é conexa — e é a maior possível:
+          acrescentar qualquer vértice ou aresta de fora a desconectaria ou sairia de <span class="m"><i>G</i></span>.
+          Maximal, aqui, é por inclusão de subgrafo, não por número de vértices.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · subgrafo conexo maximal e componente</div>
+          <p>
+            <span class="m"><i>H</i></span> é um <b>subgrafo conexo maximal</b> de <span class="m"><i>G</i></span>
+            se <span class="m"><i>H</i></span> é conexo, <span class="m"><i>H</i> ⊆ <i>G</i></span>, e não existe
+            subgrafo conexo <span class="m"><i>F</i> ⊆ <i>G</i></span> com <span class="m"><i>H</i> ⊂ <i>F</i></span>.
+            Os subgrafos conexos maximais de um grafo qualquer são os <b>componentes conexos</b> do grafo.
+          </p>
+        </div>
+        <p>
+          No grafo do Exemplo 1 do capítulo 1 há quatro componentes, induzidos pelos conjuntos
+          <span class="m">{1,2,5}</span>, <span class="m">{3,4}</span>, <span class="m">{6,7}</span> e
+          <span class="m">{8}</span>. O vértice isolado é um componente — um grafo trivial é conexo.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 560 200" role="img" aria-label="Grafo com quatro componentes: triângulo 1-2-5, aresta 3-4, aresta 6-7 e vértice isolado 8">
+            <line class="e" x1="70" y1="55" x2="165" y2="55"/>
+            <line class="e" x1="70" y1="55" x2="117" y2="140"/>
+            <line class="e" x1="165" y1="55" x2="117" y2="140"/>
+            <line class="e" x1="265" y1="55" x2="265" y2="145"/>
+            <line class="e" x1="365" y1="55" x2="460" y2="55"/>
+            <g class="v c1"><circle cx="70" cy="55" r="17"/><text x="70" y="55">1</text></g>
+            <g class="v c1"><circle cx="165" cy="55" r="17"/><text x="165" y="55">2</text></g>
+            <g class="v c1"><circle cx="117" cy="140" r="17"/><text x="117" y="140">5</text></g>
+            <g class="v c2"><circle cx="265" cy="55" r="17"/><text x="265" y="55">3</text></g>
+            <g class="v c2"><circle cx="265" cy="145" r="17"/><text x="265" y="145">4</text></g>
+            <g class="v c3"><circle cx="365" cy="55" r="17"/><text x="365" y="55">6</text></g>
+            <g class="v c3"><circle cx="460" cy="55" r="17"/><text x="460" y="55">7</text></g>
+            <g class="v c4"><circle cx="510" cy="145" r="17"/><text x="510" y="145">8</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c1)"></i>{1,2,5}</span>
+            <span><i style="background:var(--c2)"></i>{3,4}</span>
+            <span><i style="background:var(--c3)"></i>{6,7}</span>
+            <span><i style="background:var(--c4)"></i>{8}</span>
+          </div>
+          <figcaption><b>Figura 1.</b> Os quatro componentes do Exemplo 1. Cada cor é um subgrafo conexo maximal: não dá para acrescentar mais nenhum vértice de <span class="m"><i>G</i></span> sem perder a conexidade.</figcaption>
+        </figure>
+        <div class="box rec">
+          <div class="h">Receita: como reconhecer um componente</div>
+          <ol>
+            <li><b>Fixe um vértice <span class="m"><i>u</i></span>.</b> O componente de <span class="m"><i>u</i></span> é o subgrafo induzido por todos os vértices alcançáveis a partir de <span class="m"><i>u</i></span> (incluindo <span class="m"><i>u</i></span>).</li>
+            <li><b>É induzido.</b> Se dois vértices do componente são adjacentes em <span class="m"><i>G</i></span>, a aresta também está no componente — senão você poderia acrescentá-la e continuar conexo.</li>
+            <li><b>Não há arestas entre componentes.</b> Uma aresta entre dois deles os fundiria num subgrafo conexo maior.</li>
+          </ol>
+        </div>
+        <p>
+          Duas consequências imediatas, usadas o tempo todo nos exercícios:
+        </p>
+        <ul>
+          <li>Um <b>subgrafo gerador</b> conexo força o grafo inteiro a ser conexo — os caminhos do subgrafo já ligam todos os vértices (exercício 89).</li>
+          <li>Se <span class="m">Δ(<i>G</i>) ≤ 2</span>, nenhum vértice tem três vizinhos: o componente não ramifica. Só restam caminhos e circuitos (exercício 88).</li>
+        </ul>
+
+        <h3 id="s12-art">12.3 Articulação e a operação <span class="m"><i>G</i> − <i>v</i></span></h3>
+        <p>
+          Agora o grafo é conexo e perguntamos o quão <i>frágil</i> é essa conexidade. O teste mais simples:
+          existe um vértice cuja remoção parte o grafo em dois?
+        </p>
+        <div class="box def">
+          <div class="h">Definição · articulação</div>
+          <p>
+            Um vértice <span class="m"><i>v</i> ∈ <i>V</i></span> num grafo <b>conexo</b>
+            <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span> é uma <b>articulação</b>
+            (ou <b>vértice de corte</b>) se a remoção de <span class="m"><i>v</i></span> e das arestas de
+            <span class="m"><i>E</i>(<i>v</i>)</span> resulta num grafo desconexo. Em símbolos: o grafo
+          </p>
+          <div class="eq"><div class="body">
+            <i>G</i> − <i>v</i> = (<i>V</i> \ {<i>v</i>}, <i>E</i> \ <i>E</i>(<i>v</i>))
+          </div></div>
+          <p>é desconexo.</p>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · folha não é articulação</div>
+          <p>
+            Se <span class="m"><i>u</i></span> tem grau 1, <span class="m"><i>G</i> − <i>u</i></span> é o resto do
+            grafo conexo — continua conexo. A folha <b>não</b> é articulação, embora a única aresta que chega nela
+            não pertença a circuito nenhum. O enunciado do exercício 93 esquece essa hipótese; a leitura correta
+            pede <span class="m"><i>d</i>(<i>u</i>) ≥ 2</span>.
+          </p>
+        </div>
+        <p>
+          A vizinhança de uma articulação não precisa ser conexa. No caminho
+          <span class="m"><i>a</i> — <i>u</i> — <i>b</i></span>, o meio <span class="m"><i>u</i></span> é articulação
+          e <span class="m"><i>G</i>[<i>N</i>(<i>u</i>)]</span> são dois vértices isolados (exercício 95).
+        </p>
+
+        <h3 id="s12-bi">12.4 Biconexo e componentes biconexos</h3>
+        <div class="box def">
+          <div class="h">Definição · biconexo e componente biconexo</div>
+          <p>
+            Um grafo <b>sem articulações</b> é chamado de <b>biconexo</b>. Os subgrafos biconexos maximais de um
+            grafo <span class="m"><i>G</i></span> qualquer são os <b>componentes biconexos</b> de
+            <span class="m"><i>G</i></span> (também chamados de <b>blocos</b>).
+          </p>
+        </div>
+        <p>
+          Por esta definição, <span class="m"><i>K</i><sub>1</sub></span> e
+          <span class="m"><i>K</i><sub>2</sub></span> são biconexos: não há vértice cuja remoção os desconecte.
+          Uma ponte (aresta que não está em circuito) é um componente biconexo isomorfo a
+          <span class="m"><i>K</i><sub>2</sub></span>. Os blocos maiores são os “pedaços 2-conexos”: ciclos com
+          cordas, cliques, etc. Dois blocos distintos compartilham no máximo um vértice — e esse vértice, se o
+          grafo for conexo e tiver mais de um bloco, é articulação.
+        </p>
+        <p>
+          As notas ilustram isso com as figuras 19 e 20, que não puderam ser extraídas. O diagrama abaixo é um
+          <b>exemplo construído para esta versão</b>, com as mesmas articulações e os mesmos conjuntos de vértices
+          dos componentes biconexos listados no original: articulações 1, 3, 7, 9; blocos induzidos por
+          <span class="m">{1,13}</span>, <span class="m">{1,2,3,4,5,6}</span>,
+          <span class="m">{3,7}</span>, <span class="m">{7,8}</span>,
+          <span class="m">{9,10}</span> e <span class="m">{3,9,11,12}</span>.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 540 280" role="img" aria-label="Grafo com articulações 1, 3, 7 e 9 ligando seis blocos: uma aresta 1-13, um ciclo 1-2-3-4-5-6, as pontes 3-7, 7-8 e 9-10, e o ciclo 3-12-9-11">
+            <line class="e" x1="32" y1="130" x2="95" y2="130"/>
+            <line class="e" x1="95" y1="130" x2="145" y2="60"/>
+            <line class="e" x1="145" y1="60" x2="225" y2="55"/>
+            <line class="e" x1="225" y1="55" x2="225" y2="160"/>
+            <line class="e" x1="225" y1="160" x2="145" y2="195"/>
+            <line class="e" x1="145" y1="195" x2="95" y2="195"/>
+            <line class="e" x1="95" y1="195" x2="95" y2="130"/>
+            <line class="e" x1="225" y1="55" x2="310" y2="35"/>
+            <line class="e" x1="310" y1="35" x2="400" y2="30"/>
+            <line class="e" x1="225" y1="55" x2="315" y2="115"/>
+            <line class="e" x1="315" y1="115" x2="405" y2="155"/>
+            <line class="e" x1="405" y1="155" x2="320" y2="215"/>
+            <line class="e" x1="320" y1="215" x2="225" y2="55"/>
+            <line class="e" x1="405" y1="155" x2="500" y2="155"/>
+            <g class="v"><circle cx="32" cy="130" r="16"/><text x="32" y="130">13</text></g>
+            <g class="v hl"><circle cx="95" cy="130" r="16"/><text x="95" y="130">1</text></g>
+            <g class="v"><circle cx="145" cy="60" r="16"/><text x="145" y="60">2</text></g>
+            <g class="v hl"><circle cx="225" cy="55" r="16"/><text x="225" y="55">3</text></g>
+            <g class="v"><circle cx="225" cy="160" r="16"/><text x="225" y="160">4</text></g>
+            <g class="v"><circle cx="145" cy="195" r="16"/><text x="145" y="195">5</text></g>
+            <g class="v"><circle cx="95" cy="195" r="16"/><text x="95" y="195">6</text></g>
+            <g class="v hl"><circle cx="310" cy="35" r="16"/><text x="310" y="35">7</text></g>
+            <g class="v"><circle cx="400" cy="30" r="16"/><text x="400" y="30">8</text></g>
+            <g class="v"><circle cx="315" cy="115" r="16"/><text x="315" y="115">12</text></g>
+            <g class="v hl"><circle cx="405" cy="155" r="16"/><text x="405" y="155">9</text></g>
+            <g class="v"><circle cx="320" cy="215" r="16"/><text x="320" y="215">11</text></g>
+            <g class="v"><circle cx="500" cy="155" r="16"/><text x="500" y="155">10</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c2)"></i>articulação (1, 3, 7, 9)</span>
+            <span><i style="background:var(--node)"></i>vértice interno a um bloco</span>
+          </div>
+          <figcaption><b>Figura 2.</b> Exemplo construído para esta versão, equivalente à figura 19 das notas. Remover qualquer vértice vermelho desconecta o grafo; remover qualquer outro, não.</figcaption>
+        </figure>
+        <figure>
+          <svg class="dg" viewBox="0 0 540 270" role="img" aria-label="Os seis componentes biconexos desenhados em separado: três arestas isoladas, um hexágono, outra aresta e um quadrilátero">
+            <line class="e" x1="30" y1="70" x2="90" y2="70"/>
+            <g class="v hl"><circle cx="30" cy="70" r="15"/><text x="30" y="70">1</text></g>
+            <g class="v"><circle cx="90" cy="70" r="15"/><text x="90" y="70">13</text></g>
+            <text class="lbl" x="60" y="112">{1,13}</text>
+
+            <line class="e" x1="168" y1="70" x2="206" y2="32"/>
+            <line class="e" x1="206" y1="32" x2="258" y2="32"/>
+            <line class="e" x1="258" y1="32" x2="258" y2="88"/>
+            <line class="e" x1="258" y1="88" x2="206" y2="108"/>
+            <line class="e" x1="206" y1="108" x2="168" y2="88"/>
+            <line class="e" x1="168" y1="88" x2="168" y2="70"/>
+            <g class="v hl"><circle cx="168" cy="70" r="14"/><text x="168" y="70">1</text></g>
+            <g class="v"><circle cx="206" cy="32" r="14"/><text x="206" y="32">2</text></g>
+            <g class="v hl"><circle cx="258" cy="32" r="14"/><text x="258" y="32">3</text></g>
+            <g class="v"><circle cx="258" cy="88" r="14"/><text x="258" y="88">4</text></g>
+            <g class="v"><circle cx="206" cy="108" r="14"/><text x="206" y="108">5</text></g>
+            <g class="v"><circle cx="168" cy="88" r="14"/><text x="168" y="88">6</text></g>
+            <text class="lbl" x="213" y="136">{1,2,3,4,5,6}</text>
+
+            <line class="e" x1="330" y1="70" x2="400" y2="70"/>
+            <g class="v hl"><circle cx="330" cy="70" r="15"/><text x="330" y="70">3</text></g>
+            <g class="v hl"><circle cx="400" cy="70" r="15"/><text x="400" y="70">7</text></g>
+            <text class="lbl" x="365" y="112">{3,7}</text>
+
+            <line class="e" x1="450" y1="70" x2="520" y2="70"/>
+            <g class="v hl"><circle cx="450" cy="70" r="15"/><text x="450" y="70">7</text></g>
+            <g class="v"><circle cx="520" cy="70" r="15"/><text x="520" y="70">8</text></g>
+            <text class="lbl" x="485" y="112">{7,8}</text>
+
+            <line class="e" x1="50" y1="200" x2="120" y2="200"/>
+            <g class="v hl"><circle cx="50" cy="200" r="15"/><text x="50" y="200">9</text></g>
+            <g class="v"><circle cx="120" cy="200" r="15"/><text x="120" y="200">10</text></g>
+            <text class="lbl" x="85" y="242">{9,10}</text>
+
+            <line class="e" x1="250" y1="168" x2="330" y2="168"/>
+            <line class="e" x1="330" y1="168" x2="330" y2="228"/>
+            <line class="e" x1="330" y1="228" x2="250" y2="228"/>
+            <line class="e" x1="250" y1="228" x2="250" y2="168"/>
+            <g class="v hl"><circle cx="250" cy="168" r="15"/><text x="250" y="168">3</text></g>
+            <g class="v hl"><circle cx="330" cy="168" r="15"/><text x="330" y="168">9</text></g>
+            <g class="v"><circle cx="330" cy="228" r="15"/><text x="330" y="228">11</text></g>
+            <g class="v"><circle cx="250" cy="228" r="15"/><text x="250" y="228">12</text></g>
+            <text class="lbl" x="290" y="258">{3,9,11,12}</text>
+          </svg>
+          <figcaption><b>Figura 3.</b> Exemplo construído para esta versão, equivalente à figura 20. Os seis componentes biconexos: três pontes, o ciclo de seis vértices e o ciclo de quatro. As articulações (vermelho) são exatamente os vértices que pertencem a mais de um bloco.</figcaption>
+        </figure>
+        <div class="box tip">
+          <div class="h">Intuição · a árvore de blocos</div>
+          <p>
+            Se você contrair cada componente biconexo a um “super-vértice” e ligar dois deles quando compartilham
+            uma articulação, o resultado é uma árvore. Por isso não existe ciclo de blocos: um ciclo passaria por
+            duas articulações e os fundiria num bloco maior, contradizendo a maximalidade.
+          </p>
+        </div>
+
+        <h3 id="s12-receita">12.5 Receita e um critério por graus</h3>
+        <div class="box rec">
+          <div class="h">Receita: como atacar um exercício de conexidade</div>
+          <ol>
+            <li><b>Conexo ou não?</b> Exiba um caminho entre pares genéricos, ou um subgrafo gerador conexo, ou uma condição sobre graus (exercício 90). Para desconexidade, aponte duas ilhas sem aresta entre elas.</li>
+            <li><b>Componentes.</b> A classe de <span class="m"><i>u</i></span> na relação “existe caminho” é o conjunto de vértices do componente de <span class="m"><i>u</i></span>. Em circulantes (exercício 91), a classe de 0 é o subgrupo gerado pelo passo.</li>
+            <li><b>Articulação.</b> Teste <span class="m"><i>G</i> − <i>v</i></span>: se restam dois vértices inalcançáveis um do outro, <span class="m"><i>v</i></span> é articulação. Folha nunca passa no teste.</li>
+            <li><b>Aresta em circuito.</b> Equivale a “não é ponte”: os extremos continuam ligados em <span class="m"><i>G</i> − <i>e</i></span>.</li>
+          </ol>
+        </div>
+        <p>
+          Um critério útil, que o exercício 90 pede para demonstrar: se a sequência de graus
+          <span class="m">δ(<i>G</i>) = <i>d</i><sub>1</sub> ≤ <i>d</i><sub>2</sub> ≤ ⋅⋅⋅ ≤ <i>d</i><sub><i>n</i></sub> = Δ(<i>G</i>)</span>
+          cumpre <span class="m"><i>d</i><sub><i>k</i></sub> ≥ <i>k</i></span> para todo
+          <span class="m"><i>k</i></span> com <span class="m">0 &lt; <i>k</i> &lt; <i>n</i> − Δ(<i>G</i>)</span>,
+          então <span class="m"><i>G</i></span> é conexo. A ideia da prova é a contrapositiva: num componente
+          pequeno demais, os graus ficam baixos demais para satisfazer a desigualdade.
+        </p>
+        <div class="box def">
+          <div class="h">Resumo do bloco</div>
+          <ul>
+            <li>Conexo = não-vazio + caminho entre qualquer par.</li>
+            <li>Componente = subgrafo conexo maximal; particionam <span class="m"><i>V</i></span>.</li>
+            <li><span class="m"><i>v</i></span> é articulação ⇔ <span class="m"><i>G</i></span> conexo e <span class="m"><i>G</i> − <i>v</i></span> desconexo.</li>
+            <li>Biconexo = sem articulações. Componentes biconexos = blocos maximais; encontram-se só em articulações.</li>
+            <li>Aresta de circuito não desconecta; folha não é articulação.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="chapter" id="ex1">
+        <div class="ex-head">
+          <h3>Exercícios 86 a 95</h3>
+          <button class="toggle" type="button" data-scope="#ex1" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: relação de equivalência dos componentes, preservação da conexidade, Δ ≤ 2, critérios por graus, circulantes, grafo linha, articulações e biconexidade.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 86</span><div class="stmt">
+            <p>
+              Dado <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span> escrevemos
+              <span class="m"><i>u</i> ∼ <i>v</i></span>, para quaisquer vértices
+              <span class="m"><i>u</i></span> e <span class="m"><i>v</i></span> de
+              <span class="m"><i>G</i></span>, se e somente se
+              <span class="m"><i>u</i> = <i>v</i></span> ou existe um caminho ligando
+              <span class="m"><i>u</i></span> a <span class="m"><i>v</i></span> em
+              <span class="m"><i>G</i></span>. Mostre que
+              <span class="m">∼</span> é uma relação de equivalência sobre
+              <span class="m"><i>V</i></span> e caracterize as classes de equivalência dessa relação.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h86" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a86" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h86"><div class="plab">Dica</div>
+            <p>Reflexiva e simétrica cabem em uma linha cada. Na transitividade, concatene e, se o passeio repetir vértice, corte o ciclo. A classe de <span class="m"><i>u</i></span> é exatamente o conjunto de vértices do componente de <span class="m"><i>u</i></span>.</p>
+          </div>
+          <div class="panel answer" id="a86"><div class="plab">Resolução</div>
+            <p><b>Reflexiva.</b> Por definição, <span class="m"><i>u</i> = <i>u</i></span> implica <span class="m"><i>u</i> ∼ <i>u</i></span>.</p>
+            <p><b>Simétrica.</b> Se <span class="m"><i>u</i> = <i>v</i></span>, pronto. Se há um caminho
+              <span class="m"><i>u</i> = <i>x</i><sub>0</sub>, <i>x</i><sub>1</sub>, …, <i>x</i><sub><i>ℓ</i></sub> = <i>v</i></span>,
+              o reverso
+              <span class="m"><i>v</i> = <i>x</i><sub><i>ℓ</i></sub>, …, <i>x</i><sub>0</sub> = <i>u</i></span>
+              é um caminho de <span class="m"><i>v</i></span> a <span class="m"><i>u</i></span>.</p>
+            <p><b>Transitiva.</b> Sejam <span class="m"><i>u</i> ∼ <i>v</i></span> e <span class="m"><i>v</i> ∼ <i>w</i></span>. Se algum dos três coincide com outro, a conclusão é imediata. Caso contrário há um caminho <span class="m"><i>P</i></span> de <span class="m"><i>u</i></span> a <span class="m"><i>v</i></span> e um caminho <span class="m"><i>Q</i></span> de <span class="m"><i>v</i></span> a <span class="m"><i>w</i></span>. A concatenação <span class="m"><i>P</i><i>Q</i></span> é um <i>passeio</i> de <span class="m"><i>u</i></span> a <span class="m"><i>w</i></span>. Todo passeio contém um caminho com os mesmos extremos: enquanto houver vértice repetido, o trecho entre as duas ocorrências é um circuito e pode ser apagado. O que resta é um caminho de <span class="m"><i>u</i></span> a <span class="m"><i>w</i></span>, logo <span class="m"><i>u</i> ∼ <i>w</i></span>.</p>
+            <p><b>Classes.</b> A classe de <span class="m"><i>u</i></span> é</p>
+            <div class="eq"><div class="body">
+              [<i>u</i>] = { <i>v</i> ∈ <i>V</i> : <i>u</i> ∼ <i>v</i> } = { <i>v</i> ∈ <i>V</i> : <i>v</i> é alcançável a partir de <i>u</i> }.
+            </div></div>
+            <p>
+              Esse é precisamente o conjunto de vértices do componente conexo que contém
+              <span class="m"><i>u</i></span>. O subgrafo induzido por <span class="m">[<i>u</i>]</span> é conexo
+              (há caminho entre quaisquer dois, passando por <span class="m"><i>u</i></span> se preciso) e é maximal
+              (um vértice de fora não é alcançável). Assim, as classes de
+              <span class="m">∼</span> são os conjuntos de vértices dos componentes conexos de
+              <span class="m"><i>G</i></span>. <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 87</span><div class="stmt">
+            <p>
+              Mostre que se <span class="m"><i>G</i> = (<i>V</i>, <i>E</i>)</span> é conexo então
+              <span class="m"><i>G</i> − <i>e</i> = (<i>V</i>, <i>E</i> \ {<i>e</i>})</span> é conexo para toda aresta
+              <span class="m"><i>e</i></span> que pertence a algum circuito de <span class="m"><i>G</i></span>.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a87" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a87"><div class="plab">Resolução</div>
+            <p>
+              Seja <span class="m"><i>e</i> = {<i>x</i>, <i>y</i>}</span> uma aresta de um circuito
+              <span class="m"><i>C</i></span>. Então <span class="m"><i>C</i> − <i>e</i></span> é um caminho
+              <span class="m"><i>P</i><sub><i>C</i></sub></span> de <span class="m"><i>x</i></span> a
+              <span class="m"><i>y</i></span> que <b>não</b> usa <span class="m"><i>e</i></span>.
+            </p>
+            <p>
+              Sejam <span class="m"><i>u</i>, <i>v</i> ∈ <i>V</i></span> quaisquer. Como
+              <span class="m"><i>G</i></span> é conexo, existe um caminho
+              <span class="m"><i>Q</i></span> de <span class="m"><i>u</i></span> a
+              <span class="m"><i>v</i></span> em <span class="m"><i>G</i></span>.
+            </p>
+            <ul>
+              <li>Se <span class="m"><i>Q</i></span> não contém <span class="m"><i>e</i></span>, então <span class="m"><i>Q</i></span> sobrevive em <span class="m"><i>G</i> − <i>e</i></span>.</li>
+              <li>Se <span class="m"><i>Q</i></span> contém <span class="m"><i>e</i></span>, substitua a ocorrência de <span class="m"><i>e</i></span> pelo caminho <span class="m"><i>P</i><sub><i>C</i></sub></span> (ou pelo reverso, conforme a orientação em que <span class="m"><i>Q</i></span> atravessa <span class="m"><i>e</i></span>). O resultado é um passeio de <span class="m"><i>u</i></span> a <span class="m"><i>v</i></span> em <span class="m"><i>G</i> − <i>e</i></span>; dele se extrai um caminho.</li>
+            </ul>
+            <p>
+              Em ambos os casos <span class="m"><i>u</i></span> e <span class="m"><i>v</i></span> estão ligados em
+              <span class="m"><i>G</i> − <i>e</i></span>. O conjunto de vértices não mudou e não é vazio. Logo
+              <span class="m"><i>G</i> − <i>e</i></span> é conexo. <span class="qed">□</span>
+            </p>
+            <p>
+              A recíproca também vale e vale a pena guardar: se <span class="m"><i>e</i></span> <b>não</b> está em
+              circuito, ela é a única ligação entre seus extremos, e <span class="m"><i>G</i> − <i>e</i></span>
+              desconecta esses extremos. Por isso “pertence a um circuito” e “não é ponte” são a mesma afirmação
+              num grafo conexo.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 88</span><div class="stmt">
+            <p>
+              Mostre que se <span class="m">Δ(<i>G</i>) ≤ 2</span> então os componentes conexos de
+              <span class="m"><i>G</i></span> ou são caminhos ou são circuitos.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h88" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a88" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h88"><div class="plab">Dica</div>
+            <p>Num componente, comece num vértice de grau mínimo e ande sem repetir vértice. O grau no máximo 2 impede qualquer “cruzamento” ou ramificação: ou você fecha um circuito, ou para numa ponta e o que cobriu é um caminho gerador.</p>
+          </div>
+          <div class="panel answer" id="a88"><div class="plab">Resolução</div>
+            <p>
+              Basta tratar um componente <span class="m"><i>H</i></span>, que herda
+              <span class="m">Δ(<i>H</i>) ≤ 2</span> e é conexo.
+            </p>
+            <p>
+              Se algum vértice de <span class="m"><i>H</i></span> tem grau 0, a conexidade força
+              <span class="m"><i>H</i> ≃ <i>K</i><sub>1</sub></span>, que é um caminho de comprimento 0.
+            </p>
+            <p>
+              Agora todos os graus estão em <span class="m">{1,2}</span>. Comece num vértice
+              <span class="m"><i>u</i></span> de grau mínimo e construa um caminho
+              <span class="m"><i>P</i> = <i>x</i><sub>0</sub>, <i>x</i><sub>1</sub>, …, <i>x</i><sub><i>t</i></sub></span>
+              maximal (não prolongável por nenhum extremo). Em particular
+              <span class="m"><i>x</i><sub>0</sub> = <i>u</i></span>.
+            </p>
+            <p class="kicker">Caso A · os dois extremos de <span class="m"><i>P</i></span> têm grau 1 em <span class="m"><i>H</i></span></p>
+            <p>
+              Afirmamos que <span class="m"><i>V</i>(<i>P</i>) = <i>V</i>(<i>H</i>)</span>. Se existisse
+              <span class="m"><i>z</i> ∉ <i>V</i>(<i>P</i>)</span>, um caminho de
+              <span class="m"><i>z</i></span> até <span class="m"><i>P</i></span> (existe, <span class="m"><i>H</i></span> é conexo)
+              encontraria <span class="m"><i>P</i></span> pela primeira vez num vértice
+              <span class="m"><i>x</i><sub><i>i</i></sub></span>. Esse vértice ganharia um vizinho fora de
+              <span class="m"><i>P</i></span>. Os extremos de <span class="m"><i>P</i></span> já usaram seu único
+              vizinho <i>dentro</i> de <span class="m"><i>P</i></span>, e um vértice interno já tem dois vizinhos
+              em <span class="m"><i>P</i></span>. Em qualquer posição o grau passaria de 2, absurdo.
+              Logo <span class="m"><i>H</i></span> é o próprio caminho <span class="m"><i>P</i></span>.
+            </p>
+            <p class="kicker">Caso B · algum extremo de <span class="m"><i>P</i></span> tem grau 2</p>
+            <p>
+              Esse extremo, digamos <span class="m"><i>x</i><sub>0</sub></span>, já tem o vizinho
+              <span class="m"><i>x</i><sub>1</sub></span> em <span class="m"><i>P</i></span> e precisa de outro
+              vizinho <span class="m"><i>w</i></span>. Por maximalidade,
+              <span class="m"><i>w</i></span> já está em <span class="m"><i>P</i></span>. O único vértice de
+              <span class="m"><i>P</i></span> que ainda tem “grau sobrando” para receber essa aresta sem ultrapassar 2
+              é o outro extremo <span class="m"><i>x</i><sub><i>t</i></sub></span>
+              (um interno já tem grau 2 em <span class="m"><i>P</i></span>). Assim
+              <span class="m"><i>w</i> = <i>x</i><sub><i>t</i></sub></span> e
+              <span class="m"><i>P</i></span> mais essa aresta é um circuito. O mesmo argumento do Caso A mostra
+              que o circuito cobre <span class="m"><i>V</i>(<i>H</i>)</span>: um vértice extra criaria grau 3.
+              Logo <span class="m"><i>H</i></span> é um circuito.
+            </p>
+            <p>
+              Não há outros casos: se os dois extremos tivessem grau 2 e a aresta extra de cada um não fosse para
+              o outro extremo, algum interno receberia uma terceira aresta. <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 89</span><div class="stmt">
+            <p>
+              Seja <span class="m"><i>H</i></span> um subgrafo gerador de <span class="m"><i>G</i></span>, isto é,
+              <span class="m"><i>H</i> ⊆ <i>G</i></span> e
+              <span class="m"><i>V</i>(<i>H</i>) = <i>V</i>(<i>G</i>)</span>. Mostre que se
+              <span class="m"><i>H</i></span> é conexo então <span class="m"><i>G</i></span> é conexo.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a89" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a89"><div class="plab">Resolução</div>
+            <p>
+              <span class="m"><i>H</i></span> é não-vazio (é conexo), logo
+              <span class="m"><i>G</i></span> também é. Sejam
+              <span class="m"><i>u</i>, <i>v</i> ∈ <i>V</i>(<i>G</i>) = <i>V</i>(<i>H</i>)</span>.
+              Como <span class="m"><i>H</i></span> é conexo, existe um caminho
+              <span class="m"><i>P</i></span> de <span class="m"><i>u</i></span> a
+              <span class="m"><i>v</i></span> em <span class="m"><i>H</i></span>. Toda aresta de
+              <span class="m"><i>P</i></span> está em <span class="m"><i>E</i>(<i>H</i>) ⊆ <i>E</i>(<i>G</i>)</span>,
+              portanto <span class="m"><i>P</i></span> é um caminho em <span class="m"><i>G</i></span>.
+              Logo <span class="m"><i>G</i></span> é conexo. <span class="qed">□</span>
+            </p>
+            <p>
+              A recíproca é falsa: <span class="m"><i>G</i></span> pode ser conexo e
+              <span class="m"><i>H</i></span> um gerador desconexo (apague uma ponte, ou apague todas as arestas
+              de um grafo com pelo menos dois vértices). Acrescentar arestas nunca destrói caminhos — só pode criar.
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 90</span><div class="stmt">
+            <p>
+              Seja <span class="m"><i>G</i></span> um grafo com <span class="m"><i>n</i></span> vértices. Considere
+              os graus dos vértices em ordem crescente,
+              <span class="m">δ(<i>G</i>) = <i>d</i><sub>1</sub> ≤ <i>d</i><sub>2</sub> ≤ ⋅⋅⋅ ≤ <i>d</i><sub><i>n</i></sub> = Δ(<i>G</i>)</span>.
+              Mostre que se <span class="m"><i>d</i><sub><i>k</i></sub> ≥ <i>k</i></span> vale para todo
+              <span class="m"><i>k</i></span> com
+              <span class="m">0 &lt; <i>k</i> &lt; <i>n</i> − Δ(<i>G</i>)</span>, então
+              <span class="m"><i>G</i></span> é conexo.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h90" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a90" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h90"><div class="plab">Dica</div>
+            <p>Suponha <span class="m"><i>G</i></span> desconexo e tome um componente <span class="m"><i>C</i></span> com o menor número <span class="m"><i>t</i></span> de vértices. Todo vértice de <span class="m"><i>C</i></span> tem grau no máximo <span class="m"><i>t</i> − 1</span>, e <span class="m">Δ</span> não pode “enxergar” o outro lado — isso força <span class="m"><i>t</i> &lt; <i>n</i> − Δ</span>, exatamente a faixa da hipótese.</p>
+          </div>
+          <div class="panel answer" id="a90"><div class="plab">Resolução</div>
+            <p>
+              Se <span class="m">Δ = <i>n</i> − 1</span>, algum vértice é adjacente a todos os outros, e
+              <span class="m"><i>G</i></span> é conexo sem usar a hipótese (que, neste caso, é vacua:
+              não existe <span class="m"><i>k</i></span> com
+              <span class="m">0 &lt; <i>k</i> &lt; 1</span>). Doravante
+              <span class="m">Δ ≤ <i>n</i> − 2</span>.
+            </p>
+            <p>
+              Suponha, por absurdo, que <span class="m"><i>G</i></span> é desconexo. Seja
+              <span class="m"><i>C</i></span> um componente com o menor número de vértices, e ponha
+              <span class="m"><i>t</i> = |<i>V</i>(<i>C</i>)|</span>. Então
+              <span class="m">1 ≤ <i>t</i> ≤ ⌊<i>n</i>∕2⌋</span>, e não há arestas entre
+              <span class="m"><i>C</i></span> e o resto.
+            </p>
+            <p>
+              Todo vértice de <span class="m"><i>C</i></span> tem os vizinhos dentro de
+              <span class="m"><i>C</i></span>, logo grau no máximo
+              <span class="m"><i>t</i> − 1</span>. Os vértices de fora têm os vizinhos fora, logo grau no máximo
+              <span class="m"><i>n</i> − <i>t</i> − 1</span>. Portanto
+            </p>
+            <div class="eq"><div class="body">
+              Δ(<i>G</i>) ≤ max{<i>t</i> − 1, <i>n</i> − <i>t</i> − 1} = <i>n</i> − <i>t</i> − 1,
+            </div></div>
+            <p>
+              onde a última igualdade usa <span class="m"><i>t</i> ≤ <i>n</i> − <i>t</i></span>. Daí
+              <span class="m"><i>t</i> ≤ <i>n</i> − Δ − 1</span>, e em particular
+              <span class="m"><i>t</i> &lt; <i>n</i> − Δ</span>. A hipótese se aplica a
+              <span class="m"><i>k</i> = <i>t</i></span> e dá
+              <span class="m"><i>d</i><sub><i>t</i></sub> ≥ <i>t</i></span>.
+            </p>
+            <p>
+              Por outro lado, os <span class="m"><i>t</i></span> vértices de
+              <span class="m"><i>C</i></span> têm grau ≤ <span class="m"><i>t</i> − 1</span>. Na sequência
+              ordenada, os <span class="m"><i>t</i></span> menores graus são no máximo esses, logo
+              <span class="m"><i>d</i><sub><i>t</i></sub> ≤ <i>t</i> − 1</span>. Contradição.
+            </p>
+            <p>
+              Portanto <span class="m"><i>G</i></span> é conexo. <span class="qed">□</span>
+            </p>
+            <p class="kicker">Conferência · dois extremos</p>
+            <p>
+              Se <span class="m"><i>G</i></span> tem um isolado, <span class="m"><i>d</i><sub>1</sub> = 0</span>.
+              Desde que <span class="m">Δ &lt; <i>n</i> − 1</span>, a hipótese pede
+              <span class="m"><i>d</i><sub>1</sub> ≥ 1</span> e recusa o isolado — como deve.
+              Se <span class="m"><i>G</i></span> é a união de dois
+              <span class="m"><i>K</i><sub>3</sub></span> (<span class="m"><i>n</i> = 6</span>,
+              <span class="m">Δ = 2</span>), a sequência é
+              <span class="m">(2,2,2,2,2,2)</span> e a faixa é
+              <span class="m">0 &lt; <i>k</i> &lt; 4</span>. Para
+              <span class="m"><i>k</i> = 3</span> teríamos de ter
+              <span class="m"><i>d</i><sub>3</sub> ≥ 3</span>, mas
+              <span class="m"><i>d</i><sub>3</sub> = 2</span>: a hipótese falha, e de fato o grafo é desconexo. ✔
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 91</span><div class="stmt">
+            <p>
+              Seja <span class="m"><i>G</i></span> o grafo definido sobre o conjunto de vértices
+              <span class="m">{0, 1, …, <i>n</i> − 1}</span> com
+              <span class="m">{<i>u</i>, <i>v</i>} ∈ <i>E</i>(<i>G</i>)</span> se, e somente se,
+              <span class="m"><i>u</i> − <i>v</i> ≡ ±<i>k</i> (mod <i>n</i>)</span>.
+            </p>
+            <p>Dê uma condição necessária e suficiente sobre <span class="m"><i>n</i></span> e <span class="m"><i>k</i></span> para que <span class="m"><i>G</i></span> seja conexo.</p>
+            <p>Determine o número de componentes conexos em função de <span class="m"><i>n</i></span> e <span class="m"><i>k</i></span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h91" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a91" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h91"><div class="plab">Dica</div>
+            <p>A partir de 0 você só alcança múltiplos de <span class="m"><i>k</i></span> módulo <span class="m"><i>n</i></span>. Quantos múltiplos distintos existem? O número que falta para fechar o círculo é <span class="m">mdc(<i>n</i>, <i>k</i>)</span>.</p>
+          </div>
+          <div class="panel answer" id="a91"><div class="plab">Resolução</div>
+            <p>
+              Cada vértice <span class="m"><i>u</i></span> é adjacente a
+              <span class="m"><i>u</i> + <i>k</i></span> e a
+              <span class="m"><i>u</i> − <i>k</i></span> (módulo
+              <span class="m"><i>n</i></span>), com as duas pontas coincidindo precisamente quando
+              <span class="m">2<i>k</i> ≡ 0 (mod <i>n</i>)</span>.
+              Os vértices alcançáveis a partir de 0 são
+            </p>
+            <div class="eq"><div class="body">
+              { 0, <i>k</i>, 2<i>k</i>, 3<i>k</i>, … } ⊆ ℤ∕<i>n</i>ℤ,
+            </div></div>
+            <p>
+              o subgrupo cíclico gerado por <span class="m"><i>k</i></span>. Esse subgrupo tem
+              <span class="m"><i>n</i>∕<i>d</i></span> elementos, onde
+              <span class="m"><i>d</i> = mdc(<i>n</i>, <i>k</i>)</span>
+              (o menor <span class="m"><i>m</i> &gt; 0</span> com
+              <span class="m"><i>m k</i> ≡ 0 (mod <i>n</i>)</span> é
+              <span class="m"><i>m</i> = <i>n</i>∕<i>d</i></span>).
+            </p>
+            <p>
+              O componente de um vértice <span class="m"><i>a</i></span> é a classe
+              <span class="m"><i>a</i> + ⟨<i>k</i>⟩ = { <i>a</i> + <i>j k</i> (mod <i>n</i>) : <i>j</i> ∈ ℤ }</span>,
+              isto é, os inteiros módulo <span class="m"><i>n</i></span> congruentes a
+              <span class="m"><i>a</i></span> módulo <span class="m"><i>d</i></span>. Há exatamente
+              <span class="m"><i>d</i></span> tais classes:
+              <span class="m">0, 1, …, <i>d</i> − 1</span>.
+            </p>
+            <p>
+              Logo o número de componentes é <span class="m">mdc(<i>n</i>, <i>k</i>)</span>, e
+              <span class="m"><i>G</i></span> é conexo se e somente se
+              <span class="m">mdc(<i>n</i>, <i>k</i>) = 1</span>.
+            </p>
+            <p class="kicker">Conferência dos casos degenerados</p>
+            <ul>
+              <li>Se <span class="m"><i>k</i> ≡ 0 (mod <i>n</i>)</span>, a condição <span class="m"><i>u</i> − <i>v</i> ≡ 0</span> força <span class="m"><i>u</i> = <i>v</i></span>: não há arestas, <span class="m"><i>n</i></span> isolados, e <span class="m">mdc(<i>n</i>, 0) = <i>n</i></span> ✔</li>
+              <li>Se <span class="m"><i>n</i></span> é par e <span class="m"><i>k</i> = <i>n</i>∕2</span>, cada vértice tem um único vizinho (o oposto). O grafo é um emparelhamento perfeito com <span class="m"><i>n</i>∕2 = mdc(<i>n</i>, <i>n</i>∕2)</span> componentes ✔</li>
+              <li>Se <span class="m"><i>d</i> = 1</span>, o passo <span class="m"><i>k</i></span> gera todo ℤ∕<i>n</i>ℤ e o grafo é um único circuito de comprimento <span class="m"><i>n</i></span> (ou <span class="m"><i>K</i><sub>2</sub></span> quando <span class="m"><i>n</i> = 2</span>) ✔</li>
+            </ul>
+            <figure>
+              <svg class="dg" viewBox="0 0 480 210" role="img" aria-label="Dois circuitos de quatro vértices: os pares 0-2-4-6 e os ímpares 1-3-5-7, o grafo do circulante n=8 k=2">
+                <line class="e" x1="80" y1="40" x2="200" y2="40"/>
+                <line class="e" x1="200" y1="40" x2="200" y2="160"/>
+                <line class="e" x1="200" y1="160" x2="80" y2="160"/>
+                <line class="e" x1="80" y1="160" x2="80" y2="40"/>
+                <line class="e" x1="300" y1="40" x2="420" y2="40"/>
+                <line class="e" x1="420" y1="40" x2="420" y2="160"/>
+                <line class="e" x1="420" y1="160" x2="300" y2="160"/>
+                <line class="e" x1="300" y1="160" x2="300" y2="40"/>
+                <g class="v c1"><circle cx="80" cy="40" r="16"/><text x="80" y="40">0</text></g>
+                <g class="v c1"><circle cx="200" cy="40" r="16"/><text x="200" y="40">2</text></g>
+                <g class="v c1"><circle cx="200" cy="160" r="16"/><text x="200" y="160">4</text></g>
+                <g class="v c1"><circle cx="80" cy="160" r="16"/><text x="80" y="160">6</text></g>
+                <g class="v c3"><circle cx="300" cy="40" r="16"/><text x="300" y="40">1</text></g>
+                <g class="v c3"><circle cx="420" cy="40" r="16"/><text x="420" y="40">3</text></g>
+                <g class="v c3"><circle cx="420" cy="160" r="16"/><text x="420" y="160">5</text></g>
+                <g class="v c3"><circle cx="300" cy="160" r="16"/><text x="300" y="160">7</text></g>
+                <text class="lbl" x="140" y="200">mdc(8, 2) = 2</text>
+              </svg>
+              <figcaption><b>Figura 4.</b> O circulante com <span class="m"><i>n</i> = 8</span>, <span class="m"><i>k</i> = 2</span>: dois componentes, cada um um 4-ciclo. Conferência: <span class="m">mdc(8,2) = 2</span> ✔</figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 92</span><div class="stmt">
+            <p>
+              Mostre que se <span class="m"><i>G</i></span> é conexo então
+              <span class="m"><i>L</i><sub><i>G</i></sub></span>
+              (veja o exercício 16 do capítulo 1) é conexo.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a92" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a92"><div class="plab">Resolução</div>
+            <p>
+              Recordamos: os vértices de <span class="m"><i>L</i><sub><i>G</i></sub></span> são as arestas de
+              <span class="m"><i>G</i></span>, e dois deles são adjacentes se e somente se as arestas
+              correspondentes compartilham um extremo em <span class="m"><i>G</i></span>.
+            </p>
+            <p>
+              O enunciado não exclui o grafo trivial. Se
+              <span class="m"><i>G</i> ≃ <i>K</i><sub>1</sub></span>, então
+              <span class="m"><i>L</i><sub><i>G</i></sub></span> é o grafo vazio, que pela definição deste
+              capítulo (conexo exige não-vazio) <b>não</b> é conexo. A afirmação vale — e é o que
+              demonstramos — para todo grafo conexo com pelo menos uma aresta.
+            </p>
+            <p>
+              Seja <span class="m"><i>G</i></span> conexo com
+              <span class="m"><i>E</i>(<i>G</i>) ≠ ∅</span>. Então
+              <span class="m"><i>L</i><sub><i>G</i></sub></span> é não-vazio. Sejam
+              <span class="m"><i>e</i> = {<i>a</i>, <i>b</i>}</span> e
+              <span class="m"><i>f</i> = {<i>c</i>, <i>d</i>}</span> duas arestas de
+              <span class="m"><i>G</i></span>. Como <span class="m"><i>G</i></span> é conexo, existe um caminho
+              <span class="m"><i>P</i></span> de <span class="m"><i>a</i></span> a
+              <span class="m"><i>c</i></span>. As arestas de
+              <span class="m"><i>P</i></span>, nesta ordem, formam um passeio em
+              <span class="m"><i>L</i><sub><i>G</i></sub></span> (arestas consecutivas de um caminho compartilham
+              um vértice). Prefixe <span class="m"><i>e</i></span> se
+              <span class="m"><i>e</i></span> ainda não é a primeira aresta de
+              <span class="m"><i>P</i></span> (ela compartilha <span class="m"><i>a</i></span> com a primeira),
+              e anexe <span class="m"><i>f</i></span> analogamente. O passeio resultante em
+              <span class="m"><i>L</i><sub><i>G</i></sub></span> liga
+              <span class="m"><i>e</i></span> a <span class="m"><i>f</i></span>; dele se extrai um caminho.
+            </p>
+            <p>
+              Logo <span class="m"><i>L</i><sub><i>G</i></sub></span> é conexo. <span class="qed">□</span>
+            </p>
+            <p>
+              A recíproca é quase verdadeira: se <span class="m"><i>L</i><sub><i>G</i></sub></span> é conexo, todas
+              as arestas de <span class="m"><i>G</i></span> estão no mesmo “bloco de incidências”, logo
+              <span class="m"><i>G</i></span> tem no máximo um componente com arestas — os demais, se existirem,
+              são isolados. Assim <span class="m"><i>L</i><sub><i>G</i></sub></span> conexo não força
+              <span class="m"><i>G</i></span> conexo (uma estrela mais um isolado tem grafo linha completo).
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 93</span><div class="stmt">
+            <p>
+              Mostre que se <span class="m"><i>u</i></span> não é articulação num grafo conexo
+              <span class="m"><i>G</i></span> então toda aresta que incide em
+              <span class="m"><i>u</i></span> pertence a um circuito de
+              <span class="m"><i>G</i></span>.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h93" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a93" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h93"><div class="plab">Dica</div>
+            <p>Teste primeiro uma folha. Se o enunciado sobrevive, <span class="m"><i>G</i> − <i>u</i></span> conexo e <span class="m"><i>d</i>(<i>u</i>) ≥ 2</span> dão um desvio: saia por um segundo vizinho e volte pelo caminho em <span class="m"><i>G</i> − <i>u</i></span>.</p>
+          </div>
+          <div class="panel answer" id="a93"><div class="plab">Resolução</div>
+            <p>
+              O enunciado, lido ao pé da letra, é <b>falso</b>. Num caminho com pelo menos dois vértices, cada
+              folha <span class="m"><i>u</i></span> não é articulação
+              (<span class="m"><i>G</i> − <i>u</i></span> continua um caminho, logo conexo), mas a única aresta
+              incidente em <span class="m"><i>u</i></span> não pertence a circuito nenhum.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 360 120" role="img" aria-label="Caminho a-u-b: a folha a não é articulação e sua aresta não está em circuito">
+                <line class="e" x1="60" y1="60" x2="180" y2="60"/>
+                <line class="e" x1="180" y1="60" x2="300" y2="60"/>
+                <g class="v open"><circle cx="60" cy="60" r="16"/><text x="60" y="60">a</text></g>
+                <g class="v hl"><circle cx="180" cy="60" r="16"/><text x="180" y="60">u</text></g>
+                <g class="v open"><circle cx="300" cy="60" r="16"/><text x="300" y="60">b</text></g>
+              </svg>
+              <figcaption><b>Figura 5.</b> Contraexemplo: <span class="m"><i>a</i></span> não é articulação, e <span class="m">{<i>a</i>,<i>u</i>}</span> não está em circuito. O vértice vermelho é a única articulação.</figcaption>
+            </figure>
+            <p>
+              A leitura razoável — e o que as notas querem — acrescenta
+              <span class="m"><i>d</i>(<i>u</i>) ≥ 2</span>. Provamos essa versão.
+            </p>
+            <p>
+              Seja <span class="m"><i>e</i> = {<i>u</i>, <i>w</i>}</span> uma aresta incidente em
+              <span class="m"><i>u</i></span>. Como <span class="m"><i>u</i></span> não é articulação e
+              <span class="m"><i>G</i></span> é conexo, o grafo
+              <span class="m"><i>G</i> − <i>u</i></span> é conexo. Como
+              <span class="m"><i>d</i>(<i>u</i>) ≥ 2</span>, existe um vizinho
+              <span class="m"><i>w</i>′ ≠ <i>w</i></span>. Em
+              <span class="m"><i>G</i> − <i>u</i></span> há um caminho
+              <span class="m"><i>P</i></span> de <span class="m"><i>w</i>′</span> a
+              <span class="m"><i>w</i></span>. Então
+            </p>
+            <div class="eq"><div class="body">
+              <i>u</i>, <i>w</i>′, &nbsp;<i>P</i>&nbsp;, <i>w</i>, <i>u</i>
+            </div></div>
+            <p>
+              é um circuito de <span class="m"><i>G</i></span> que contém
+              <span class="m"><i>e</i></span>. <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 94</span><div class="stmt">
+            <p>
+              Prove ou dê um contraexemplo para: dado <span class="m"><i>n</i> ∈ ℕ</span> existe
+              <span class="m">δ<sub><i>n</i></sub> ∈ ℕ</span> tal que todo grafo com
+              <span class="m"><i>n</i></span> vértices e grau mínimo
+              <span class="m">δ<sub><i>n</i></sub></span> é biconexo.
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h94" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a94" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h94"><div class="plab">Dica</div>
+            <p>O original omite a palavra “vértices” (“todo grafo com <span class="m"><i>n</i></span> e grau mínimo”). A afirmação é de existência: um <span class="m">δ<sub><i>n</i></sub></span> grande o bastante basta. Dois cliques colados numa articulação mostram até onde <span class="m">δ</span> pode crescer sem forçar biconexidade.</p>
+          </div>
+          <div class="panel answer" id="a94"><div class="plab">Resolução</div>
+            <p>
+              O original diz “todo grafo com <span class="m"><i>n</i></span> e grau mínimo”; lemos
+              “com <span class="m"><i>n</i></span> vértices e
+              <span class="m">δ(<i>G</i>) ≥ δ<sub><i>n</i></sub></span>”.
+              A afirmação é <b>verdadeira</b>.
+            </p>
+            <p>
+              Para <span class="m"><i>n</i> = 1</span> tome
+              <span class="m">δ<sub>1</sub> = 0</span>: o único grafo é
+              <span class="m"><i>K</i><sub>1</sub></span>, sem articulações.
+              Para <span class="m"><i>n</i> ≥ 2</span> afirmamos que
+              <span class="m">δ<sub><i>n</i></sub> = ⌈<i>n</i>∕2⌉</span> funciona.
+            </p>
+            <p>
+              Seja <span class="m"><i>G</i></span> com
+              <span class="m">|<i>V</i>| = <i>n</i></span> e
+              <span class="m">δ(<i>G</i>) ≥ ⌈<i>n</i>∕2⌉</span>.
+              Suponha que <span class="m"><i>v</i></span> seja articulação. Então
+              <span class="m"><i>G</i> − <i>v</i></span> tem pelo menos dois componentes; seja
+              <span class="m"><i>C</i></span> o menor, com
+              <span class="m"><i>t</i> = |<i>V</i>(<i>C</i>)| ≤ ⌊(<i>n</i> − 1)∕2⌋</span>.
+              Um vértice <span class="m"><i>u</i> ∈ <i>C</i></span> só pode ter vizinhos em
+              <span class="m"><i>C</i> ∪ {<i>v</i>}</span>, logo
+            </p>
+            <div class="eq"><div class="body">
+              <i>d</i>(<i>u</i>) ≤ <i>t</i> ≤ ⌊(<i>n</i> − 1)∕2⌋ &lt; ⌈<i>n</i>∕2⌉ ≤ δ(<i>G</i>),
+            </div></div>
+            <p>
+              absurdo. Portanto não há articulação:
+              <span class="m"><i>G</i></span> é biconexo.
+            </p>
+            <p>
+              A cota é justa. Cole dois cliques por um único vértice comum de modo que a ordem total seja
+              <span class="m"><i>n</i></span>
+              (por exemplo <span class="m"><i>K</i><sub>⌈<i>n</i>∕2⌉</sub></span> e
+              <span class="m"><i>K</i><sub>⌊<i>n</i>∕2⌋+1</sub></span> com um vértice identificado).
+              O grau mínimo fica
+              <span class="m">⌈<i>n</i>∕2⌉ − 1</span>
+              e o vértice comum é articulação.
+              Assim <span class="m">δ<sub><i>n</i></sub> = ⌈<i>n</i>∕2⌉</span>
+              é o menor inteiro que funciona para todo grafo de ordem
+              <span class="m"><i>n</i></span>.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 420 200" role="img" aria-label="Dois blocos colados no vértice v, uma articulação">
+                <line class="e" x1="70" y1="50" x2="150" y2="100"/>
+                <line class="e" x1="70" y1="150" x2="150" y2="100"/>
+                <line class="e" x1="70" y1="50" x2="70" y2="150"/>
+                <line class="e" x1="150" y1="100" x2="280" y2="50"/>
+                <line class="e" x1="150" y1="100" x2="280" y2="150"/>
+                <line class="e" x1="280" y1="50" x2="280" y2="150"/>
+                <line class="e" x1="280" y1="50" x2="350" y2="100"/>
+                <line class="e" x1="280" y1="150" x2="350" y2="100"/>
+                <g class="v"><circle cx="70" cy="50" r="16"/><text x="70" y="50">a</text></g>
+                <g class="v"><circle cx="70" cy="150" r="16"/><text x="70" y="150">b</text></g>
+                <g class="v hl"><circle cx="150" cy="100" r="16"/><text x="150" y="100">v</text></g>
+                <g class="v"><circle cx="280" cy="50" r="16"/><text x="280" y="50">c</text></g>
+                <g class="v"><circle cx="280" cy="150" r="16"/><text x="280" y="150">d</text></g>
+                <g class="v"><circle cx="350" cy="100" r="16"/><text x="350" y="100">e</text></g>
+              </svg>
+              <figcaption><b>Figura 6.</b> Dois blocos colados em <span class="m"><i>v</i></span>: <span class="m"><i>n</i> = 6</span>, <span class="m">δ = 2 = ⌈6∕2⌉ − 1</span>. Aumentar <span class="m">δ</span> para 3 já impede essa costura.</figcaption>
+            </figure>
+            <p>
+              A escolha preguiçosa <span class="m">δ<sub><i>n</i></sub> = <i>n</i> − 1</span> também
+              funciona: o único grafo é <span class="m"><i>K</i><sub><i>n</i></sub></span>, que não tem
+              articulação. A cota <span class="m">⌈<i>n</i>∕2⌉</span> é a que ensina alguma coisa.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 95</span><div class="stmt">
+            <p>
+              Se <span class="m"><i>u</i></span> é uma articulação de um grafo conexo
+              <span class="m"><i>G</i></span> então
+              <span class="m"><i>G</i>[<i>N</i>(<i>u</i>)]</span> é conexo?
+            </p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle" type="button" data-target="a95" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel answer" id="a95"><div class="plab">Resolução</div>
+            <p>
+              <b>Não.</b> Seja <span class="m"><i>G</i> = <i>K</i><sub>1,3</sub></span> a estrela com centro
+              <span class="m"><i>u</i></span> e folhas
+              <span class="m"><i>a</i>, <i>b</i>, <i>c</i></span>. O grafo é conexo e
+              <span class="m"><i>G</i> − <i>u</i></span> são três isolados, logo
+              <span class="m"><i>u</i></span> é articulação. Mas
+              <span class="m"><i>N</i>(<i>u</i>) = {<i>a</i>, <i>b</i>, <i>c</i>}</span>
+              é um conjunto independente, e
+              <span class="m"><i>G</i>[<i>N</i>(<i>u</i>)] ≃ 3<i>K</i><sub>1</sub></span>
+              é desconexo.
+            </p>
+            <figure>
+              <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="Estrela com centro u e três folhas a, b, c">
+                <line class="e" x1="160" y1="100" x2="60" y2="40"/>
+                <line class="e" x1="160" y1="100" x2="60" y2="160"/>
+                <line class="e" x1="160" y1="100" x2="270" y2="100"/>
+                <g class="v open"><circle cx="60" cy="40" r="16"/><text x="60" y="40">a</text></g>
+                <g class="v open"><circle cx="60" cy="160" r="16"/><text x="60" y="160">b</text></g>
+                <g class="v open"><circle cx="270" cy="100" r="16"/><text x="270" y="100">c</text></g>
+                <g class="v hl"><circle cx="160" cy="100" r="16"/><text x="160" y="100">u</text></g>
+              </svg>
+              <figcaption><b>Figura 7.</b> Articulação cujo induzido na vizinhança é totalmente desconexo. O caminho <span class="m"><i>P</i><sub>3</sub></span> já basta: duas folhas isoladas em <span class="m"><i>G</i>[<i>N</i>(<i>u</i>)]</span>.</figcaption>
+            </figure>
+            <p>
+              O que é verdade: os vizinhos de uma articulação caem em pelo menos dois componentes de
+              <span class="m"><i>G</i> − <i>u</i></span>, e não há aresta de
+              <span class="m"><i>G</i></span> entre esses componentes. Por isso
+              <span class="m"><i>G</i>[<i>N</i>(<i>u</i>)]</span> herda essa partição e, salvo arestas
+              dentro de um mesmo componente de <span class="m"><i>G</i> − <i>u</i></span>,
+              tende a ser desconexo. <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+      </section>
+      <hr class="sep">
+
+      <section class="chapter" id="s12k">
+        <h2><span class="num">§12</span> k-conexidade e o parâmetro κ</h2>
+        <p class="sub-lead">Objetivo do bloco: medir quantos vértices é preciso remover para partir o grafo, relacionar isso ao grau mínimo e construir o circulante que realiza a cota de arestas.</p>
+
+        <h3 id="s12k-def">A definição e a escala 0, 1, 2, …</h3>
+        <p>
+          Articulação é o caso “basta remover 1 vértice”. A definição seguinte conta quantos vértices, no
+          mínimo, separam o grafo — e recusa o truque de apagar quase todos os vértices até sobrar um isolado.
+          Por isso se exige <span class="m">|<i>V</i>| &gt; <i>k</i></span>.
+        </p>
+        <div class="box def">
+          <div class="h">Definição · k-conexo e conexidade κ(G)</div>
+          <p>
+            Para todo <span class="m"><i>k</i> ∈ ℕ</span>, o grafo <span class="m"><i>G</i></span> é
+            <b><span class="m"><i>k</i></span>-conexo</b> se
+          </p>
+          <ul>
+            <li><span class="m">|<i>V</i>(<i>G</i>)| &gt; <i>k</i></span> e</li>
+            <li>não existe <span class="m"><i>U</i> ⊂ <i>V</i>(<i>G</i>)</span> com
+              <span class="m">|<i>U</i>| &lt; <i>k</i></span> tal que
+              <span class="m"><i>G</i> − <i>U</i></span> é desconexo.</li>
+          </ul>
+          <p>
+            A <b>conexidade</b> de <span class="m"><i>G</i></span> é o maior inteiro
+            <span class="m"><i>k</i></span> para o qual <span class="m"><i>G</i></span> é
+            <span class="m"><i>k</i></span>-conexo:
+          </p>
+          <div class="eq"><div class="body">
+            κ(<i>G</i>) = max { <i>k</i> ∈ ℕ : <i>G</i> é <i>k</i>-conexo }.
+          </div><div class="tag">(30)</div></div>
+        </div>
+        <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Afirmação</th><th>Significa</th></tr></thead>
+          <tbody>
+            <tr><td>todo grafo não-vazio é 0-conexo</td><td>não se pede para remover vértice nenhum; a condição sobre <span class="m"><i>U</i></span> é vacua</td></tr>
+            <tr><td>conexo e não-trivial ⇔ 1-conexo</td><td><span class="m">|<i>V</i>| &gt; 1</span> e o conjunto vazio não desconecta</td></tr>
+            <tr><td>biconexo com pelo menos 3 vértices ⇔ 2-conexo</td><td>não existe articulação</td></tr>
+            <tr><td><span class="m"><i>K</i><sub><i>n</i></sub></span> é <span class="m">(<i>n</i> − 1)</span>-conexo</td><td>apagar menos de <span class="m"><i>n</i> − 1</span> vértices deixa um completo</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="box warn">
+          <div class="h">Atenção · k-conexo implica ℓ-conexo para ℓ &lt; k</div>
+          <p>
+            A definição é cumulativa para baixo. Se não existe corte com menos de
+            <span class="m"><i>k</i></span> vértices, tampouco existe corte com menos de
+            <span class="m"><i>ℓ</i> &lt; <i>k</i></span>. E
+            <span class="m">|<i>V</i>| &gt; <i>k</i> &gt; <i>ℓ</i></span>. Por isso
+            <span class="m">κ(<i>G</i>)</span> está bem definido como um máximo, e
+            <span class="m"><i>G</i></span> é <span class="m"><i>k</i></span>-conexo se e somente se
+            <span class="m">κ(<i>G</i>) ≥ <i>k</i></span>.
+          </p>
+        </div>
+
+        <h3 id="s12k-desig">Por que κ ≤ δ, e a cota |E| ≥ k|V|∕2</h3>
+        <p>
+          O grau mínimo já é um corte disfarçado. Se <span class="m"><i>v</i></span> tem grau
+          <span class="m">δ</span>, a vizinhança <span class="m"><i>N</i>(<i>v</i>)</span> tem
+          <span class="m">δ</span> vértices e, ao ser removida, isola <span class="m"><i>v</i></span>
+          do resto — desde que exista resto, isto é,
+          <span class="m">|<i>V</i>| ≥ δ + 2</span>. Num grafo que não é completo, isso produz um
+          corte de tamanho <span class="m">δ</span>. No completo,
+          <span class="m">κ = δ = <i>n</i> − 1</span>. Em todos os casos
+        </p>
+        <div class="eq"><div class="body">κ(<i>G</i>) ≤ δ(<i>G</i>).</div></div>
+        <figure>
+          <svg class="dg" viewBox="0 0 420 200" role="img" aria-label="Vértice v de grau 2 cuja vizinhança o separa do resto do grafo">
+            <line class="e cut" x1="80" y1="100" x2="180" y2="50"/>
+            <line class="e cut" x1="80" y1="100" x2="180" y2="150"/>
+            <line class="e" x1="180" y1="50" x2="180" y2="150"/>
+            <line class="e" x1="180" y1="50" x2="300" y2="50"/>
+            <line class="e" x1="180" y1="150" x2="300" y2="150"/>
+            <line class="e" x1="300" y1="50" x2="300" y2="150"/>
+            <line class="e" x1="300" y1="50" x2="370" y2="100"/>
+            <line class="e" x1="300" y1="150" x2="370" y2="100"/>
+            <g class="v open"><circle cx="80" cy="100" r="16"/><text x="80" y="100">v</text></g>
+            <g class="v hl"><circle cx="180" cy="50" r="16"/><text x="180" y="50">a</text></g>
+            <g class="v hl"><circle cx="180" cy="150" r="16"/><text x="180" y="150">b</text></g>
+            <g class="v"><circle cx="300" cy="50" r="16"/><text x="300" y="50">c</text></g>
+            <g class="v"><circle cx="300" cy="150" r="16"/><text x="300" y="150">d</text></g>
+            <g class="v"><circle cx="370" cy="100" r="16"/><text x="370" y="100">e</text></g>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--c2)"></i><span class="m"><i>N</i>(<i>v</i>)</span>, um corte de tamanho δ</span>
+            <span><i class="ln" style="background:var(--c2)"></i>arestas incidentes em v</span>
+          </div>
+          <figcaption><b>Figura 8.</b> Remover os dois vizinhos de <span class="m"><i>v</i></span> isola <span class="m"><i>v</i></span>. Por isso nenhum grafo com <span class="m">δ = 2</span> pode ser 3-conexo.</figcaption>
+        </figure>
+        <p>
+          Combinando as duas desigualdades: se <span class="m"><i>G</i></span> é
+          <span class="m"><i>k</i></span>-conexo, então
+          <span class="m">δ ≥ κ ≥ <i>k</i></span>, e o teorema do aperto de mão dá
+        </p>
+        <div class="eq"><div class="body">
+          2|<i>E</i>(<i>G</i>)| =
+          <span class="sum"><span class="o">∑</span><span class="l"><i>v</i> ∈ <i>V</i></span></span>
+          <i>d</i>(<i>v</i>) ≥ |<i>V</i>| · δ ≥ <i>k</i>|<i>V</i>|,
+        </div></div>
+        <p>
+          ou seja <span class="m">|<i>E</i>(<i>G</i>)| ≥ <i>k</i>|<i>V</i>|∕2</span>.
+          Um grafo <span class="m"><i>k</i></span>-conexo não pode ser esparso demais: cada vértice
+          precisa de pelo menos <span class="m"><i>k</i></span> saídas.
+        </p>
+
+        <h3 id="s12k-h">O circulante H<sub>n,k</sub></h3>
+        <p>
+          A cota <span class="m">|<i>E</i>| ≥ <i>k n</i>∕2</span> é atingida pelo grafo de Harary: o mais
+          regular possível entre os <span class="m"><i>k</i></span>-conexos de ordem
+          <span class="m"><i>n</i></span>. Dados
+          <span class="m"><i>k</i> ≥ 2</span> e
+          <span class="m"><i>n</i> &gt; <i>k</i></span>, o grafo
+          <span class="m"><i>H</i><sub><i>n</i>,<i>k</i></sub></span> tem
+          <span class="m"><i>V</i> = {0, 1, …, <i>n</i> − 1}</span> disposto num círculo.
+        </p>
+        <p>
+          <b>Se <span class="m"><i>k</i></span> é par</b>, escreva
+          <span class="m"><i>k</i> = 2<i>r</i></span>. Cada vértice liga-se aos
+          <span class="m"><i>r</i></span> vizinhos imediatos de cada lado
+          (operações módulo <span class="m"><i>n</i></span>):
+        </p>
+        <div class="eq"><div class="body">
+          <i>E</i> = { {<i>i</i>, <i>j</i>} : 1 ≤ |<i>j</i> − <i>i</i>|<sub><i>n</i></sub> ≤ <i>r</i> },
+        </div><div class="tag">(31)</div></div>
+        <p>
+          onde <span class="m">|<i>j</i> − <i>i</i>|<sub><i>n</i></sub></span> é a distância no ciclo.
+          Equivale a <span class="m">−<i>r</i> ≤ <i>j</i> − <i>i</i> ≤ <i>r</i></span> módulo
+          <span class="m"><i>n</i></span>, excluindo o laço
+          <span class="m"><i>i</i> = <i>j</i></span>. O grafo é
+          <span class="m"><i>k</i></span>-regular.
+        </p>
+        <p>
+          <b>Se <span class="m"><i>k</i></span> é ímpar</b>, escreva
+          <span class="m"><i>k</i> = 2<i>r</i> + 1</span> e comece de
+          <span class="m"><i>H</i><sub><i>n</i>,<i>k</i> − 1</sub></span>. Falta um quase-emparelhamento
+          de arestas diametralmente opostas.
+        </p>
+        <p><b>(2.1)</b> Se <span class="m"><i>n</i></span> é par,</p>
+        <div class="eq"><div class="body">
+          <i>E</i> = <i>E</i>(<i>H</i><sub><i>n</i>,<i>k</i>−1</sub>) ∪
+          { {<i>i</i>, <i>i</i> + <i>n</i>∕2} : 1 ≤ <i>i</i> ≤ <i>n</i>∕2 }.
+        </div><div class="tag">(32)</div></div>
+        <p>Cada vértice ganha exatamente uma aresta para o antípoda. O grafo fica <span class="m"><i>k</i></span>-regular.</p>
+        <p><b>(2.2)</b> Se <span class="m"><i>n</i></span> é ímpar, um 1-fator é impossível. O vértice 0 ganha duas cordas e os demais, uma:</p>
+        <div class="eq"><div class="body">
+          <i>E</i> = <i>E</i>(<i>H</i><sub><i>n</i>,<i>k</i>−1</sub>) ∪
+          { {0, (<i>n</i>−1)∕2}, {0, (<i>n</i>+1)∕2} } ∪
+          { {<i>i</i>, <i>i</i> + (<i>n</i>+1)∕2} : 1 ≤ <i>i</i> &lt; (<i>n</i>−1)∕2 }.
+        </div><div class="tag">(33)</div></div>
+        <p>
+          O vértice 0 fica com grau <span class="m"><i>k</i> + 1</span>; os outros, com grau
+          <span class="m"><i>k</i></span>. Não existe grafo
+          <span class="m"><i>k</i></span>-regular de ordem ímpar com
+          <span class="m"><i>k</i></span> ímpar — o aperto de mão proíbe.
+        </p>
+        <figure>
+          <svg class="dg" viewBox="0 0 560 230" role="img" aria-label="Circulantes H8,4, H8,5 e H9,5 em círculos, o terceiro com cordas extras destacadas">
+            <line class="e faint" x1="95" y1="38" x2="146" y2="59"/>
+            <line class="e faint" x1="146" y1="59" x2="167" y2="110"/>
+            <line class="e faint" x1="167" y1="110" x2="146" y2="161"/>
+            <line class="e faint" x1="146" y1="161" x2="95" y2="182"/>
+            <line class="e faint" x1="95" y1="182" x2="44" y2="161"/>
+            <line class="e faint" x1="44" y1="161" x2="23" y2="110"/>
+            <line class="e faint" x1="23" y1="110" x2="44" y2="59"/>
+            <line class="e faint" x1="44" y1="59" x2="95" y2="38"/>
+            <line class="e" x1="95" y1="38" x2="167" y2="110"/>
+            <line class="e" x1="146" y1="59" x2="146" y2="161"/>
+            <line class="e" x1="167" y1="110" x2="95" y2="182"/>
+            <line class="e" x1="146" y1="161" x2="44" y2="161"/>
+            <line class="e" x1="95" y1="182" x2="23" y2="110"/>
+            <line class="e" x1="44" y1="161" x2="44" y2="59"/>
+            <line class="e" x1="23" y1="110" x2="95" y2="38"/>
+            <line class="e" x1="44" y1="59" x2="146" y2="59"/>
+            <g class="v"><circle cx="95" cy="38" r="14"/><text x="95" y="38">0</text></g>
+            <g class="v"><circle cx="146" cy="59" r="14"/><text x="146" y="59">1</text></g>
+            <g class="v"><circle cx="167" cy="110" r="14"/><text x="167" y="110">2</text></g>
+            <g class="v"><circle cx="146" cy="161" r="14"/><text x="146" y="161">3</text></g>
+            <g class="v"><circle cx="95" cy="182" r="14"/><text x="95" y="182">4</text></g>
+            <g class="v"><circle cx="44" cy="161" r="14"/><text x="44" y="161">5</text></g>
+            <g class="v"><circle cx="23" cy="110" r="14"/><text x="23" y="110">6</text></g>
+            <g class="v"><circle cx="44" cy="59" r="14"/><text x="44" y="59">7</text></g>
+            <text class="lbl" x="95" y="218">H8,4</text>
+
+            <line class="e faint" x1="280" y1="38" x2="331" y2="59"/>
+            <line class="e faint" x1="331" y1="59" x2="352" y2="110"/>
+            <line class="e faint" x1="352" y1="110" x2="331" y2="161"/>
+            <line class="e faint" x1="331" y1="161" x2="280" y2="182"/>
+            <line class="e faint" x1="280" y1="182" x2="229" y2="161"/>
+            <line class="e faint" x1="229" y1="161" x2="208" y2="110"/>
+            <line class="e faint" x1="208" y1="110" x2="229" y2="59"/>
+            <line class="e faint" x1="229" y1="59" x2="280" y2="38"/>
+            <line class="e" x1="280" y1="38" x2="352" y2="110"/>
+            <line class="e" x1="331" y1="59" x2="331" y2="161"/>
+            <line class="e" x1="352" y1="110" x2="280" y2="182"/>
+            <line class="e" x1="331" y1="161" x2="229" y2="161"/>
+            <line class="e" x1="280" y1="182" x2="208" y2="110"/>
+            <line class="e" x1="229" y1="161" x2="229" y2="59"/>
+            <line class="e" x1="208" y1="110" x2="280" y2="38"/>
+            <line class="e" x1="229" y1="59" x2="331" y2="59"/>
+            <line class="e match" x1="280" y1="38" x2="280" y2="182"/>
+            <line class="e match" x1="331" y1="59" x2="229" y2="161"/>
+            <line class="e match" x1="352" y1="110" x2="208" y2="110"/>
+            <line class="e match" x1="331" y1="161" x2="229" y2="59"/>
+            <g class="v"><circle cx="280" cy="38" r="14"/><text x="280" y="38">0</text></g>
+            <g class="v"><circle cx="331" cy="59" r="14"/><text x="331" y="59">1</text></g>
+            <g class="v"><circle cx="352" cy="110" r="14"/><text x="352" y="110">2</text></g>
+            <g class="v"><circle cx="331" cy="161" r="14"/><text x="331" y="161">3</text></g>
+            <g class="v"><circle cx="280" cy="182" r="14"/><text x="280" y="182">4</text></g>
+            <g class="v"><circle cx="229" cy="161" r="14"/><text x="229" y="161">5</text></g>
+            <g class="v"><circle cx="208" cy="110" r="14"/><text x="208" y="110">6</text></g>
+            <g class="v"><circle cx="229" cy="59" r="14"/><text x="229" y="59">7</text></g>
+            <text class="lbl" x="280" y="218">H8,5</text>
+
+            <line class="e faint" x1="460" y1="42" x2="504" y2="58"/>
+            <line class="e faint" x1="504" y1="58" x2="527" y2="98"/>
+            <line class="e faint" x1="527" y1="98" x2="519" y2="144"/>
+            <line class="e faint" x1="519" y1="144" x2="483" y2="174"/>
+            <line class="e faint" x1="483" y1="174" x2="437" y2="174"/>
+            <line class="e faint" x1="437" y1="174" x2="401" y2="144"/>
+            <line class="e faint" x1="401" y1="144" x2="393" y2="98"/>
+            <line class="e faint" x1="393" y1="98" x2="416" y2="58"/>
+            <line class="e faint" x1="416" y1="58" x2="460" y2="42"/>
+            <line class="e" x1="460" y1="42" x2="527" y2="98"/>
+            <line class="e" x1="504" y1="58" x2="519" y2="144"/>
+            <line class="e" x1="527" y1="98" x2="483" y2="174"/>
+            <line class="e" x1="519" y1="144" x2="437" y2="174"/>
+            <line class="e" x1="483" y1="174" x2="401" y2="144"/>
+            <line class="e" x1="437" y1="174" x2="393" y2="98"/>
+            <line class="e" x1="401" y1="144" x2="416" y2="58"/>
+            <line class="e" x1="393" y1="98" x2="460" y2="42"/>
+            <line class="e" x1="416" y1="58" x2="504" y2="58"/>
+            <line class="e match" x1="460" y1="42" x2="483" y2="174"/>
+            <line class="e match" x1="460" y1="42" x2="437" y2="174"/>
+            <line class="e match" x1="504" y1="58" x2="401" y2="144"/>
+            <line class="e match" x1="527" y1="98" x2="393" y2="98"/>
+            <line class="e match" x1="519" y1="144" x2="416" y2="58"/>
+            <g class="v hl2"><circle cx="460" cy="42" r="14"/><text x="460" y="42">0</text></g>
+            <g class="v"><circle cx="504" cy="58" r="14"/><text x="504" y="58">1</text></g>
+            <g class="v"><circle cx="527" cy="98" r="14"/><text x="527" y="98">2</text></g>
+            <g class="v"><circle cx="519" cy="144" r="14"/><text x="519" y="144">3</text></g>
+            <g class="v"><circle cx="483" cy="174" r="14"/><text x="483" y="174">4</text></g>
+            <g class="v"><circle cx="437" cy="174" r="14"/><text x="437" y="174">5</text></g>
+            <g class="v"><circle cx="401" cy="144" r="14"/><text x="401" y="144">6</text></g>
+            <g class="v"><circle cx="393" cy="98" r="14"/><text x="393" y="98">7</text></g>
+            <g class="v"><circle cx="416" cy="58" r="14"/><text x="416" y="58">8</text></g>
+            <text class="lbl" x="460" y="218">H9,5</text>
+          </svg>
+          <div class="legend">
+            <span><i class="ln" style="background:var(--edge)"></i>ciclo e cordas de comprimento no máximo r</span>
+            <span><i class="ln" style="background:var(--ok)"></i>arestas diametrais extras</span>
+            <span><i style="background:var(--c3)"></i>vértice 0, grau k+1 em H9,5</span>
+          </div>
+          <figcaption><b>Figura 9.</b> Os três diagramas pedidos nas notas. Em H<sub>8,4</sub> cada vértice liga-se a ±1 e ±2. Em H<sub>8,5</sub> entram as quatro diametrais. Em H<sub>9,5</sub> o vértice 0 ganha duas cordas extras e os demais, uma.</figcaption>
+        </figure>
+        <div class="box rec">
+          <div class="h">Receita: contar arestas de H<sub>n,k</sub> e provar k-conexidade</div>
+          <ol>
+            <li><b>Paridade.</b> Separe k par / k ímpar com n par / n ímpar. Nos dois primeiros casos o grafo é k-regular e |E| = kn/2. No terceiro, some as (n+1)/2 cordas extras a H<sub>n,k−1</sub>.</li>
+            <li><b>Teto.</b> Quando kn é ímpar, kn/2 não é inteiro e o aperto de mão força |E| ≥ ⌈kn/2⌉. A construção atinge o teto.</li>
+            <li><b>Caso par.</b> Para desconectar H<sub>n,2r</sub> é preciso uma muralha de r vértices consecutivos em cada arco entre o par que se quer separar — no total, 2r vértices.</li>
+            <li><b>Caso ímpar.</b> O subgrafo H<sub>n,k−1</sub> já é (k−1)-conexo. Um corte de tamanho k−1 que o desconecte deixa dois arcos vivos; alguma corda diametral os religa.</li>
+          </ol>
+        </div>
+        <div class="box def">
+          <div class="h">Resumo do bloco</div>
+          <ul>
+            <li><span class="m"><i>k</i></span>-conexo: <span class="m">|<i>V</i>| &gt; <i>k</i></span> e nenhum corte com menos de <span class="m"><i>k</i></span> vértices.</li>
+            <li><span class="m">κ(<i>G</i>)</span> é o maior tal <span class="m"><i>k</i></span>; a propriedade desce.</li>
+            <li>Sempre <span class="m">κ(<i>G</i>) ≤ δ(<i>G</i>)</span>. Donde <span class="m">|<i>E</i>| ≥ <i>k</i>|<i>V</i>|∕2</span> em todo grafo <span class="m"><i>k</i></span>-conexo.</li>
+            <li><span class="m"><i>H</i><sub><i>n</i>,<i>k</i></sub></span> realiza o teto <span class="m">⌈<i>k n</i>∕2⌉</span> e é <span class="m"><i>k</i></span>-conexo.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="chapter" id="ex2">
+        <div class="ex-head">
+          <h3>Exercícios 96 e 97</h3>
+          <button class="toggle" type="button" data-scope="#ex2" aria-expanded="false">Abrir todas as respostas do bloco <span class="chev">▼</span></button>
+          <p class="hint">O que é cobrado: a definição de k-conexo, a desigualdade κ ≤ δ, a cota de arestas e o circulante H<sub>n,k</sub>.</p>
+        </div>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 96</span><div class="stmt">
+            <p>
+              Dado um subconjunto <span class="m"><i>U</i> ⊂ <i>V</i>(<i>G</i>)</span> denotamos por
+              <span class="m"><i>G</i> − <i>U</i></span> o subgrafo induzido por
+              <span class="m"><i>V</i>(<i>G</i>) \ <i>U</i></span>. Para todo
+              <span class="m"><i>k</i> ∈ ℕ</span>, dizemos que um grafo
+              <span class="m"><i>G</i></span> é <span class="m"><i>k</i></span>-conexo se
+            </p>
+            <ul>
+              <li><span class="m">|<i>V</i>(<i>G</i>)| &gt; <i>k</i></span> e</li>
+              <li>não existe um <span class="m"><i>U</i> ⊂ <i>V</i>(<i>G</i>)</span> de cardinalidade
+                <span class="m">|<i>U</i>| &lt; <i>k</i></span> tal que
+                <span class="m"><i>G</i> − <i>U</i></span> é desconexo.</li>
+            </ul>
+            <p>
+              Assim, todo grafo não-vazio é 0-conexo, todo grafo não-trivial e conexo é 1-conexo e todo grafo
+              biconexo com pelo menos três vértices é 2-conexo. A conexidade de
+              <span class="m"><i>G</i></span> é o maior inteiro
+              <span class="m"><i>k</i></span> para o qual <span class="m"><i>G</i></span> é
+              <span class="m"><i>k</i></span>-conexo
+            </p>
+            <div class="eq"><div class="body">
+              κ(<i>G</i>) = max { <i>k</i> ∈ ℕ : <i>G</i> é <i>k</i>-conexo }.
+            </div><div class="tag">(30)</div></div>
+            <p>(i) Prove que todo grafo <span class="m"><i>k</i></span>-conexo também é <span class="m"><i>ℓ</i></span>-conexo para todo <span class="m"><i>ℓ</i> &lt; <i>k</i></span>.</p>
+            <p>(ii) Prove ou refute: para todo <span class="m"><i>G</i></span> vale <span class="m">δ(<i>G</i>) ≥ κ(<i>G</i>)</span>.</p>
+            <p>(iii) Prove que para todo <span class="m"><i>G</i></span> <span class="m"><i>k</i></span>-conexo vale <span class="m">|<i>E</i>(<i>G</i>)| ≥ <i>k</i>|<i>V</i>(<i>G</i>)|∕2</span>.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h96" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a96" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h96"><div class="plab">Dica</div>
+            <p>(i) é a definição com uma desigualdade mais fraca. (ii) remova a vizinhança de um vértice de grau δ. (iii) junte (ii) com o aperto de mão.</p>
+          </div>
+          <div class="panel answer" id="a96"><div class="plab">Resolução</div>
+            <p class="kicker">Parte (i)</p>
+            <p>
+              Seja <span class="m"><i>G</i></span> <span class="m"><i>k</i></span>-conexo e
+              <span class="m"><i>ℓ</i> &lt; <i>k</i></span>. Então
+              <span class="m">|<i>V</i>(<i>G</i>)| &gt; <i>k</i> &gt; <i>ℓ</i></span>.
+              Se existisse <span class="m"><i>U</i></span> com
+              <span class="m">|<i>U</i>| &lt; <i>ℓ</i></span> e
+              <span class="m"><i>G</i> − <i>U</i></span> desconexo, teríamos também
+              <span class="m">|<i>U</i>| &lt; <i>k</i></span>, contradizendo a
+              <span class="m"><i>k</i></span>-conexidade. Logo
+              <span class="m"><i>G</i></span> é <span class="m"><i>ℓ</i></span>-conexo.
+            </p>
+            <p class="kicker">Parte (ii)</p>
+            <p>
+              A desigualdade é <b>verdadeira</b>:
+              <span class="m">δ(<i>G</i>) ≥ κ(<i>G</i>)</span> para todo
+              <span class="m"><i>G</i></span> (equivalentemente
+              <span class="m">κ ≤ δ</span>).
+            </p>
+            <p>
+              Se <span class="m">κ(<i>G</i>) = 0</span>, não há o que provar
+              (<span class="m">δ ≥ 0</span>). Seja
+              <span class="m">κ = κ(<i>G</i>) ≥ 1</span> e seja
+              <span class="m"><i>v</i></span> um vértice com
+              <span class="m"><i>d</i>(<i>v</i>) = δ = δ(<i>G</i>)</span>.
+              Ponha <span class="m"><i>U</i> = <i>N</i>(<i>v</i>)</span>, logo
+              <span class="m">|<i>U</i>| = δ</span>.
+            </p>
+            <p>
+              Suponha, por absurdo, que <span class="m">δ &lt; κ</span>. Como
+              <span class="m"><i>G</i></span> é κ-conexo,
+              <span class="m">|<i>V</i>| &gt; κ &gt; δ</span>, portanto
+              <span class="m">|<i>V</i>| ≥ δ + 2</span> e
+              <span class="m"><i>G</i> − <i>U</i></span> tem pelo menos dois vértices.
+              Um deles é <span class="m"><i>v</i></span>, que em
+              <span class="m"><i>G</i> − <i>U</i></span> não tem vizinho nenhum.
+              O outro está em outra componente. Assim
+              <span class="m"><i>G</i> − <i>U</i></span> é desconexo e
+              <span class="m">|<i>U</i>| = δ &lt; κ</span>, contradizendo a definição de κ.
+            </p>
+            <p>
+              No grafo completo a hipótese <span class="m">δ &lt; κ</span> já é impossível:
+              <span class="m">κ(<i>K</i><sub><i>n</i></sub>) = <i>n</i> − 1 = δ</span>.
+              A desigualdade vale com igualdade.
+            </p>
+            <p class="kicker">Parte (iii)</p>
+            <p>
+              Seja <span class="m"><i>G</i></span> <span class="m"><i>k</i></span>-conexo.
+              Por (i) e pela definição de κ, temos
+              <span class="m">κ(<i>G</i>) ≥ <i>k</i></span>. Por (ii),
+              <span class="m">δ(<i>G</i>) ≥ κ(<i>G</i>) ≥ <i>k</i></span>.
+              O teorema do aperto de mão conclui
+            </p>
+            <div class="eq"><div class="body">
+              2|<i>E</i>(<i>G</i>)| =
+              <span class="sum"><span class="o">∑</span><span class="l"><i>v</i> ∈ <i>V</i></span></span>
+              <i>d</i>(<i>v</i>) ≥ |<i>V</i>(<i>G</i>)| · δ(<i>G</i>) ≥ <i>k</i>|<i>V</i>(<i>G</i>)|,
+            </div></div>
+            <p>
+              logo <span class="m">|<i>E</i>(<i>G</i>)| ≥ <i>k</i>|<i>V</i>(<i>G</i>)|∕2</span>.
+              <span class="qed">□</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="ex">
+          <div class="top"><span class="tagnum">Ex. 97</span><div class="stmt">
+            <p>
+              Dados <span class="m"><i>k</i> ≥ 2</span> e
+              <span class="m"><i>n</i> &gt; <i>k</i></span> vamos construir o grafo
+              <span class="m"><i>H</i><sub><i>n</i>,<i>k</i></sub> = (<i>V</i>, <i>E</i>)</span> sobre
+              <span class="m"><i>V</i> = {0, 1, …, <i>n</i> − 1}</span> com conjunto de arestas que depende da
+              paridade de <span class="m"><i>k</i></span>.
+            </p>
+            <p>Se <span class="m"><i>k</i></span> é par, digamos <span class="m"><i>k</i> = 2<i>r</i></span>, então</p>
+            <div class="eq"><div class="body">
+              <i>E</i> = { {<i>i</i>, <i>j</i>} : −<i>r</i> ≤ <i>j</i> − <i>i</i> ≤ <i>r</i> com as operações módulo <i>n</i> }.
+            </div><div class="tag">(31)</div></div>
+            <p>Se <span class="m"><i>k</i></span> é ímpar, digamos <span class="m"><i>k</i> = 2<i>r</i> + 1</span>, então</p>
+            <p>(2.1) Se <span class="m"><i>n</i></span> é par,</p>
+            <div class="eq"><div class="body">
+              <i>E</i> = <i>E</i>(<i>H</i><sub><i>n</i>,<i>k</i>−1</sub>) ∪
+              { {<i>i</i>, <i>i</i> + (<i>n</i>∕2)} : 1 ≤ <i>i</i> ≤ <i>n</i>∕2 }.
+            </div><div class="tag">(32)</div></div>
+            <p>(2.2) Se <span class="m"><i>n</i></span> é ímpar,</p>
+            <div class="eq"><div class="body">
+              <i>E</i> = <i>E</i>(<i>H</i><sub><i>n</i>,<i>k</i>−1</sub>) ∪
+              { {0, (<i>n</i>−1)∕2}, {0, (<i>n</i>+1)∕2} } ∪
+              { {<i>i</i>, <i>i</i> + (<i>n</i>+1)∕2} : 1 ≤ <i>i</i> &lt; (<i>n</i>−1)∕2 }.
+            </div><div class="tag">(33)</div></div>
+            <p>Abaixo temos, respectivamente, os diagramas dos grafos <span class="m"><i>H</i><sub>8,4</sub></span>, <span class="m"><i>H</i><sub>8,5</sub></span> e <span class="m"><i>H</i><sub>9,5</sub></span> (Figura 9, na teoria deste bloco).</p>
+            <p>(i) Prove que o número de arestas de <span class="m"><i>H</i><sub><i>n</i>,<i>k</i></sub></span> é <span class="m">⌈<i>k</i>|<i>V</i>|∕2⌉</span>.</p>
+            <p>(ii) Prove que <span class="m"><i>H</i><sub><i>n</i>,<i>k</i></sub></span> é <span class="m"><i>k</i></span>-conexo.</p>
+          </div></div>
+          <div class="actions">
+            <button class="toggle ghost" type="button" data-target="h97" aria-expanded="false">Dica <span class="chev">▼</span></button>
+            <button class="toggle" type="button" data-target="a97" aria-expanded="false">Mostrar resposta <span class="chev">▼</span></button>
+          </div>
+          <div class="panel hintp" id="h97"><div class="plab">Dica</div>
+            <p>Em (i) separe os três casos de paridade e conte as cordas extras no caso ímpar-ímpar: são 2 + (n−3)/2 = (n+1)/2. Em (ii), para k = 2r, mostre que um conjunto com menos de 2r vértices deixa um dos dois arcos do círculo sem muralha de r consecutivos; salte por aí.</p>
+          </div>
+          <div class="panel answer" id="a97"><div class="plab">Resolução</div>
+            <p>
+              Em (31) a condição
+              <span class="m">−<i>r</i> ≤ <i>j</i> − <i>i</i> ≤ <i>r</i></span> inclui
+              <span class="m"><i>i</i> = <i>j</i></span>; lemos a intenção óbvia
+              (grafo simples, sem laços) e excluímos essa diagonal. As cordas de
+              (32) e (33) não repetem arestas de
+              <span class="m"><i>H</i><sub><i>n</i>,<i>k</i>−1</sub></span>: a distância circular
+              <span class="m">⌊<i>n</i>∕2⌋</span> é maior que
+              <span class="m"><i>r</i> = (<i>k</i>−1)∕2</span> porque
+              <span class="m"><i>n</i> &gt; <i>k</i></span>.
+            </p>
+            <p class="kicker">Parte (i) · a contagem</p>
+            <p>
+              <b>Caso k = 2r par.</b> Cada vértice tem grau
+              <span class="m">2<i>r</i> = <i>k</i></span>. Conferência:
+              <span class="m">2|<i>E</i>| = <i>n k</i></span>, logo
+              <span class="m">|<i>E</i>| = <i>k n</i>∕2 = ⌈<i>k n</i>∕2⌉</span>
+              (o produto é par). ✔
+            </p>
+            <p>
+              <b>Caso k ímpar e n par.</b>
+              <span class="m"><i>H</i><sub><i>n</i>,<i>k</i>−1</sub></span> tem
+              <span class="m"><i>n</i>(<i>k</i>−1)∕2</span> arestas, e
+              (32) acrescenta as <span class="m"><i>n</i>∕2</span> diametrais.
+              Logo
+              <span class="m">|<i>E</i>| = <i>n</i>(<i>k</i>−1)∕2 + <i>n</i>∕2 = <i>n k</i>∕2 = ⌈<i>k n</i>∕2⌉</span>.
+              Conferência em <span class="m"><i>H</i><sub>8,5</sub></span>:
+              <span class="m">16 + 4 = 20 = 5·8∕2</span> ✔
+            </p>
+            <p>
+              <b>Caso k e n ímpares.</b>
+              De novo
+              <span class="m">|<i>E</i>(<i>H</i><sub><i>n</i>,<i>k</i>−1</sub>)| = <i>n</i>(<i>k</i>−1)∕2</span>.
+              As extras de (33) são 2 (as duas cordas de 0) mais o número de índices
+              <span class="m"><i>i</i></span> com
+              <span class="m">1 ≤ <i>i</i> &lt; (<i>n</i>−1)∕2</span>, isto é
+              <span class="m">(<i>n</i>−3)∕2</span> valores. Total de extras:
+              <span class="m">2 + (<i>n</i>−3)∕2 = (<i>n</i>+1)∕2</span>.
+              Somando,
+            </p>
+            <div class="eq"><div class="body">
+              |<i>E</i>| = <i>n</i>(<i>k</i>−1)∕2 + (<i>n</i>+1)∕2
+              = (<i>n k</i> − <i>n</i> + <i>n</i> + 1)∕2
+              = (<i>n k</i> + 1)∕2
+              = ⌈<i>k n</i>∕2⌉,
+            </div></div>
+            <p>
+              pois <span class="m"><i>k n</i></span> é ímpar.
+              Conferência em <span class="m"><i>H</i><sub>9,5</sub></span>:
+              <span class="m">9·4∕2 + 5 = 18 + 5 = 23</span> e
+              <span class="m">⌈45∕2⌉ = 23</span> ✔
+            </p>
+
+            <p class="kicker">Parte (ii) · H<sub>n,k</sub> é k-conexo</p>
+            <p>
+              Temos <span class="m">|<i>V</i>| = <i>n</i> &gt; <i>k</i></span>. Falta mostrar que nenhum
+              conjunto com menos de <span class="m"><i>k</i></span> vértices desconecta. Como
+              <span class="m">δ(<i>H</i><sub><i>n</i>,<i>k</i></sub>) ≥ <i>k</i></span>, o exercício 96 já
+              dá <span class="m">κ ≤ δ</span>, e a k-conexidade produz
+              <span class="m">κ = <i>k</i></span>
+              (no caso ímpar-ímpar, <span class="m">δ = <i>k</i></span> mesmo com um vértice de grau
+              <span class="m"><i>k</i>+1</span>).
+            </p>
+            <p>
+              <b>Passo A · k = 2r par.</b>
+              Seja <span class="m"><i>S</i> ⊂ <i>V</i></span> com
+              <span class="m">|<i>S</i>| ≤ 2<i>r</i> − 1</span>, e sejam
+              <span class="m"><i>x</i>, <i>y</i> ∉ <i>S</i></span>. No ciclo
+              <span class="m">0 — 1 — ⋅⋅⋅ — (<i>n</i>−1) — 0</span> há dois arcos de
+              <span class="m"><i>x</i></span> a <span class="m"><i>y</i></span>.
+              Se cada arco contivesse pelo menos <span class="m"><i>r</i></span> vértices de
+              <span class="m"><i>S</i></span>, teríamos
+              <span class="m">|<i>S</i>| ≥ 2<i>r</i></span>, absurdo. Logo algum arco contém no máximo
+              <span class="m"><i>r</i> − 1</span> vértices de <span class="m"><i>S</i></span>.
+            </p>
+            <p>
+              Nesse arco, um caminho de <span class="m"><i>x</i></span> a
+              <span class="m"><i>y</i></span> em
+              <span class="m"><i>H</i><sub><i>n</i>,2<i>r</i></sub> − <i>S</i></span>
+              se constrói por saltos gulosos. Estando em
+              <span class="m"><i>i</i></span> (ainda antes de <span class="m"><i>y</i></span>,
+              <span class="m"><i>i</i> ∉ <i>S</i></span>), olhe a janela das próximas no máximo
+              <span class="m"><i>r</i></span> posições até <span class="m"><i>y</i></span>.
+              Se <span class="m"><i>y</i></span> está na janela, salte para
+              <span class="m"><i>y</i></span>. Se não, a janela tem
+              <span class="m"><i>r</i></span> vértices; não podem estar todos em
+              <span class="m"><i>S</i></span> (há no máximo
+              <span class="m"><i>r</i> − 1</span> neste arco). Salte para o mais distante deles fora de
+              <span class="m"><i>S</i></span>. O índice cresce e o processo termina em
+              <span class="m"><i>y</i></span>.
+            </p>
+            <p>
+              Assim <span class="m"><i>H</i><sub><i>n</i>,2<i>r</i></sub> − <i>S</i></span> é conexo,
+              e <span class="m"><i>H</i><sub><i>n</i>,2<i>r</i></sub></span> é
+              <span class="m">2<i>r</i></span>-conexo.
+            </p>
+            <p>
+              <b>Passo B · k = 2r+1 ímpar.</b>
+              O subgrafo gerador <span class="m"><i>H</i><sub><i>n</i>,2<i>r</i></sub></span> já é
+              <span class="m">2<i>r</i></span>-conexo. Seja
+              <span class="m"><i>S</i></span> com
+              <span class="m">|<i>S</i>| ≤ 2<i>r</i></span>.
+              Se <span class="m">|<i>S</i>| ≤ 2<i>r</i> − 1</span>, o Passo A resolve.
+              Resta <span class="m">|<i>S</i>| = 2<i>r</i></span>.
+            </p>
+            <p>
+              Se <span class="m"><i>H</i><sub><i>n</i>,2<i>r</i></sub> − <i>S</i></span> é conexo, pronto.
+              Se não é, o salto guloso força a configuração apertada:
+              <span class="m"><i>S</i></span> é a união de dois blocos de
+              <span class="m"><i>r</i></span> vértices consecutivos (duas muralhas), e restam exatamente
+              dois arcos vivos <span class="m"><i>L</i><sub>1</sub></span> e
+              <span class="m"><i>L</i><sub>2</sub></span>.
+              Os dois blocos de <span class="m"><i>S</i></span> não podem ser adjacentes: senão
+              fundir-se-iam e sobraria um único arco vivo, conexo.
+              Tome <span class="m"><i>L</i><sub>1</sub></span> o menor.
+              Como <span class="m"><i>n</i> &gt; 2<i>r</i> + 1</span>, a distância diametral
+              <span class="m">⌊<i>n</i>∕2⌋</span> (ou
+              <span class="m">⌈<i>n</i>∕2⌉</span>) é maior que
+              <span class="m"><i>r</i></span> e, a partir de um vértice de
+              <span class="m"><i>L</i><sub>1</sub></span>, cai depois da muralha mais próxima —
+              portanto em <span class="m"><i>L</i><sub>2</sub></span>
+              (vale <span class="m"><i>r</i> + 1 ≤ <i>n</i>∕2 ≤ <i>n</i> − <i>r</i> − |<i>L</i><sub>1</sub>|</span>
+              pela minimalidade de <span class="m"><i>L</i><sub>1</sub></span> e por
+              <span class="m"><i>n</i> ≥ <i>k</i> + 1</span>).
+            </p>
+            <p>
+              Essa aresta diametral pertence a (32) ou a (33) e sobrevive em
+              <span class="m"><i>H</i><sub><i>n</i>,<i>k</i></sub> − <i>S</i></span>.
+              Ela religa as duas componentes. Logo o grafo menos
+              <span class="m"><i>S</i></span> é conexo.
+            </p>
+            <p>
+              Em todos os casos, <span class="m"><i>H</i><sub><i>n</i>,<i>k</i></sub></span> é
+              <span class="m"><i>k</i></span>-conexo. <span class="qed">□</span>
+            </p>
+            <p class="kicker">Conferência na Figura 9</p>
+            <p>
+              <span class="m"><i>H</i><sub>8,4</sub></span> é 4-regular com 16 arestas;
+              <span class="m"><i>H</i><sub>8,5</sub></span> é 5-regular com 20;
+              <span class="m"><i>H</i><sub>9,5</sub></span> tem 23 arestas e o vértice 0 de grau 6.
+              Os três números coincidem com
+              <span class="m">⌈<i>k n</i>∕2⌉</span>. ✔
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="chapnav" aria-label="Navegação entre capítulos">
+        <a href="07-caminhos-minimos.html"><span class="dir">Capítulo anterior</span><span class="ttl">7. Caminhos mínimos</span></a>
+        <a class="next" href="09-arvores-e-florestas.html"><span class="dir">Próximo capítulo</span><span class="ttl">9. Árvores e florestas</span></a>
+      </nav>
+
+      <footer class="pg">
+        <p>
+          <b>Sobre esta versão.</b> Reorganização didática da seção “Conexidade” das notas de
+          Teoria dos Grafos (CI065 / BC1429) do Prof. Jair Donadelli. Enunciados dos exercícios 86 a 97 preservados;
+          explicações, diagramas e resoluções foram escritos para esta versão.
+        </p>
+        <p>
+          Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+          Página estática, sem dependências externas — funciona offline e imprime com todas as respostas abertas. <a href="index.html">Voltar ao índice</a>.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
+</body>
+</html>
