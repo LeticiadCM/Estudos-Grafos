@@ -1,178 +1,158 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Estudos Grafos</title>
-  <meta name="description" content="Página inicial do projeto Estudos Grafos com material de teoria, tutoriais e exemplos." />
-  <link rel="stylesheet" href="assets/styles.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teoria dos Grafos — Notas de aula com exercícios resolvidos</title>
+<meta name="description" content="Versão reorganizada das notas de Teoria dos Grafos (CI065 / BC1429): teoria prática antes de cada bloco e 162 exercícios com resposta que se exibe ou oculta.">
+<link rel="stylesheet" href="assets/grafos.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="container nav-wrap">
-      <div class="brand">
-        <span class="brand-mark">G</span>
-        <h1>Estudos Grafos</h1>
-      </div>
-      <nav aria-label="Menu principal">
-        <ul class="nav">
-          <li><a href="index.html" class="active">Início</a></li>
-          <li><a href="sobre.html">Sobre</a></li>
-          <li><a href="tutoriais.html">Tutoriais</a></li>
-          <li><a href="exemplos.html">Exemplos</a></li>
-        </ul>
-      </nav>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <a class="brandmark" href="index.html"><span class="dot"></span>Teoria dos Grafos · Notas de aula</a>
+    <span class="spacer"></span>
+    <button class="btn" id="themeBtn" type="button" title="Alternar tema claro/escuro">Tema</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">CI065 / BC1429</span>
+    <h1>Teoria dos Grafos</h1>
+    <p class="lead">
+      Uma versão das notas do Prof. Jair Donadelli reescrita para estudo: cada bloco de exercícios vem
+      precedido da teoria necessária, com exemplos, diagramas e receitas de resolução. Os enunciados
+      originais foram preservados; cada exercício tem um botão que exibe ou oculta a resposta completa.
+    </p>
+    <div class="meta">
+      <span><b>12 capítulos</b> · 162 exercícios resolvidos</span>
+      <span><b>Fonte:</b> <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">notas originais</a></span>
+      <span>Páginas estáticas, sem dependências — funcionam offline</span>
     </div>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="container hero-grid">
-        <div>
-          <p class="eyebrow">Projeto de estudo</p>
-          <h2>Teoria dos Grafos, visualização e algoritmos em um só lugar.</h2>
-          <p>
-            Este projeto reúne conteúdo, anotações e exemplos para estudar grafos de forma prática e didática.
-            Aqui você encontra conceitos fundamentais, representações, algoritmos e aplicações reais.
-          </p>
-          <div class="cta-group">
-            <a class="button primary" href="tutoriais.html">Começar os tutoriais</a>
-            <a class="button secondary" href="exemplos.html">Ver exemplos</a>
-          </div>
-        </div>
+  <div class="box tip">
+    <div class="h">Como usar</div>
+    <ol>
+      <li>Abra o capítulo, leia a teoria do bloco e tente o exercício sem abrir nada.</li>
+      <li>Se travar, use <i>Dica</i> (quando existir) antes de <i>Mostrar resposta</i>.</li>
+      <li>Compare o raciocínio, não só o resultado. Em matemática discreta o caminho vale mais.</li>
+    </ol>
+  </div>
 
-        <div class="hero-card">
-          <h3>Mapa do conteúdo</h3>
-          <ul>
-            <li>Definições básicas</li>
-            <li>Grafos direcionados e não direcionados</li>
-            <li>Representações: lista e matriz</li>
-            <li>Busca em largura e profundidade</li>
-            <li>Caminhos mínimos e árvores geradoras</li>
-          </ul>
-        </div>
-      </div>
-    </section>
+  <h2><span class="num">I</span> Fundamentos</h2>
+  <div class="cards">
+    <a class="card" href="01-definicoes-e-grau.html">
+      <span class="cnum">Capítulo 1 · seções 1 e 1.1</span>
+      <span class="ctitle">Definições iniciais e grau</span>
+      <span class="cdesc">O que é um grafo, diagramas, ordem, complemento, grafos completos e o teorema do aperto de mão.</span>
+      <span class="cfoot"><span class="pill">Ex. 1–16</span><span>16 exercícios</span></span>
+    </a>
+    <a class="card" href="02-subgrafos-cliques-bipartidos.html">
+      <span class="cnum">Capítulo 2 · seções 2 e 3</span>
+      <span class="ctitle">Subgrafos, cliques e cortes</span>
+      <span class="cdesc">Subgrafo induzido, α, ω, χ, grafos bipartidos e k-partidos, decomposição de E(G) pelo corte.</span>
+      <span class="cfoot"><span class="pill">Ex. 17–30</span><span>14 exercícios</span></span>
+    </a>
+    <a class="card" href="03-isomorfismo-e-outras-nocoes.html">
+      <span class="cnum">Capítulo 3 · seções 4 e 5</span>
+      <span class="ctitle">Isomorfismo e outras noções</span>
+      <span class="cdesc">Quando dois grafos são o mesmo objeto, automorfismos, pesos, orientação, digrafos e multigrafos.</span>
+      <span class="cfoot"><span class="pill">Ex. 31–39</span><span>9 exercícios</span></span>
+    </a>
+  </div>
 
-    <section class="section">
-      <div class="container">
-        <div class="grid-3">
-          <article class="card">
-            <h3>Fundamentos</h3>
-            <p>Entenda vértices, arestas, graus, conectividade, componentes e classificações essenciais.</p>
-          </article>
-          <article class="card">
-            <h3>Algoritmos</h3>
-            <p>Explore BFS, DFS, Dijkstra, Prim, Kruskal e outras técnicas clássicas de grafos.</p>
-          </article>
-          <article class="card">
-            <h3>Aplicações</h3>
-            <p>Veja como grafos aparecem em redes, mapas, recomendação, IA, logística e ciência da computação.</p>
-          </article>
-        </div>
-      </div>
-    </section>
+  <h2><span class="num">II</span> Algoritmos e percursos</h2>
+  <div class="cards">
+    <a class="card" href="04-representacao-computacional.html">
+      <span class="cnum">Capítulo 4 · seção 6</span>
+      <span class="ctitle">Representação computacional</span>
+      <span class="cdesc">Matriz e lista de adjacências, complexidade, autovalores e tarefas elementares.</span>
+      <span class="cfoot"><span class="pill">Ex. 40–52</span><span>13 exercícios</span></span>
+    </a>
+    <a class="card" href="05-percursos-e-busca.html">
+      <span class="cnum">Capítulo 5 · seções 7 e 8</span>
+      <span class="ctitle">Percursos e busca</span>
+      <span class="cdesc">O algoritmo Visite, BFS, DFS e a busca em profundidade rotulada.</span>
+      <span class="cfoot"><span class="pill">Ex. 53–61</span><span>9 exercícios</span></span>
+    </a>
+    <a class="card" href="06-caminhos-e-circuitos.html">
+      <span class="cnum">Capítulo 6 · seção 9</span>
+      <span class="ctitle">Caminhos e circuitos</span>
+      <span class="cdesc">Distância, diâmetro, cintura, caracterização de grafos bipartidos e o k-cubo.</span>
+      <span class="cfoot"><span class="pill">Ex. 62–72</span><span>11 exercícios</span></span>
+    </a>
+    <a class="card" href="07-caminhos-minimos.html">
+      <span class="cnum">Capítulo 7 · seções 10 e 11</span>
+      <span class="ctitle">Caminhos mínimos</span>
+      <span class="cdesc">Desigualdade triangular com pesos, Dijkstra, Bellman–Ford e Floyd–Warshall.</span>
+      <span class="cfoot"><span class="pill">Ex. 73–85</span><span>13 exercícios</span></span>
+    </a>
+  </div>
 
-    <section class="section alt">
-      <div class="container">
-        <h2>Estrutura sugerida para o projeto</h2>
-        <div class="code-box">
-<pre><code>Estudos-Grafos/
-├── index.html
-├── sobre.html
-├── tutoriais.html
-├── exemplos.html
-├── assets/
-│   └── styles.css
-├── teoria/
-├── algoritmos/
-├── exemplos/
-└── README.md</code></pre>
-        </div>
-      </div>
-    </section>
-  </main>
+  <h2><span class="num">III</span> Estrutura</h2>
+  <div class="cards">
+    <a class="card" href="08-conexidade.html">
+      <span class="cnum">Capítulo 8 · seção 12</span>
+      <span class="ctitle">Conexidade</span>
+      <span class="cdesc">Componentes, articulações, biconexidade, κ(G) e os grafos H<sub>n,k</sub>.</span>
+      <span class="cfoot"><span class="pill">Ex. 86–97</span><span>12 exercícios</span></span>
+    </a>
+    <a class="card" href="09-arvores-e-florestas.html">
+      <span class="cnum">Capítulo 9 · seção 13</span>
+      <span class="ctitle">Árvores e florestas</span>
+      <span class="cdesc">Quatro caracterizações de árvore, folhas, árvores geradoras e a floresta da DFS.</span>
+      <span class="cfoot"><span class="pill">Ex. 98–103</span><span>6 exercícios</span></span>
+    </a>
+    <a class="card" href="10-arvores-geradoras-minimas.html">
+      <span class="cnum">Capítulo 10 · seções 14 a 16</span>
+      <span class="ctitle">Árvores geradoras mínimas</span>
+      <span class="cdesc">Arestas boas, Kruskal com union-find e Prim, com as provas de correção.</span>
+      <span class="cfoot"><span class="pill">Ex. 104–118</span><span>15 exercícios</span></span>
+    </a>
+  </div>
 
-  <footer class="site-footer">
-    <div class="container footer-wrap">
-      <p>© 2026 Estudos Grafos</p>
-      <a href="sobre.html">Sobre o projeto</a>
-    </div>
+  <h2><span class="num">IV</span> Emparelhamento e circuitos especiais</h2>
+  <div class="cards">
+    <a class="card" href="11-emparelhamento-e-cobertura.html">
+      <span class="cnum">Capítulo 11 · seções 17 a 19</span>
+      <span class="ctitle">Emparelhamento e cobertura</span>
+      <span class="cdesc">Berge, Hall, Edmonds, König e a dualidade emparelhamento–cobertura em bipartidos.</span>
+      <span class="cfoot"><span class="pill">Ex. 119–145</span><span>27 exercícios</span></span>
+    </a>
+    <a class="card" href="12-hamilton-e-euler.html">
+      <span class="cnum">Capítulo 12 · seções 20 e 21</span>
+      <span class="ctitle">Hamilton e Euler</span>
+      <span class="cdesc">Dirac, condição de Ore, trilhas eulerianas, Fleury e os problemas clássicos de desenho.</span>
+      <span class="cfoot"><span class="pill">Ex. 146–162</span><span>17 exercícios</span></span>
+    </a>
+  </div>
+
+  <div class="box warn">
+    <div class="h">Sobre a seção 22 das notas originais</div>
+    <p>
+      O sumário original lista “22. Grafos dirigidos” (representação e fluxo em redes), mas o HTML publicado
+      das notas termina no exercício 162, sem o corpo dessa seção. Por isso ela não foi reescrita aqui —
+      não há enunciados nem teoria-fonte para preservar. Os capítulos 4, 7 e 11 já cobrem o essencial de
+      digrafos, fluxo unitário e emparelhamento como fluxo, quando o original os usa.
+    </p>
+  </div>
+
+  <footer class="pg">
+    <p>
+      Reorganização didática das notas de Teoria dos Grafos (CI065 / BC1429) do Prof. Jair Donadelli.
+      Enunciados dos exercícios preservados; explicações, diagramas e resoluções foram escritos para esta versão.
+    </p>
+    <p>
+      Original: <a href="http://professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065/" target="_blank" rel="noopener">professor.ufabc.edu.br/~jair.donadelli/disciplinas-ufpr/ci065</a>.
+    </p>
   </footer>
+</div>
+
+<button class="btn tothetop" id="topBtn" type="button" title="Voltar ao topo">↑ Topo</button>
+<script src="assets/grafos.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
